@@ -244,6 +244,7 @@ if acao == "✏️ Alterar Produto":
 
     idx = df[df["produto"] == produto_sel].index[0]
     row = df.loc[idx]
+    produto_id = int(row["id"])
 
     with st.form("form_editar"):
         produto = st.text_input("Produto", row["produto"])
@@ -277,7 +278,7 @@ if acao == "✏️ Alterar Produto":
             preco,
             lucro,
             codigo,
-            row["id"]
+            produto_id
         ))
 
         conn.commit()
@@ -437,5 +438,6 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
