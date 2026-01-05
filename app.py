@@ -76,12 +76,6 @@ def gerar_pdf(df):
     c.save()
     return temp_file.name
 
-st.set_page_config(
-    page_title="MODARTE",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 # =====================
 # CONFIGURAÇÕES
 # =====================
@@ -89,6 +83,12 @@ BASE_DIR = Path(__file__).parent
 PLANILHA = BASE_DIR / "PLANILHA_MODARTE.xlsx"
 ESTOQUE_MINIMO = 5
 
+st.set_page_config(
+    page_title="MODARTE",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    page_icon=str(BASE_DIR / "Logo_Modarte.jpg")
+)
 
 # =====================
 # CARREGAR DADOS
