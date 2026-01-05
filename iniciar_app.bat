@@ -17,6 +17,6 @@ REM Instalar dependencias (se necessario)
 venv\Scripts\python.exe -m pip install -r requirements.txt --quiet
 
 REM Iniciar a aplicacao
-venv\Scripts\python.exe -m streamlit run app.py
+venv\Scripts\python.exe -m streamlit run teste_app.py
 
 exit
