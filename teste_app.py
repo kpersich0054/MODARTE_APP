@@ -148,7 +148,7 @@ st.sidebar.title("⚙️ Gerenciamento")
 
 acao = st.sidebar.radio(
     "Escolha uma ação:",
-    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "🗑️ Excluir Produto"]
+    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "💰 Registrar Venda", "🗑️ Excluir Produto"]
 )
 
 if st.sidebar.button("❌ Encerrar aplicação"):
@@ -190,7 +190,7 @@ if acao == "➕ Inserir Produto":
 
             cursor.execute("""
             INSERT INTO produtos
-            (produto, foto, estoque_inicial, estoque_atual, preco, lucro, codigo_nf)
+            (produto, foto, estoque_inicial, estoque_atual, preco, lucro, codigo)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 produto,
@@ -211,8 +211,7 @@ if acao == "✏️ Alterar Produto":
 
     produto_sel = st.selectbox("Selecione o produto", df["produto"])
 
-    idx = df[df["produto"] == produto_sel].index[0]
-    row = df.loc[idx]
+    row = df[df["produto"] == produto_sel].index[0]
     produto_id = int(row["id"])
 
     with st.form("form_editar"):
@@ -226,6 +225,7 @@ if acao == "✏️ Alterar Produto":
         submit = st.form_submit_button("Atualizar")
 
     if submit:
+        conn = get_conn()
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE produtos
@@ -244,6 +244,36 @@ if acao == "✏️ Alterar Produto":
 
         conn.commit()
         st.success("✏️ Produto atualizado com sucesso!")
+        st.rerun()
+
+if acao == "💰 Registrar Venda":
+    st.subheader("💰 Registrar Venda")
+
+    produto_sel = st.selectbox(
+        "Produto",
+        df["produto"].tolist()
+    )
+
+    row = df[df["produto"] == produto_sel].iloc[0]
+
+    estoque_disp = int(row["estoque_atual"])
+
+    quantidade = st.number_input(
+        "Quantidade vendida",
+        min_value=1,
+        max_value=estoque_disp,
+        step=1
+    )
+
+    if st.button("✅ Confirmar venda"):
+        registrar_venda(
+            produto_id=int(row["id"]),
+            quantidade=quantidade,
+            preco=float(row["preco"]),
+            lucro=float(row["lucro"])
+        )
+
+        st.success("✅ Venda registrada com sucesso!")
         st.rerun()
 
 if acao == "🗑️ Excluir Produto":
@@ -287,7 +317,7 @@ with kpi1:
     st.metric("💰 Renda Total", f"R$ {df['renda_atual'].sum():,.2f}")
 
 with kpi2:
-    st.metric("📈 Lucro Total", f"R$ {df['lucro_atual'].sum():,.2f}")
+    st.metric("📈 Lucro Total", f"R$ {df['lucro_total'].sum():,.2f}")
 
 with kpi3:
     st.metric("🛒 Produtos Vendidos", int(df["vendidos"].sum()))
@@ -399,7 +429,6 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
-
 
 
 
