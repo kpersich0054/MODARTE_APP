@@ -87,7 +87,7 @@ st.set_page_config(
     page_title="MODARTE",
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon=str(BASE_DIR / "Logo_Modarte.jpg")
+    page_icon=Logo_Modarte.jpg
 )
 
 # =====================
