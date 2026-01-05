@@ -122,7 +122,10 @@ st.set_page_config(
 # =====================
 # CARREGAR DADOS
 # =====================
-df = pd.read_excel(PLANILHA)
+df = pd.read_sql_query(
+    "SELECT * FROM produtos",
+    conn
+)
 
 # Garantir tipos corretos
 df["ESTOQUE INICIAL"] = pd.to_numeric(df["ESTOQUE INICIAL"], errors="coerce").fillna(0)
@@ -361,4 +364,5 @@ for _, row in df.iterrows():
         st.write(f"💵 **Renda Atual:** R$ {row['RENDA ATUAL']:,.2f}")
         st.write(f"🏆 **Lucro Atual:** R$ {row['LUCRO ATUAL']:,.2f}")
     
+
     st.markdown("---")
