@@ -211,7 +211,7 @@ if acao == "✏️ Alterar Produto":
 
     produto_sel = st.selectbox("Selecione o produto", df["produto"])
 
-    row = df[df["produto"] == produto_sel].index[0]
+    row = df[df["produto"] == produto_sel].iloc[0]
     produto_id = int(row["id"])
 
     with st.form("form_editar"):
@@ -429,6 +429,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
