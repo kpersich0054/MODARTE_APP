@@ -48,7 +48,7 @@ def gerar_pdf(df):
     c.setFont("Helvetica-Bold", 11)
     c.drawString(2 * cm, y, f"Renda Total: R$ {df['renda_atual'].sum():,.2f}")
     y -= 0.6 * cm
-    c.drawString(2 * cm, y, f"Lucro Total: R$ {df['lucro_total'].sum():,.2f}")
+    c.drawString(2 * cm, y, f"Lucro Total: R$ {df['lucro_atual'].sum():,.2f}")
     y -= 1 * cm
 
     # TABELA
@@ -317,7 +317,7 @@ with kpi1:
     st.metric("💰 Renda Total", f"R$ {df['renda_atual'].sum():,.2f}")
 
 with kpi2:
-    st.metric("📈 Lucro Total", f"R$ {df['lucro_total'].sum():,.2f}")
+    st.metric("📈 Lucro Total", f"R$ {df['lucro_atual'].sum():,.2f}")
 
 with kpi3:
     st.metric("🛒 Produtos Vendidos", int(df["vendidos"].sum()))
@@ -429,6 +429,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
