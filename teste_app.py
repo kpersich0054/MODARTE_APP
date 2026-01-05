@@ -430,11 +430,12 @@ for _, row in df.iterrows():
         st.write(f"📦 **Estoque Inicial:** {int(row['estoque_inicial'])}")
         st.write(f"📦 **Estoque Atual:** {int(row['estoque_atual'])}")
         st.write(f"🛒 **Vendidos:** {int(row['vendidos'])}")
-        st.write(f"💰 **Preço:** R$ {row['preço']:,.2f}")
+        st.write(f"💰 **Preço:** R$ {row['preco']:,.2f}")
         st.write(f"📈 **Lucro unidade:** R$ {row['lucro']:,.2f}")
         st.write(f"💵 **Renda Atual:** R$ {row['renda_atual']:,.2f}")
         st.write(f"🏆 **Lucro Atual:** R$ {row['lucro_atual']:,.2f}")
     
 
     st.markdown("---")
+
 
