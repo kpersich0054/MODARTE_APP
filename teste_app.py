@@ -121,37 +121,6 @@ st.set_page_config(
 # =====================
 
 conn = get_conn()
-
-def criar_tabelas():
-    conn = get_conn()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS produtos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        produto TEXT NOT NULL,
-        foto TEXT,
-        estoque_inicial INTEGER NOT NULL,
-        estoque_atual INTEGER NOT NULL,
-        preco REAL NOT NULL,
-        lucro REAL NOT NULL,
-        codigo_nf TEXT
-    )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS vendas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        produto_id INTEGER NOT NULL,
-        quantidade INTEGER NOT NULL,
-        data_venda TEXT NOT NULL,
-        preco_unit REAL NOT NULL,
-        lucro_unit REAL NOT NULL,
-        FOREIGN KEY (produto_id) REFERENCES produtos(id)
-    )
-    """)
-
-    conn.commit()
     
 df = pd.read_sql_query(
     "SELECT * FROM produtos",
@@ -257,32 +226,24 @@ if acao == "✏️ Alterar Produto":
         submit = st.form_submit_button("Atualizar")
 
     if submit:
-        df.at[idx, "produto"] = produto
-        df.at[idx, "estoque_inicial"] = estoque_inicial
-        df.at[idx, "estoque_atual"] = estoque_atual
-        df.at[idx, "preco"] = preco
-        df.at[idx, "lucro"] = lucro
-        df.at[idx, "codigo"] = codigo
-
-        conn = get_conn()
         cursor = conn.cursor()
-
         cursor.execute("""
-        UPDATE produtos
-        SET produto = ?, estoque_inicial = ?, estoque_atual = ?, preco = ?, lucro = ?, codigo_nf = ?
-        WHERE id = ?
+            UPDATE produtos
+            SET produto = ?, codigo = ?, preco = ?, lucro = ?,
+                estoque_inicial = ?, estoque_atual = ?
+            WHERE id = ?
         """, (
             produto,
-            estoque_inicial,
-            estoque_atual,
+            codigo,
             preco,
             lucro,
-            codigo,
+            estoque_inicial,
+            estoque_atual,
             produto_id
         ))
 
         conn.commit()
-        st.success("✏️ Produto atualizado!")
+        st.success("✏️ Produto atualizado com sucesso!")
         st.rerun()
 
 if acao == "🗑️ Excluir Produto":
@@ -438,6 +399,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
