@@ -365,7 +365,7 @@ st.markdown("---")
 # =====================
 # DASHBOARD DE VENDAS
 # =====================
-st.subheader("📊 Dashboard de Vendas")
+st.subheader("📊 Dashboard - Histórico de Vendas")
 
 conn = get_conn()
 
@@ -382,8 +382,6 @@ JOIN produtos p ON p.id = v.produto_id
 
 if not df_vendas.empty:
     df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"])
-
-    st.subheader("📊 Histórico de Vendas")
 
     produto_sel = st.selectbox(
         "Produto",
@@ -429,6 +427,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
