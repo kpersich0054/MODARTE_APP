@@ -426,7 +426,7 @@ for _, row in df.iterrows():
             st.image(str(img_logo), use_container_width=True)
 
     with col2:
-        st.subheader(row["PRODUTO"])
+        st.subheader(row["produto"])
         st.write(f"📦 **Estoque Inicial:** {int(row['estoque_inicial'])}")
         st.write(f"📦 **Estoque Atual:** {int(row['estoque_atual'])}")
         st.write(f"🛒 **Vendidos:** {int(row['vendidos'])}")
@@ -437,3 +437,4 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
