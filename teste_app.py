@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
+import psycopg2
 from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -79,20 +79,21 @@ def registrar_venda(produto_id, quantidade, preco, lucro):
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO vendas (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO public.vendas
+    (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
+    VALUES (%s,%s,%s,%s,%s)
     """, (
         produto_id,
         quantidade,
-        datetime.now().isoformat(),
+        datetime.now(),
         preco,
         lucro
     ))
 
     cursor.execute("""
-    UPDATE produtos
-    SET estoque_atual = estoque_atual - ?
-    WHERE id = ?
+    UPDATE public.produtos
+    SET estoque_atual = estoque_atual - %s
+    WHERE id = %s
     """, (quantidade, produto_id))
 
     conn.commit()
@@ -100,12 +101,19 @@ def registrar_venda(produto_id, quantidade, preco, lucro):
 # =====================
 # CONFIGURAÇÕES
 # =====================
+
 BASE_DIR = Path(__file__).parent
-PLANILHA = BASE_DIR / "modarte.db"
 
 @st.cache_resource
 def get_conn():
-    return sqlite3.connect(PLANILHA, check_same_thread=False)
+    return psycopg2.connect(
+        host=st.secrets["database"]["host"],
+        port=st.secrets["database"]["port"],
+        database=st.secrets["database"]["dbname"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        sslmode=st.secrets["database"]["sslmode"]
+    )
 
 ESTOQUE_MINIMO = 5
 
@@ -121,9 +129,9 @@ st.set_page_config(
 # =====================
 
 conn = get_conn()
-    
-df = pd.read_sql_query(
-    "SELECT * FROM produtos",
+
+df = pd.read_sql(
+    "SELECT * FROM public.produtos",
     conn
 )
 
@@ -189,9 +197,9 @@ if acao == "➕ Inserir Produto":
             cursor = conn.cursor()
 
             cursor.execute("""
-            INSERT INTO produtos
+            INSERT INTO public.produtos
             (produto, foto, estoque_inicial, estoque_atual, preco, lucro, codigo)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
             """, (
                 produto,
                 foto,
@@ -202,9 +210,6 @@ if acao == "➕ Inserir Produto":
                 codigo
             ))
 
-            conn.commit()
-            st.success("✅ Produto inserido com sucesso!")
-            st.rerun()
 
 if acao == "✏️ Alterar Produto":
     st.subheader("✏️ Alterar produto")
@@ -228,10 +233,10 @@ if acao == "✏️ Alterar Produto":
         conn = get_conn()
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE produtos
-            SET produto = ?, codigo = ?, preco = ?, lucro = ?,
-                estoque_inicial = ?, estoque_atual = ?
-            WHERE id = ?
+        UPDATE public.produtos
+        SET produto=%s, codigo=%s, preco=%s, lucro=%s,
+            estoque_inicial=%s, estoque_atual=%s
+        WHERE id=%s
         """, (
             produto,
             codigo,
@@ -241,6 +246,7 @@ if acao == "✏️ Alterar Produto":
             estoque_atual,
             produto_id
         ))
+
 
         conn.commit()
         st.success("✏️ Produto atualizado com sucesso!")
@@ -294,7 +300,7 @@ if acao == "🗑️ Excluir Produto":
             cursor = conn.cursor()
 
             cursor.execute(
-                "DELETE FROM produtos WHERE produto = ?",
+                "DELETE FROM public.produtos WHERE produto=%s",
                 (produto_sel,)
             )
 
@@ -376,8 +382,8 @@ SELECT
     v.quantidade,
     v.quantidade * v.preco_unit AS renda,
     v.quantidade * v.lucro_unit AS lucro
-FROM vendas v
-JOIN produtos p ON p.id = v.produto_id
+FROM public.vendas v
+JOIN public.produtos p ON p.id = v.produto_id
 """, conn)
 
 if not df_vendas.empty:
@@ -427,9 +433,3 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
-
-
-
-
-
-
