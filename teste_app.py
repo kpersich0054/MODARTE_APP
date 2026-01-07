@@ -385,14 +385,15 @@ conn = get_conn()
 df_vendas = pd.read_sql("""
 SELECT
     v.id,
-    p.produto,
     v.produto_id,
+    p.produto,
     v.data_venda,
     v.quantidade,
-    v.quantidade * v.preco_unit AS renda,
-    v.quantidade * v.lucro_unit AS lucro
+    v.preco_unit,
+    v.lucro_unit
 FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
+ORDER BY v.data_venda DESC
 """, conn)
 
 if not df_vendas.empty:
@@ -413,41 +414,52 @@ if not df_vendas.empty:
 
     st.markdown("### 🗑️ Excluir Venda")
 
+    produto_excluir = st.selectbox(
+        "📦 Selecione o produto",
+        df_vendas["produto"].unique()
+    )
+
+    df_vendas_produto = df_vendas[
+        df_vendas["produto"] == produto_excluir
+    ].copy()
+
+    df_vendas_produto["label"] = df_vendas_produto.apply(
+        lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un | R$ {(x['quantidade'] * x['preco_unit']):,.2f}",
+        axis=1
+    )
+
     venda_sel = st.selectbox(
-        "Selecione a venda (data | quantidade)",
-        df_prod.apply(
-            lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un",
-            axis=1
-        )
+        "🧾 Selecione a venda",
+        df_vendas_produto["label"]
     )
 
     if st.button("❌ Excluir venda selecionada"):
-        venda = df_prod.iloc[
-            df_prod.apply(
-                lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un",
-                axis=1
-            ).tolist().index(venda_sel)
-        ]
-
+        venda = df_vendas_produto[
+            df_vendas_produto["label"] == venda_sel
+        ].iloc[0]
+    
         conn = get_conn()
         cursor = conn.cursor()
-
-        # Devolve estoque
+    
+        # Devolver estoque
         cursor.execute("""
             UPDATE public.produtos
             SET estoque_atual = estoque_atual + %s
             WHERE id = %s
-        """, (int(venda["quantidade"]), int(venda["produto_id"])))
-
-        # Remove venda
-        cursor.execute(
-            "DELETE FROM public.vendas_modarte WHERE id = %s",
-            (int(venda["id"]),)
-        )
-
+        """, (
+            int(venda["quantidade"]),
+            int(venda["produto_id"])
+        ))
+    
+        # Excluir venda
+        cursor.execute("""
+            DELETE FROM public.vendas_modarte
+            WHERE id = %s
+        """, (int(venda["id"]),))
+    
         conn.commit()
-
-        st.success("🗑️ Venda excluída e estoque ajustado!")
+    
+        st.success("🗑️ Venda excluída e estoque ajustado com sucesso!")
         st.rerun()
 else:
     st.info("Nenhuma venda registrada ainda.")
