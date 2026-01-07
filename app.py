@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import psycopg2
 from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -9,12 +10,9 @@ import tempfile
 import os
 import signal
 
-def salvar_planilha(df, caminho):
-    df.to_excel(caminho, index=False)
-
 def validar_produto(dados):
-    campos_texto = ["PRODUTO", "FOTO DO PRODUTO", "CODIGO N"]
-    campos_num = ["ESTOQUE INICIAL", "ESTOQUE ATUAL", "PREÇO FINAL", "LUCRO LIQUIDO"]
+    campos_texto = ["produto", "foto", "codigo"]
+    campos_num = ["estoque_inicial", "estoque_atual", "preco", "lucro"]
 
     for campo in campos_texto:
         if not dados[campo] or str(dados[campo]).strip() == "":
@@ -24,7 +22,7 @@ def validar_produto(dados):
         if dados[campo] <= 0:
             return False, f"Campo '{campo}' deve ser maior que zero."
 
-    if dados["ESTOQUE ATUAL"] > dados["ESTOQUE INICIAL"]:
+    if dados["estoque_atual"] > dados["estoque_inicial"]:
         return False, "Estoque atual não pode ser maior que o estoque inicial."
 
     return True, ""
@@ -48,9 +46,9 @@ def gerar_pdf(df):
 
     # KPIs
     c.setFont("Helvetica-Bold", 11)
-    c.drawString(2 * cm, y, f"Renda Total: R$ {df['RENDA ATUAL'].sum():,.2f}")
+    c.drawString(2 * cm, y, f"Renda Total: R$ {df['renda_atual'].sum():,.2f}")
     y -= 0.6 * cm
-    c.drawString(2 * cm, y, f"Lucro Total: R$ {df['LUCRO ATUAL'].sum():,.2f}")
+    c.drawString(2 * cm, y, f"Lucro Total: R$ {df['lucro_atual'].sum():,.2f}")
     y -= 1 * cm
 
     # TABELA
@@ -61,9 +59,9 @@ def gerar_pdf(df):
     c.setFont("Helvetica", 9)
     for _, row in df.iterrows():
         texto = (
-            f"{row['PRODUTO']} | "
-            f"Vendidos: {int(row['VENDIDOS'])} | "
-            f"Renda: R$ {row['RENDA ATUAL']:,.2f}"
+            f"{row['produto']} | "
+            f"Vendidos: {int(row['vendidos'])} | "
+            f"Renda: R$ {row['renda_atual']:,.2f}"
         )
         c.drawString(2 * cm, y, texto)
         y -= 0.45 * cm
@@ -76,11 +74,47 @@ def gerar_pdf(df):
     c.save()
     return temp_file.name
 
+def registrar_venda(produto_id, quantidade, preco, lucro, data_venda):
+    conn = get_conn()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO public.vendas_modarte
+        (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
+        VALUES (%s,%s,%s,%s,%s)
+    """, (
+        produto_id,
+        quantidade,
+        data_venda,
+        preco,
+        lucro
+    ))
+
+    cursor.execute("""
+        UPDATE public.produtos
+        SET estoque_atual = estoque_atual - %s
+        WHERE id = %s
+    """, (quantidade, produto_id))
+
+    conn.commit()
+
 # =====================
 # CONFIGURAÇÕES
 # =====================
+
 BASE_DIR = Path(__file__).parent
-PLANILHA = BASE_DIR / "PLANILHA_MODARTE.xlsx"
+
+@st.cache_resource
+def get_conn():
+    return psycopg2.connect(
+        host=st.secrets["database"]["host"],
+        port=st.secrets["database"]["port"],
+        database=st.secrets["database"]["dbname"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        sslmode=st.secrets["database"]["sslmode"]
+    )
+
 ESTOQUE_MINIMO = 5
 
 st.set_page_config(
@@ -93,20 +127,26 @@ st.set_page_config(
 # =====================
 # CARREGAR DADOS
 # =====================
-df = pd.read_excel(PLANILHA)
+
+conn = get_conn()
+
+df = pd.read_sql(
+    "SELECT * FROM public.produtos",
+    conn
+)
 
 # Garantir tipos corretos
-df["ESTOQUE INICIAL"] = pd.to_numeric(df["ESTOQUE INICIAL"], errors="coerce").fillna(0)
-df["ESTOQUE ATUAL"] = pd.to_numeric(df["ESTOQUE ATUAL"], errors="coerce").fillna(0)
-df["PREÇO FINAL"] = pd.to_numeric(df["PREÇO FINAL"], errors="coerce").fillna(0)
-df["LUCRO LIQUIDO"] = pd.to_numeric(df["LUCRO LIQUIDO"], errors="coerce").fillna(0)
+df["estoque_inicial"] = pd.to_numeric(df["estoque_inicial"], errors="coerce").fillna(0)
+df["estoque_atual"] = pd.to_numeric(df["estoque_atual"], errors="coerce").fillna(0)
+df["preco"] = pd.to_numeric(df["preco"], errors="coerce").fillna(0)
+df["lucro"] = pd.to_numeric(df["lucro"], errors="coerce").fillna(0)
 
 # =====================
 # CÁLCULOS
 # =====================
-df["VENDIDOS"] = (df["ESTOQUE INICIAL"] - df["ESTOQUE ATUAL"]).clip(lower=0)
-df["RENDA ATUAL"] = df["VENDIDOS"] * df["PREÇO FINAL"]
-df["LUCRO ATUAL"] = df["VENDIDOS"] * df["LUCRO LIQUIDO"]
+df["vendidos"] = (df["estoque_inicial"] - df["estoque_atual"]).clip(lower=0)
+df["renda_atual"] = df["vendidos"] * df["preco"]
+df["lucro_atual"] = df["vendidos"] * df["lucro"]
 
 # =====================
 # GERENCIAMENTO
@@ -116,7 +156,7 @@ st.sidebar.title("⚙️ Gerenciamento")
 
 acao = st.sidebar.radio(
     "Escolha uma ação:",
-    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "🗑️ Excluir Produto"]
+    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "💰 Registrar Venda", "🗑️ Excluir Produto"]
 )
 
 if st.sidebar.button("❌ Encerrar aplicação"):
@@ -139,13 +179,13 @@ if acao == "➕ Inserir Produto":
 
     if submit:
         novo = {
-            "PRODUTO": produto,
-            "FOTO DO PRODUTO": foto,
-            "ESTOQUE INICIAL": estoque_inicial,
-            "ESTOQUE ATUAL": estoque_atual,
-            "PREÇO FINAL": preco,
-            "LUCRO LIQUIDO": lucro,
-            "CODIGO NF": codigo
+            "produto": produto,
+            "foto": foto,
+            "estoque_inicial": estoque_inicial,
+            "estoque_atual": estoque_atual,
+            "preco": preco,
+            "lucro": lucro,
+            "codigo": codigo
         }
 
         valido, msg = validar_produto(novo)
@@ -153,47 +193,108 @@ if acao == "➕ Inserir Produto":
         if not valido:
             st.error(f"❌ {msg}")
         else:
-            df = pd.concat([df, pd.DataFrame([novo])], ignore_index=True)
-            salvar_planilha(df, PLANILHA)
-            st.success("✅ Produto inserido com sucesso!")
-            st.rerun()
+            conn = get_conn()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+            INSERT INTO public.produtos
+            (produto, foto, estoque_inicial, estoque_atual, preco, lucro, codigo)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                produto,
+                foto,
+                estoque_inicial,
+                estoque_atual,
+                preco,
+                lucro,
+                codigo
+            ))
+
 
 if acao == "✏️ Alterar Produto":
     st.subheader("✏️ Alterar produto")
 
-    produto_sel = st.selectbox("Selecione o produto", df["PRODUTO"])
+    produto_sel = st.selectbox("Selecione o produto", df["produto"])
 
-    idx = df[df["PRODUTO"] == produto_sel].index[0]
-    row = df.loc[idx]
+    row = df[df["produto"] == produto_sel].iloc[0]
+    produto_id = int(row["id"])
 
     with st.form("form_editar"):
-        produto = st.text_input("Produto", row["PRODUTO"])
-        estoque_inicial = st.number_input("Estoque inicial", value=int(row["ESTOQUE INICIAL"]))
-        estoque_atual = st.number_input("Estoque atual", value=int(row["ESTOQUE ATUAL"]))
-        preco = st.number_input("Preço final", value=float(row["PREÇO FINAL"]))
-        lucro = st.number_input("Lucro líquido (unidade)", value=float(row["LUCRO LIQUIDO"]))
-        codigo = st.text_input("Código do produto", row["CODIGO NF"])
+        produto = st.text_input("Produto", row["produto"])
+        estoque_inicial = st.number_input("Estoque inicial", value=int(row["estoque_inicial"]))
+        estoque_atual = st.number_input("Estoque atual", value=int(row["estoque_atual"]))
+        preco = st.number_input("Preço final", value=float(row["preco"]))
+        lucro = st.number_input("Lucro líquido (unidade)", value=float(row["lucro"]))
+        codigo = st.text_input("Código do produto", row["codigo"])
 
         submit = st.form_submit_button("Atualizar")
 
     if submit:
-        df.at[idx, "PRODUTO"] = produto
-        df.at[idx, "ESTOQUE INICIAL"] = estoque_inicial
-        df.at[idx, "ESTOQUE ATUAL"] = estoque_atual
-        df.at[idx, "PREÇO FINAL"] = preco
-        df.at[idx, "LUCRO LIQUIDO"] = lucro
-        df.at[idx, "CODIGO NF"] = codigo
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("""
+        UPDATE public.produtos
+        SET produto=%s, codigo=%s, preco=%s, lucro=%s,
+            estoque_inicial=%s, estoque_atual=%s
+        WHERE id=%s
+        """, (
+            produto,
+            codigo,
+            preco,
+            lucro,
+            estoque_inicial,
+            estoque_atual,
+            produto_id
+        ))
 
-        salvar_planilha(df, PLANILHA)
+
+        conn.commit()
         st.success("✏️ Produto atualizado com sucesso!")
         st.rerun()
+
+if acao == "💰 Registrar Venda":
+    st.subheader("💰 Registrar Venda")
+
+    data_venda = st.date_input(
+        "📅 Data da venda",
+        value=datetime.today()
+    )
+    
+    produto_sel = st.selectbox(
+        "Produto",
+        df["produto"].tolist()
+    )
+
+    row = df[df["produto"] == produto_sel].iloc[0]
+
+    estoque_disp = int(row["estoque_atual"])
+
+    quantidade = st.number_input(
+        "Quantidade vendida",
+        min_value=1,
+        max_value=estoque_disp,
+        step=1
+    )
+
+    if st.button("✅ Confirmar venda"):
+        registrar_venda(
+            produto_id=int(row["id"]),
+            quantidade=quantidade,
+            preco=float(row["preco"]),
+            lucro=float(row["lucro"]),
+            data_venda=datetime.combine(data_venda, datetime.min.time())
+        )
+
+        st.success("✅ Venda registrada com sucesso!")
+        st.rerun()
+
 
 if acao == "🗑️ Excluir Produto":
     st.subheader("🗑️ Excluir produto")
 
     produto_sel = st.selectbox(
         "Selecione o produto",
-        df["PRODUTO"].unique()
+        df["produto"].unique()
     )
 
     st.warning("⚠️ Esta ação não pode ser desfeita.")
@@ -202,8 +303,15 @@ if acao == "🗑️ Excluir Produto":
 
     if confirmar:
         if st.button("🗑️ Excluir definitivamente"):
-            df = df[df["PRODUTO"] != produto_sel]
-            salvar_planilha(df, PLANILHA)
+            conn = get_conn()
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "DELETE FROM public.produtos WHERE produto=%s",
+                (produto_sel,)
+            )
+
+            conn.commit()
             st.success("🗑️ Produto excluído com sucesso!")
             st.rerun()
 
@@ -219,16 +327,16 @@ st.title("📦 Painel de Produtos")
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 with kpi1:
-    st.metric("💰 Renda Total", f"R$ {df['RENDA ATUAL'].sum():,.2f}")
+    st.metric("💰 Renda Total", f"R$ {df['renda_atual'].sum():,.2f}")
 
 with kpi2:
-    st.metric("📈 Lucro Total", f"R$ {df['LUCRO ATUAL'].sum():,.2f}")
+    st.metric("📈 Lucro Total", f"R$ {df['lucro_atual'].sum():,.2f}")
 
 with kpi3:
-    st.metric("🛒 Produtos Vendidos", int(df["VENDIDOS"].sum()))
+    st.metric("🛒 Produtos Vendidos", int(df["vendidos"].sum()))
 
 with kpi4:
-    st.metric("📦 Estoque Total", int(df["ESTOQUE ATUAL"].sum()))
+    st.metric("📦 Estoque Total", int(df["estoque_atual"].sum()))
     
 st.markdown("### 🧾 Relatórios")
 
@@ -247,21 +355,21 @@ st.markdown("---")
 # =====================
 # FILTRO POR PRODUTO
 # =====================
-produtos = ["Todos"] + sorted(df["PRODUTO"].dropna().unique().tolist())
+produtos = ["Todos"] + sorted(df["produto"].dropna().unique().tolist())
 produto_selecionado = st.selectbox("🔎 Filtrar produto:", produtos)
 
 if produto_selecionado != "Todos":
-    df = df[df["PRODUTO"] == produto_selecionado]
+    df = df[df["produto"] == produto_selecionado]
 
 # =====================
 # ALERTA ESTOQUE BAIXO
 # =====================
-estoque_baixo = df[df["ESTOQUE ATUAL"] <= ESTOQUE_MINIMO]
+estoque_baixo = df[df["estoque_atual"] <= ESTOQUE_MINIMO]
 
 if not estoque_baixo.empty:
     st.error("🚨 Produtos com estoque baixo!")
     st.dataframe(
-        estoque_baixo[["PRODUTO", "ESTOQUE ATUAL"]],
+        estoque_baixo[["produto", "estoque_atual"]],
         use_container_width=True
     )
 
@@ -270,23 +378,91 @@ st.markdown("---")
 # =====================
 # DASHBOARD DE VENDAS
 # =====================
-st.subheader("📊 Dashboard de Vendas")
+st.subheader("📊 Dashboard - Histórico de Vendas")
 
-col_g1, col_g2 = st.columns(2)
+conn = get_conn()
 
-with col_g1:
-    st.bar_chart(
-        df.set_index("PRODUTO")["VENDIDOS"],
-        use_container_width=True
+df_vendas = pd.read_sql("""
+SELECT
+    v.id,
+    v.produto_id,
+    p.produto,
+    v.data_venda,
+    v.quantidade,
+    v.preco_unit,
+    v.lucro_unit
+FROM public.vendas_modarte v
+JOIN public.produtos p ON p.id = v.produto_id
+ORDER BY v.data_venda DESC
+""", conn)
+
+if not df_vendas.empty:
+    df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"])
+
+    produto_sel = st.selectbox(
+        "Produto",
+        df_vendas["produto"].unique()
     )
 
-with col_g2:
-    st.bar_chart(
-        df.set_index("PRODUTO")["RENDA ATUAL"],
-        use_container_width=True
+    df_prod = df_vendas[df_vendas["produto"] == produto_sel]
+
+    st.line_chart(
+        df_prod.groupby(df_prod["data_venda"].dt.date)["quantidade"].sum()
     )
 
-st.markdown("---")
+    st.dataframe(df_prod, use_container_width=True)
+
+    st.markdown("### 🗑️ Excluir Venda")
+
+    produto_excluir = st.selectbox(
+        "📦 Selecione o produto",
+        df_vendas["produto"].unique()
+    )
+
+    df_vendas_produto = df_vendas[
+        df_vendas["produto"] == produto_excluir
+    ].copy()
+
+    df_vendas_produto["label"] = df_vendas_produto.apply(
+        lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un | R$ {(x['quantidade'] * x['preco_unit']):,.2f}",
+        axis=1
+    )
+
+    venda_sel = st.selectbox(
+        "🧾 Selecione a venda",
+        df_vendas_produto["label"]
+    )
+
+    if st.button("❌ Excluir venda selecionada"):
+        venda = df_vendas_produto[
+            df_vendas_produto["label"] == venda_sel
+        ].iloc[0]
+    
+        conn = get_conn()
+        cursor = conn.cursor()
+    
+        # Devolver estoque
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (
+            int(venda["quantidade"]),
+            int(venda["produto_id"])
+        ))
+    
+        # Excluir venda
+        cursor.execute("""
+            DELETE FROM public.vendas_modarte
+            WHERE id = %s
+        """, (int(venda["id"]),))
+    
+        conn.commit()
+    
+        st.success("🗑️ Venda excluída e estoque ajustado com sucesso!")
+        st.rerun()
+else:
+    st.info("Nenhuma venda registrada ainda.")
 
 # =====================
 # LISTAGEM DE PRODUTOS
@@ -298,7 +474,7 @@ for _, row in df.iterrows():
     col1, col2 = st.columns([1, 3])
 
     with col1:
-        img_path = BASE_DIR / str(row["FOTO DO PRODUTO"])
+        img_path = BASE_DIR / str(row["foto"])
         img_logo = BASE_DIR / "Logo_Modarte.jpg"
         if img_path.exists():
             st.image(str(img_path), use_container_width=True)
@@ -306,13 +482,14 @@ for _, row in df.iterrows():
             st.image(str(img_logo), use_container_width=True)
 
     with col2:
-        st.subheader(row["PRODUTO"])
-        st.write(f"📦 **Estoque Inicial:** {int(row['ESTOQUE INICIAL'])}")
-        st.write(f"📦 **Estoque Atual:** {int(row['ESTOQUE ATUAL'])}")
-        st.write(f"🛒 **Vendidos:** {int(row['VENDIDOS'])}")
-        st.write(f"💰 **Preço:** R$ {row['PREÇO FINAL']:,.2f}")
-        st.write(f"📈 **Lucro unidade:** R$ {row['LUCRO LIQUIDO']:,.2f}")
-        st.write(f"💵 **Renda Atual:** R$ {row['RENDA ATUAL']:,.2f}")
-        st.write(f"🏆 **Lucro Atual:** R$ {row['LUCRO ATUAL']:,.2f}")
+        st.subheader(row["produto"])
+        st.write(f"📦 **Estoque Inicial:** {int(row['estoque_inicial'])}")
+        st.write(f"📦 **Estoque Atual:** {int(row['estoque_atual'])}")
+        st.write(f"🛒 **Vendidos:** {int(row['vendidos'])}")
+        st.write(f"💰 **Preço:** R$ {row['preco']:,.2f}")
+        st.write(f"📈 **Lucro unidade:** R$ {row['lucro']:,.2f}")
+        st.write(f"💵 **Renda Atual:** R$ {row['renda_atual']:,.2f}")
+        st.write(f"🏆 **Lucro Atual:** R$ {row['lucro_atual']:,.2f}")
     
+
     st.markdown("---")
