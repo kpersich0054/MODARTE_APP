@@ -11,9 +11,10 @@ sqlite_cursor = sqlite_conn.cursor()
 pg_conn = psycopg2.connect(
     host="db.tkmopzgpuvwgvhoekjnv.supabase.co",
     database="Modarte",
-    user="postgres",
+    user="Modarte",
     password="Pudim0206.2026",
-    port=5432
+    port=5432,
+    sslmode="require"
 )
 pg_cursor = pg_conn.cursor()
 
