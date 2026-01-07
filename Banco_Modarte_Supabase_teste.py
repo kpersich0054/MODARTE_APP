@@ -10,7 +10,7 @@ sqlite_cursor = sqlite_conn.cursor()
 # Postgres (Supabase)
 pg_conn = psycopg2.connect(
     host="db.tkmopzgpuvwgvhoekjnv.supabase.co",
-    database="Modarte",
+    database="postgres",
     user="postgres",
     password="Pudim0206.2026",
     port=5432,
