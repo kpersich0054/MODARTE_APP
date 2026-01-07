@@ -74,26 +74,26 @@ def gerar_pdf(df):
     c.save()
     return temp_file.name
 
-def registrar_venda(produto_id, quantidade, preco, lucro):
+def registrar_venda(produto_id, quantidade, preco, lucro, data_venda):
     conn = get_conn()
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO public.vendas_modarte
-    (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
-    VALUES (%s,%s,%s,%s,%s)
+        INSERT INTO public.vendas_modarte
+        (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
+        VALUES (%s,%s,%s,%s,%s)
     """, (
         produto_id,
         quantidade,
-        datetime.now(),
+        data_venda,
         preco,
         lucro
     ))
 
     cursor.execute("""
-    UPDATE public.produtos
-    SET estoque_atual = estoque_atual - %s
-    WHERE id = %s
+        UPDATE public.produtos
+        SET estoque_atual = estoque_atual - %s
+        WHERE id = %s
     """, (quantidade, produto_id))
 
     conn.commit()
@@ -255,6 +255,11 @@ if acao == "✏️ Alterar Produto":
 if acao == "💰 Registrar Venda":
     st.subheader("💰 Registrar Venda")
 
+    data_venda = st.date_input(
+        "📅 Data da venda",
+        value=datetime.today()
+    )
+    
     produto_sel = st.selectbox(
         "Produto",
         df["produto"].tolist()
@@ -276,11 +281,13 @@ if acao == "💰 Registrar Venda":
             produto_id=int(row["id"]),
             quantidade=quantidade,
             preco=float(row["preco"]),
-            lucro=float(row["lucro"])
+            lucro=float(row["lucro"]),
+            data_venda=datetime.combine(data_venda, datetime.min.time())
         )
 
         st.success("✅ Venda registrada com sucesso!")
         st.rerun()
+
 
 if acao == "🗑️ Excluir Produto":
     st.subheader("🗑️ Excluir produto")
@@ -377,7 +384,9 @@ conn = get_conn()
 
 df_vendas = pd.read_sql("""
 SELECT
+    v.id,
     p.produto,
+    v.produto_id,
     v.data_venda,
     v.quantidade,
     v.quantidade * v.preco_unit AS renda,
@@ -401,6 +410,45 @@ if not df_vendas.empty:
     )
 
     st.dataframe(df_prod, use_container_width=True)
+
+    st.markdown("### 🗑️ Excluir Venda")
+
+    venda_sel = st.selectbox(
+        "Selecione a venda (data | quantidade)",
+        df_prod.apply(
+            lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un",
+            axis=1
+        )
+    )
+
+    if st.button("❌ Excluir venda selecionada"):
+        venda = df_prod.iloc[
+            df_prod.apply(
+                lambda x: f"{x['data_venda'].date()} | {x['quantidade']} un",
+                axis=1
+            ).tolist().index(venda_sel)
+        ]
+
+        conn = get_conn()
+        cursor = conn.cursor()
+
+        # Devolve estoque
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (int(venda["quantidade"]), int(venda["produto_id"])))
+
+        # Remove venda
+        cursor.execute(
+            "DELETE FROM public.vendas_modarte WHERE id = %s",
+            (int(venda["id"]),)
+        )
+
+        conn.commit()
+
+        st.success("🗑️ Venda excluída e estoque ajustado!")
+        st.rerun()
 else:
     st.info("Nenhuma venda registrada ainda.")
 
