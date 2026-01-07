@@ -79,7 +79,7 @@ def registrar_venda(produto_id, quantidade, preco, lucro):
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO public.vendas
+    INSERT INTO public.vendas_modarte
     (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
     VALUES (%s,%s,%s,%s,%s)
     """, (
@@ -382,7 +382,7 @@ SELECT
     v.quantidade,
     v.quantidade * v.preco_unit AS renda,
     v.quantidade * v.lucro_unit AS lucro
-FROM public.vendas v
+FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
 """, conn)
 
@@ -433,3 +433,4 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
