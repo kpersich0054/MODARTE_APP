@@ -27,7 +27,7 @@ sqlite_cursor.execute("SELECT * FROM produtos")
 
 for row in sqlite_cursor.fetchall():
     pg_cursor.execute("""
-        INSERT INTO produtos (
+        INSERT INTO public.produtos (
             id, produto, codigo, preco, lucro,
             estoque_inicial, estoque_atual,
             foto, renda_atual, lucro_atual
@@ -45,7 +45,7 @@ sqlite_cursor.execute("SELECT * FROM vendas")
 
 for row in sqlite_cursor.fetchall():
     pg_cursor.execute("""
-        INSERT INTO vendas (
+        INSERT INTO public.vendas (
             id, produto_id, quantidade,
             preco_unitario, data_venda
         ) VALUES (%s,%s,%s,%s,%s)
