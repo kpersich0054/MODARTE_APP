@@ -3,3 +3,5 @@ pandas
 openpyxl
 pillow
 reportlab
+psycopg2-binary
+sqlalchemy
