@@ -1,3 +1,4 @@
+from supabase import create_client
 import streamlit as st
 import pandas as pd
 import psycopg2
@@ -9,6 +10,39 @@ from datetime import datetime
 import tempfile
 import os
 import signal
+
+@st.cache_resource
+def get_supabase():
+    return create_client(
+        st.secrets["supabase"]["url"],
+        st.secrets["supabase"]["anon_key"]
+    )
+
+supabase = get_supabase()
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+if st.session_state.user is None:
+    st.title("🔐 Login - MODARTE")
+
+    email = st.text_input("Email")
+    senha = st.text_input("Senha", type="password")
+
+    if st.button("Entrar"):
+        try:
+            res = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": senha
+            })
+            st.session_state.user = res.user
+            st.success("✅ Login realizado!")
+            st.rerun()
+        except Exception as e:
+            st.error("❌ Email ou senha inválidos")
+
+    st.stop()  # ⛔ bloqueia o resto do app
+
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -128,6 +162,14 @@ st.set_page_config(
 # CARREGAR DADOS
 # =====================
 
+st.sidebar.markdown("---")
+st.sidebar.write(f"👤 Usuário: {st.session_state.user.email}")
+
+if st.sidebar.button("🚪 Sair"):
+    supabase.auth.sign_out()
+    st.session_state.user = None
+    st.rerun()
+    
 conn = get_conn()
 
 df = pd.read_sql(
@@ -493,4 +535,5 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
