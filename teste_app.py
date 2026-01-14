@@ -20,6 +20,17 @@ def get_supabase():
 
 supabase = get_supabase()
 
+# =====================
+# SESSION
+# =====================
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+# Recuperar sessão (OAuth / refresh)
+session = supabase.auth.get_session()
+if session and session.user:
+    st.session_state.user = session.user
+    
 def usuario_autorizado(user):
     res = supabase.table("usuarios_autorizados") \
         .select("email") \
@@ -28,63 +39,55 @@ def usuario_autorizado(user):
         .execute()
 
     return len(res.data) > 0
-    
-if "user" not in st.session_state:
-    st.session_state.user = None
 
 if st.session_state.user is None:
     st.title("🔐 Login - MODARTE")
 
     tab1, tab2 = st.tabs(["📧 Email e senha", "🔐 Entrar com Google"])
 
-    # ======================
-    # LOGIN EMAIL + SENHA
-    # ======================
+    # LOGIN EMAIL
     with tab1:
         email = st.text_input("Email")
         senha = st.text_input("Senha", type="password")
 
         if st.button("Entrar"):
-            res = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": senha
-            })
+            try:
+                res = supabase.auth.sign_in_with_password({
+                    "email": email,
+                    "password": senha
+                })
 
-            if not usuario_autorizado(res.user):
-                supabase.auth.sign_out()
-                st.error("⛔ Acesso não autorizado")
-                st.stop()
+                if not usuario_autorizado(res.user):
+                    supabase.auth.sign_out()
+                    st.error("⛔ Acesso não autorizado")
+                    st.stop()
 
-            st.session_state.user = res.user
-            st.rerun()
+                st.session_state.user = res.user
+                st.rerun()
 
-    # ======================
-    # LOGIN GOOGLE (HÍBRIDO)
-    # ======================
+            except:
+                st.error("❌ Login inválido")
+
+    # LOGIN GOOGLE
     with tab2:
-        st.info(
-            "👉 Use o Google apenas no primeiro acesso.\n"
-            "Depois, faça login normalmente com email e senha."
-        )
-
         redirect_url = "https://teste-modarte.streamlit.app/"
 
         res = supabase.auth.sign_in_with_oauth({
             "provider": "google",
-            "options": {
-                "redirect_to": redirect_url
-            }
+            "options": {"redirect_to": redirect_url}
         })
 
-        st.markdown(
-            f"### 👉 [Entrar com Google]({res.url})"
-        )
+        st.markdown(f"### 👉 [Entrar com Google]({res.url})")
 
-        if st.session_state.user:
-            if not usuario_autorizado(st.session_state.user):
-                supabase.auth.sign_out()
-                st.error("⛔ Seu email não está autorizado")
-                st.stop()
+    st.stop()
+
+# =====================
+# VALIDAÇÃO FINAL (OBRIGATÓRIA)
+# =====================
+if not usuario_autorizado(st.session_state.user):
+    supabase.auth.sign_out()
+    st.error("⛔ Seu email não está autorizado")
+    st.stop()
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -577,6 +580,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
