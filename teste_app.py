@@ -35,7 +35,7 @@ if "code" in query_params:
 
         st.rerun()
     except Exception as e:
-        st.error("Erro ao validar login Google")
+        st.error(f"Erro ao validar login Google:\n{e}")
         st.stop()
         
 # =====================
@@ -597,6 +597,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
