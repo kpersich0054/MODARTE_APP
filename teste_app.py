@@ -27,15 +27,13 @@ query_params = st.query_params
 
 if "code" in query_params:
     try:
-        code = query_params["code"][0]  # Streamlit retorna lista
+        code = query_params["code"][0]
 
         supabase.auth.exchange_code_for_session({
             "auth_code": code
         })
 
-        # Limpa a URL (?code=...)
         st.query_params.clear()
-
         st.rerun()
     except Exception as e:
         st.error(f"Erro ao validar login Google:\n{e}")
@@ -600,6 +598,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
