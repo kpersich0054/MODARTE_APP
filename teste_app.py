@@ -21,6 +21,19 @@ def get_supabase():
 supabase = get_supabase()
 
 # =====================
+# OAUTH CALLBACK (OBRIGATÓRIO)
+# =====================
+query_params = st.query_params
+
+if "code" in query_params:
+    try:
+        supabase.auth.exchange_code_for_session(query_params["code"])
+        st.rerun()
+    except Exception as e:
+        st.error("Erro ao validar login Google")
+        st.stop()
+        
+# =====================
 # SESSION
 # =====================
 if "user" not in st.session_state:
@@ -579,6 +592,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
