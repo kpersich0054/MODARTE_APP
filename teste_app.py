@@ -8,38 +8,55 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from datetime import datetime
 import tempfile
-import os
-import signal
 
 # =====================
-# LOGIN
+# CONFIG INICIAL
 # =====================
+st.set_page_config(
+    page_title="MODARTE",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-def sidebar_usuario():
-    with st.sidebar:
-        if st.session_state.user:
-            st.write(f"👤 Usuário: {st.session_state.user.email}")
-            if st.button("Sair"):
-                supabase.auth.sign_out()
-                st.session_state.user = None
-                st.session_state.fase = "login"
-                st.rerun()
-        else:
-            st.write("🔒 Não autenticado")
-            
 supabase = create_client(
     st.secrets["supabase"]["url"],
     st.secrets["supabase"]["anon_key"]
 )
 
+# =====================
+# SESSION STATE
+# =====================
 if "user" not in st.session_state:
     st.session_state.user = None
 
 if "fase" not in st.session_state:
     st.session_state.fase = "login"
 
-def tela_login_email():
-    st.subheader("🔐 Login")
+# =====================
+# FUNÇÕES AUXILIARES
+# =====================
+def usuario_autorizado(email):
+    res = supabase.table("usuarios_autorizados") \
+        .select("email") \
+        .eq("email", email) \
+        .execute()
+    return len(res.data) > 0
+
+def sidebar_usuario():
+    with st.sidebar:
+        st.write(f"👤 Usuário: {st.session_state.user.email}")
+
+        if st.button("🚪 Sair"):
+            supabase.auth.sign_out()
+            st.session_state.user = None
+            st.session_state.fase = "login"
+            st.rerun()
+
+# =====================
+# TELAS
+# =====================
+def tela_login():
+    st.title("🔐 Login - MODARTE")
 
     email = st.text_input("Email")
     senha = st.text_input("Senha", type="password")
@@ -51,20 +68,19 @@ def tela_login_email():
                 "password": senha
             })
 
+            if not usuario_autorizado(res.user.email):
+                supabase.auth.sign_out()
+                st.error("⛔ Usuário não autorizado")
+                st.stop()
+
             st.session_state.user = res.user
             st.session_state.fase = "app"
             st.rerun()
 
         except Exception:
-            st.error("Email ou senha inválidos")
+            st.error("❌ Email ou senha inválidos")
 
-def tela_google_primeiro_acesso():
-    st.subheader("🟢 Primeiro acesso")
-
-    st.info(
-        "Use o Google apenas no primeiro acesso.\n"
-        "Depois você usará email e senha."
-    )
+    st.markdown("---")
 
     auth_url = supabase.auth.sign_in_with_oauth({
         "provider": "google",
@@ -73,73 +89,73 @@ def tela_google_primeiro_acesso():
         }
     })
 
-    st.link_button("Entrar com Google", auth_url.url)
+    st.link_button("🔐 Primeiro acesso com Google", auth_url.url)
 
+# =====================
+# CALLBACK GOOGLE
+# =====================
 params = st.query_params
 
 if "email" in params:
     email = params["email"]
 
-    # Salva na tabela de autorizados
     supabase.table("usuarios_autorizados").insert({
         "email": email
     }).execute()
 
+    st.success("✅ Email autorizado. Crie sua senha.")
     st.session_state.email_google = email
     st.session_state.fase = "criar_senha"
+    st.query_params.clear()
     st.rerun()
 
 def tela_criar_senha():
-    st.subheader("🔑 Criar senha")
+    st.title("🔑 Criar senha")
 
-    senha = st.text_input("Nova senha", type="password")
+    senha1 = st.text_input("Senha", type="password")
     senha2 = st.text_input("Confirmar senha", type="password")
 
-    if st.button("Salvar senha"):
-        if senha != senha2:
+    if st.button("Salvar"):
+        if senha1 != senha2:
             st.error("Senhas não conferem")
             return
 
-        supabase.auth.update_user({
-            "password": senha
-        })
+        supabase.auth.update_user({"password": senha1})
 
-        st.success("Senha criada! Faça login.")
+        st.success("Senha criada com sucesso!")
         st.session_state.fase = "login"
         st.rerun()
-    
-def usuario_autorizado(email):
-    res = supabase.table("usuarios_autorizados") \
-        .select("email") \
-        .eq("email", email) \
-        .execute()
 
-    return len(res.data) > 0
-
-if st.session_state.user:
-    email = st.session_state.user.email
-
-    if not usuario_autorizado(email):
-        st.error("Usuário não autorizado")
-        st.stop()
-
+# =====================
+# CONTROLE DE FLUXO
+# =====================
 if st.session_state.fase == "login":
-    tela_login_email()
+    tela_login()
     st.stop()
 
-elif st.session_state.fase == "google":
-    tela_google_primeiro_acesso()
-
-elif st.session_state.fase == "criar_senha":
+if st.session_state.fase == "criar_senha":
     tela_criar_senha()
-
-elif st.session_state.fase == "app":
-    sidebar_usuario()
-    st.success("🎉 Bem-vindo ao sistema!")
+    st.stop()
 
 # =====================
-# APP
+# A PARTIR DAQUI → APP
 # =====================
+if not st.session_state.user:
+    st.session_state.fase = "login"
+    st.rerun()
+
+if not usuario_autorizado(st.session_state.user.email):
+    supabase.auth.sign_out()
+    st.error("⛔ Acesso revogado")
+    st.stop()
+
+sidebar_usuario()
+
+# =====================
+# APP PRINCIPAL
+# =====================
+st.title("📦 Painel de Produtos")
+st.success("🎉 Bem-vindo ao sistema!")
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -624,4 +640,5 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
