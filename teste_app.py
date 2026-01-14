@@ -132,7 +132,7 @@ elif st.session_state.fase == "google":
 elif st.session_state.fase == "criar_senha":
     tela_criar_senha()
 
-if st.session_state.fase == "app":
+elif st.session_state.fase == "app":
     sidebar_usuario()
     st.success("🎉 Bem-vindo ao sistema!")
 
@@ -623,23 +623,3 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
