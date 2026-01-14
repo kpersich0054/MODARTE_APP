@@ -11,14 +11,17 @@ import tempfile
 import os
 import signal
 
-@st.cache_resource
-def get_supabase():
-    return create_client(
-        st.secrets["supabase"]["url"],
-        st.secrets["supabase"]["anon_key"]
-    )
+supabase = create_client(
+    st.secrets["supabase"]["url"],
+    st.secrets["supabase"]["anon_key"]
+)
 
-supabase = get_supabase()
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+session = supabase.auth.get_session()
+if session and session.user:
+    st.session_state.user = session.user
 
 # =====================
 # OAUTH CALLBACK (OBRIGATÓRIO)
@@ -88,11 +91,11 @@ if st.session_state.user is None:
 
     # LOGIN GOOGLE
     with tab2:
-        redirect_url = "https://teste-modarte.streamlit.app"
-        
         res = supabase.auth.sign_in_with_oauth({
             "provider": "google",
-            "options": {"redirect_to": redirect_url}
+            "options": {
+                "redirect_to": "https://teste-modarte.streamlit.app"
+            }
         })
 
         st.markdown(f"### 👉 [Entrar com Google]({res.url})")
@@ -598,6 +601,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
