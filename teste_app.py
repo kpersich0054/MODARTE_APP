@@ -15,6 +15,18 @@ import signal
 # LOGIN
 # =====================
 
+def sidebar_usuario():
+    with st.sidebar:
+        if st.session_state.user:
+            st.write(f"👤 Usuário: {st.session_state.user.email}")
+            if st.button("Sair"):
+                supabase.auth.sign_out()
+                st.session_state.user = None
+                st.session_state.fase = "login"
+                st.rerun()
+        else:
+            st.write("🔒 Não autenticado")
+            
 supabase = create_client(
     st.secrets["supabase"]["url"],
     st.secrets["supabase"]["anon_key"]
@@ -120,7 +132,8 @@ elif st.session_state.fase == "google":
 elif st.session_state.fase == "criar_senha":
     tela_criar_senha()
 
-elif st.session_state.fase == "app":
+if st.session_state.fase == "app":
+    sidebar_usuario()
     st.success("🎉 Bem-vindo ao sistema!")
 
 # =====================
@@ -618,6 +631,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
