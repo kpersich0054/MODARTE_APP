@@ -258,13 +258,8 @@ st.set_page_config(
 # CARREGAR DADOS
 # =====================
 
-st.sidebar.markdown("---")
-st.sidebar.write(f"👤 Usuário: {st.session_state.user.email}")
-
-if st.sidebar.button("🚪 Sair"):
-    supabase.auth.sign_out()
-    st.session_state.user = None
-    st.rerun()
+if st.session_state.fase == "app":
+    sidebar_usuario()
     
 conn = get_conn()
 
@@ -631,6 +626,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
