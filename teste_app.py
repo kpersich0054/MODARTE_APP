@@ -26,23 +26,50 @@ if "user" not in st.session_state:
 if st.session_state.user is None:
     st.title("🔐 Login - MODARTE")
 
-    email = st.text_input("Email")
-    senha = st.text_input("Senha", type="password")
+    tab1, tab2 = st.tabs(["📧 Email e senha", "🔐 Entrar com Google"])
 
-    if st.button("Entrar"):
-        try:
-            res = supabase.auth.sign_in_with_password({
-                "email": email,
-                "password": senha
-            })
-            st.session_state.user = res.user
-            st.success("✅ Login realizado!")
-            st.rerun()
-        except Exception as e:
-            st.error("❌ Email ou senha inválidos")
+    # ======================
+    # LOGIN EMAIL + SENHA
+    # ======================
+    with tab1:
+        email = st.text_input("Email")
+        senha = st.text_input("Senha", type="password")
 
-    st.stop()  # ⛔ bloqueia o resto do app
+        if st.button("Entrar"):
+            try:
+                res = supabase.auth.sign_in_with_password({
+                    "email": email,
+                    "password": senha
+                })
+                st.session_state.user = res.user
+                st.success("✅ Login realizado!")
+                st.rerun()
+            except:
+                st.error("❌ Email ou senha inválidos")
 
+    # ======================
+    # LOGIN GOOGLE (HÍBRIDO)
+    # ======================
+    with tab2:
+        st.info(
+            "👉 Use o Google apenas no primeiro acesso.\n"
+            "Depois, faça login normalmente com email e senha."
+        )
+
+        redirect_url = "https://teste-modarte.streamlit.app/"
+
+        res = supabase.auth.sign_in_with_oauth({
+            "provider": "google",
+            "options": {
+                "redirect_to": redirect_url
+            }
+        })
+
+        st.markdown(
+            f"### 👉 [Entrar com Google]({res.url})"
+        )
+
+    st.stop()
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -535,5 +562,6 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
