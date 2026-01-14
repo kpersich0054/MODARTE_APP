@@ -20,6 +20,15 @@ def get_supabase():
 
 supabase = get_supabase()
 
+def usuario_autorizado(user):
+    res = supabase.table("usuarios_autorizados") \
+        .select("email") \
+        .eq("email", user.email) \
+        .eq("ativo", True) \
+        .execute()
+
+    return len(res.data) > 0
+    
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -36,16 +45,18 @@ if st.session_state.user is None:
         senha = st.text_input("Senha", type="password")
 
         if st.button("Entrar"):
-            try:
-                res = supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": senha
-                })
-                st.session_state.user = res.user
-                st.success("✅ Login realizado!")
-                st.rerun()
-            except:
-                st.error("❌ Email ou senha inválidos")
+            res = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": senha
+            })
+
+            if not usuario_autorizado(res.user):
+                supabase.auth.sign_out()
+                st.error("⛔ Acesso não autorizado")
+                st.stop()
+
+            st.session_state.user = res.user
+            st.rerun()
 
     # ======================
     # LOGIN GOOGLE (HÍBRIDO)
@@ -69,7 +80,11 @@ if st.session_state.user is None:
             f"### 👉 [Entrar com Google]({res.url})"
         )
 
-    st.stop()
+        if st.session_state.user:
+            if not usuario_autorizado(st.session_state.user):
+                supabase.auth.sign_out()
+                st.error("⛔ Seu email não está autorizado")
+                st.stop()
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -562,6 +577,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
