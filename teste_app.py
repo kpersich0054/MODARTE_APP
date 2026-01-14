@@ -11,6 +11,10 @@ import tempfile
 import os
 import signal
 
+# =====================
+# LOGIN
+# =====================
+
 supabase = create_client(
     st.secrets["supabase"]["url"],
     st.secrets["supabase"]["anon_key"]
@@ -19,71 +23,109 @@ supabase = create_client(
 if "user" not in st.session_state:
     st.session_state.user = None
 
-session = supabase.auth.get_session()
-if session and session.user:
-    st.session_state.user = session.user
-        
-# =====================
-# SESSION
-# =====================
+if "fase" not in st.session_state:
+    st.session_state.fase = "login"
+
+def tela_login_email():
+    st.subheader("🔐 Login")
+
+    email = st.text_input("Email")
+    senha = st.text_input("Senha", type="password")
+
+    if st.button("Entrar"):
+        try:
+            res = supabase.auth.sign_in_with_password({
+                "email": email,
+                "password": senha
+            })
+
+            st.session_state.user = res.user
+            st.session_state.fase = "app"
+            st.rerun()
+
+        except Exception:
+            st.error("Email ou senha inválidos")
+
+def tela_google_primeiro_acesso():
+    st.subheader("🟢 Primeiro acesso")
+
+    st.info(
+        "Use o Google apenas no primeiro acesso.\n"
+        "Depois você usará email e senha."
+    )
+
+    auth_url = supabase.auth.sign_in_with_oauth({
+        "provider": "google",
+        "options": {
+            "redirect_to": "https://SEU_APP.streamlit.app"
+        }
+    })
+
+    st.link_button("Entrar com Google", auth_url.url)
+
+params = st.query_params
+
+if "email" in params:
+    email = params["email"]
+
+    # Salva na tabela de autorizados
+    supabase.table("usuarios_autorizados").insert({
+        "email": email
+    }).execute()
+
+    st.session_state.email_google = email
+    st.session_state.fase = "criar_senha"
+    st.rerun()
+
+def tela_criar_senha():
+    st.subheader("🔑 Criar senha")
+
+    senha = st.text_input("Nova senha", type="password")
+    senha2 = st.text_input("Confirmar senha", type="password")
+
+    if st.button("Salvar senha"):
+        if senha != senha2:
+            st.error("Senhas não conferem")
+            return
+
+        supabase.auth.update_user({
+            "password": senha
+        })
+
+        st.success("Senha criada! Faça login.")
+        st.session_state.fase = "login"
+        st.rerun()
     
-def usuario_autorizado(user):
+def usuario_autorizado(email):
     res = supabase.table("usuarios_autorizados") \
         .select("email") \
-        .eq("email", user.email) \
-        .eq("ativo", True) \
+        .eq("email", email) \
         .execute()
 
     return len(res.data) > 0
 
-if st.session_state.user is None:
-    st.title("🔐 Login - MODARTE")
+if st.session_state.user:
+    email = st.session_state.user.email
 
-    tab1, tab2 = st.tabs(["📧 Email e senha", "🔐 Entrar com Google"])
+    if not usuario_autorizado(email):
+        st.error("Usuário não autorizado")
+        st.stop()
 
-    # LOGIN EMAIL
-    with tab1:
-        email = st.text_input("Email")
-        senha = st.text_input("Senha", type="password")
+if st.session_state.fase == "login":
+    tela_login_email()
 
-        if st.button("Entrar"):
-            try:
-                res = supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": senha
-                })
+elif st.session_state.fase == "google":
+    tela_google_primeiro_acesso()
 
-                if not usuario_autorizado(res.user):
-                    supabase.auth.sign_out()
-                    st.error("⛔ Acesso não autorizado")
-                    st.stop()
+elif st.session_state.fase == "criar_senha":
+    tela_criar_senha()
 
-                st.session_state.user = res.user
-                st.rerun()
-
-            except:
-                st.error("❌ Login inválido")
-
-    # LOGIN GOOGLE
-    with tab2:
-        res = supabase.auth.sign_in_with_oauth({
-            "provider": "google",
-            "options": {
-                "redirect_to": "https://teste-modarte.streamlit.app"
-            }
-        })
-
-        st.markdown(f"### 👉 [Entrar com Google]({res.url})")
-
-    st.stop()
+elif st.session_state.fase == "app":
+    st.success("🎉 Bem-vindo ao sistema!")
 
 # =====================
-# VALIDAÇÃO FINAL (OBRIGATÓRIA)
+# APP
 # =====================
-if not usuario_autorizado(st.session_state.user):
-    supabase.auth.sign_out()
-    st.error("⛔ Seu email não está autorizado")
-    st.stop()
 
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
@@ -576,6 +618,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
