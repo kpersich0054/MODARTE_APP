@@ -27,7 +27,12 @@ query_params = st.query_params
 
 if "code" in query_params:
     try:
-        supabase.auth.exchange_code_for_session(query_params["code"])
+        code = query_params["code"][0]  # 👈 MUITO IMPORTANTE
+        supabase.auth.exchange_code_for_session(code)
+
+        # Limpa a URL (?code=...)
+        st.query_params.clear()
+
         st.rerun()
     except Exception as e:
         st.error("Erro ao validar login Google")
@@ -592,6 +597,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
