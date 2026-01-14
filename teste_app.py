@@ -47,7 +47,6 @@ if "code" in query_params:
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# Recuperar sessão (OAuth / refresh)
 session = supabase.auth.get_session()
 if session and session.user:
     st.session_state.user = session.user
@@ -91,7 +90,8 @@ if st.session_state.user is None:
 
     # LOGIN GOOGLE
     with tab2:
-        redirect_url = "https://teste-modarte.streamlit.app/"
+        redirect_url = "https://teste-modarte.streamlit.app"
+        
         res = supabase.auth.sign_in_with_oauth({
             "provider": "google",
             "options": {"redirect_to": redirect_url}
@@ -600,6 +600,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
