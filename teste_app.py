@@ -257,9 +257,6 @@ st.set_page_config(
 # =====================
 # CARREGAR DADOS
 # =====================
-
-if st.session_state.fase == "app":
-    sidebar_usuario()
     
 conn = get_conn()
 
@@ -626,6 +623,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
