@@ -85,7 +85,7 @@ def tela_login():
     auth_url = supabase.auth.sign_in_with_oauth({
         "provider": "google",
         "options": {
-            "redirect_to": "https://SEU_APP.streamlit.app"
+            "redirect_to": "https://teste-modarte.streamlit.app/"
         }
     })
 
@@ -640,5 +640,4 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
-
 
