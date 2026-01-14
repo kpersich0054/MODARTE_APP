@@ -125,6 +125,7 @@ if st.session_state.user:
 
 if st.session_state.fase == "login":
     tela_login_email()
+    st.stop()
 
 elif st.session_state.fase == "google":
     tela_google_primeiro_acesso()
@@ -623,3 +624,4 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
