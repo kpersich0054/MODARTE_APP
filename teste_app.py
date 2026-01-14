@@ -70,7 +70,7 @@ if st.session_state.user is None:
 
     # LOGIN GOOGLE
     with tab2:
-        redirect_url = "https://tkmopzguwwghoekjnv.supabase.co/auth/v1/callback"
+        redirect_url = "https://tkmopzgpuvwgvhoekjnv.supabase.co/auth/v1/callback"
         res = supabase.auth.sign_in_with_oauth({
             "provider": "google",
             "options": {"redirect_to": redirect_url}
@@ -579,6 +579,7 @@ for _, row in df.iterrows():
     
 
     st.markdown("---")
+
 
 
 
