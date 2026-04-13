@@ -10,6 +10,11 @@ import tempfile
 import os
 import signal
 
+def gerar_codigo_produto(nome_produto, produto_id):
+    palavras = nome_produto.strip().split()
+    iniciais = ''.join([p[0].upper() for p in palavras if p])
+    return f"{iniciais}{produto_id}"
+    
 def validar_produto(dados):
     campos_texto = ["produto", "foto", "codigo"]
     campos_num = ["estoque_inicial", "estoque_atual", "preco", "lucro"]
@@ -103,6 +108,8 @@ def registrar_venda(produto_id, quantidade, preco, lucro, data_venda):
 # =====================
 
 BASE_DIR = Path(__file__).parent
+
+PASTA_IMAGENS = BASE_DIR
 
 @st.cache_resource
 def get_conn():
@@ -206,10 +213,22 @@ if acao == "➕ Inserir Produto":
                 estoque_inicial,
                 estoque_atual,
                 preco,
-                lucro,
-                codigo
+                lucro
             ))
 
+            produto_id = cursor.fetchone()[0]
+
+            codigo_gerado = gerar_codigo_produto(produto, produto_id)
+
+            foto_path = f"{PASTA_IMAGENS} / {codigo_gerado}.jpg"
+
+            cursor.execute("""
+            UPDATE public.produtos
+            SET codigo=%s, foto=%s
+            WHERE id=%s
+            """, (codigo_gerado, foto_path, produto_id))
+
+            conn.commit()
 
 if acao == "✏️ Alterar Produto":
     st.subheader("✏️ Alterar produto")
@@ -474,7 +493,7 @@ for _, row in df.iterrows():
     col1, col2 = st.columns([1, 3])
 
     with col1:
-        img_path = BASE_DIR / str(row["foto"])
+        img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
         img_logo = BASE_DIR / "Logo_Modarte.jpg"
         if img_path.exists():
             st.image(str(img_path), use_container_width=True)
