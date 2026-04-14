@@ -2,11 +2,7 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 from pathlib import Path
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
 from datetime import datetime, timedelta
-import tempfile
 
 # =====================
 # CONFIG
@@ -49,7 +45,19 @@ FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
 """, conn)
 
-df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"])
+# =====================
+# NORMALIZAÇÃO (CORREÇÃO CRÍTICA)
+# =====================
+cols_num = ["estoque_inicial", "estoque_atual", "preco", "lucro"]
+
+for col in cols_num:
+    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+df_vendas["quantidade"] = pd.to_numeric(df_vendas["quantidade"], errors="coerce").fillna(0)
+df_vendas["preco_unit"] = pd.to_numeric(df_vendas["preco_unit"], errors="coerce").fillna(0)
+df_vendas["lucro_unit"] = pd.to_numeric(df_vendas["lucro_unit"], errors="coerce").fillna(0)
+
+df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"], errors="coerce")
 
 # =====================
 # FILTRO DE PERÍODO
@@ -67,8 +75,8 @@ with col1:
 hoje = datetime.today()
 
 if tipo_periodo == "Hoje":
-    data_inicio = hoje
-    data_fim = hoje
+    data_inicio = hoje.replace(hour=0, minute=0, second=0)
+    data_fim = hoje.replace(hour=23, minute=59, second=59)
 
 elif tipo_periodo == "Últimos 7 dias":
     data_inicio = hoje - timedelta(days=7)
@@ -84,16 +92,19 @@ else:
     with col3:
         data_fim = st.date_input("Data fim", value=hoje)
 
+    data_inicio = datetime.combine(data_inicio, datetime.min.time())
+    data_fim = datetime.combine(data_fim, datetime.max.time())
+
 # =====================
 # FILTRAR VENDAS
 # =====================
 df_filtrado = df_vendas[
-    (df_vendas["data_venda"] >= pd.to_datetime(data_inicio)) &
-    (df_vendas["data_venda"] <= pd.to_datetime(data_fim))
+    (df_vendas["data_venda"] >= data_inicio) &
+    (df_vendas["data_venda"] <= data_fim)
 ]
 
 # =====================
-# KPIs (BASEADOS EM VENDAS)
+# KPIs
 # =====================
 renda_total = (df_filtrado["quantidade"] * df_filtrado["preco_unit"]).sum()
 lucro_total = (df_filtrado["quantidade"] * df_filtrado["lucro_unit"]).sum()
@@ -106,11 +117,9 @@ estoque_total = df["estoque_atual"].sum()
 st.title("📦 Painel de Produtos")
 
 st.caption(
-    f"Período: {pd.to_datetime(data_inicio).strftime('%d/%m/%Y')} "
-    f"até {pd.to_datetime(data_fim).strftime('%d/%m/%Y')}"
+    f"Período: {data_inicio.strftime('%d/%m/%Y')} até {data_fim.strftime('%d/%m/%Y')}"
 )
 
-# CSS leve pra melhorar visual
 st.markdown("""
 <style>
 [data-testid="stMetric"] {
@@ -139,7 +148,7 @@ with kpi4:
 st.markdown("---")
 
 # =====================
-# GRÁFICO DE VENDAS
+# GRÁFICO
 # =====================
 st.subheader("📊 Vendas no Período")
 
@@ -149,7 +158,6 @@ if not df_filtrado.empty:
     )["quantidade"].sum()
 
     st.line_chart(vendas_por_dia)
-
     st.dataframe(df_filtrado, use_container_width=True)
 
 else:
@@ -158,7 +166,7 @@ else:
 st.markdown("---")
 
 # =====================
-# LISTA DE PRODUTOS
+# LISTA DE PRODUTOS (CORRIGIDA)
 # =====================
 st.subheader("🧾 Lista de Produtos")
 
@@ -167,8 +175,13 @@ for _, row in df.iterrows():
 
     with col2:
         st.subheader(row["produto"])
-        st.write(f"📦 Estoque Atual: {int(row['estoque_atual'])}")
-        st.write(f"💰 Preço: R$ {row['preco']:,.2f}")
-        st.write(f"📈 Lucro unidade: R$ {row['lucro']:,.2f}")
+
+        estoque = int(row["estoque_atual"])
+        preco = float(row["preco"])
+        lucro = float(row["lucro"])
+
+        st.write(f"📦 Estoque Atual: {estoque}")
+        st.write(f"💰 Preço: R$ {preco:,.2f}")
+        st.write(f"📈 Lucro unidade: R$ {lucro:,.2f}")
 
     st.markdown("---")
