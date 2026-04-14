@@ -135,35 +135,41 @@ if acao == "➕ Inserir Produto":
         if not valido:
             st.error(msg)
         else:
-            cursor = conn.cursor()
-
-            cursor.execute("""
-                INSERT INTO public.produtos
-                (produto, estoque_inicial, estoque_atual, preco, lucro)
-                VALUES (%s,%s,%s,%s,%s)
-                RETURNING id
-            """, (
-                produto,
-                estoque_inicial,
-                estoque_atual,
-                preco,
-                lucro
-            ))
-
-            produto_id = cursor.fetchone()[0]
-
-            codigo = gerar_codigo_produto(produto, produto_id)
-            foto_path = str(BASE_DIR / f"{codigo}.jpg")
-
-            cursor.execute("""
-                UPDATE public.produtos
-                SET codigo=%s, foto=%s
-                WHERE id=%s
-            """, (codigo, foto_path, produto_id))
-
-            conn.commit()
-            st.success(f"Produto cadastrado! Código: {codigo}")
-            st.rerun()
+            try:
+                cursor = conn.cursor()
+            
+                cursor.execute("""
+                    INSERT INTO public.produtos
+                    (produto, estoque_inicial, estoque_atual, preco, lucro)
+                    VALUES (%s,%s,%s,%s,%s)
+                    RETURNING id
+                """, (
+                    produto,
+                    estoque_inicial,
+                    estoque_atual,
+                    preco,
+                    lucro
+                ))
+            
+                produto_id = cursor.fetchone()[0]
+            
+                codigo = gerar_codigo_produto(produto, produto_id)
+                foto_path = str(BASE_DIR / f"{codigo}.jpg")
+            
+                cursor.execute("""
+                    UPDATE public.produtos
+                    SET codigo=%s, foto=%s
+                    WHERE id=%s
+                """, (codigo, foto_path, produto_id))
+            
+                conn.commit()
+            
+                st.success(f"Produto cadastrado! Código: {codigo}")
+                st.rerun()
+            
+            except Exception as e:
+                conn.rollback()  # 🔥 ESSENCIAL
+                st.error(f"Erro ao inserir produto: {e}")
 
 # =====================
 # ALTERAR PRODUTO
