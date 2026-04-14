@@ -215,32 +215,35 @@ elif acao == "💰 Registrar Venda":
 
     data_venda = st.date_input("Data da venda", value=datetime.today())
 
-    # 🔥 FILTRO IMPORTANTE
     df_disponivel = df[df["estoque_atual"] > 0]
 
     if df_disponivel.empty:
         st.warning("⚠️ Nenhum produto com estoque disponível.")
         st.stop()
 
-    row = df_disponivel[df_disponivel["produto"] == produto_sel].iloc[0]
-
-    estoque_disp = int(row["estoque_atual"])
+    # 🔥 cria label com estoque
+    df_disponivel["label"] = df_disponivel.apply(
+        lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
+        axis=1
+    )
 
     produto_sel = st.selectbox(
         "Produto",
-        df_disponivel.apply(
-            lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
-            axis=1
-        )
+        df_disponivel["label"]
     )
-    
+
+    # 🔥 agora sim pega a linha correta
+    row = df_disponivel[df_disponivel["label"] == produto_sel].iloc[0]
+
+    estoque_disp = int(row["estoque_atual"])
+
     quantidade = st.number_input(
         "Quantidade",
         min_value=1,
         max_value=estoque_disp,
         step=1
     )
-    
+
     if st.button("Confirmar venda"):
         registrar_venda(
             produto_id=int(row["id"]),
