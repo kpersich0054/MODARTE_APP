@@ -16,7 +16,7 @@ def gerar_codigo_produto(nome_produto, produto_id):
     return f"{iniciais}{produto_id}"
     
 def validar_produto(dados):
-    campos_texto = ["produto", "foto", "codigo"]
+    campos_texto = ["produto"]
     campos_num = ["estoque_inicial", "estoque_atual", "preco", "lucro"]
 
     for campo in campos_texto:
@@ -175,24 +175,20 @@ if acao == "➕ Inserir Produto":
 
     with st.form("form_inserir"):
         produto = st.text_input("Produto")
-        foto = st.text_input("Caminho da imagem (ex: imagens/001.jpg)")
         estoque_inicial = st.number_input("Estoque inicial", min_value=0, step=1)
         estoque_atual = st.number_input("Estoque atual", min_value=0, step=1)
         preco = st.number_input("Preço final", min_value=0.0, step=0.01)
         lucro = st.number_input("Lucro líquido (unidade)", min_value=0.0, step=0.01)
-        codigo = st.text_input("Código do produto")
 
         submit = st.form_submit_button("Salvar produto")
 
     if submit:
         novo = {
             "produto": produto,
-            "foto": foto,
             "estoque_inicial": estoque_inicial,
             "estoque_atual": estoque_atual,
             "preco": preco,
             "lucro": lucro,
-            "codigo": codigo
         }
 
         valido, msg = validar_produto(novo)
@@ -229,6 +225,8 @@ if acao == "➕ Inserir Produto":
             """, (codigo_gerado, foto_path, produto_id))
 
             conn.commit()
+
+            st.success(f"Produto cadastrado! Código: {codigo_gerado}")
 
 if acao == "✏️ Alterar Produto":
     st.subheader("✏️ Alterar produto")
