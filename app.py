@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
-@st.cache_resource
 def get_conn():
     return psycopg2.connect(
         host=st.secrets["database"]["host"],
