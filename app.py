@@ -184,10 +184,12 @@ if acao == "➕ Inserir Produto":
 elif acao == "✏️ Alterar Produto":
     st.subheader("✏️ Alterar produto")
 
-    produto_sel = st.selectbox("Selecione o produto", df["produto"])
+    df["label"] = df["id"].astype(str) + " - " + df["produto"]
 
-    row = df[df["produto"] == produto_sel].iloc[0]
-    produto_id = int(row["id"])
+    produto_sel = st.selectbox("Selecione o produto", df["label"])
+
+    produto_id = int(produto_sel.split(" - ")[0])
+    row = df[df["id"] == produto_id].iloc[0]
 
     with st.form("form_editar"):
         produto = st.text_input("Produto", row["produto"])
@@ -202,23 +204,27 @@ elif acao == "✏️ Alterar Produto":
         conn = get_conn()
         try:
             cursor = conn.cursor()
-    
-            # 🔥 SANITIZAÇÃO (CRÍTICO)
+
+            # 🔥 SANITIZAÇÃO
             produto = produto if produto else row["produto"]
-    
-            estoque_inicial = int(estoque_inicial) if estoque_inicial is not None else int(row["estoque_inicial"])
-            estoque_atual = int(estoque_atual) if estoque_atual is not None else int(row["estoque_atual"])
-    
-            preco = float(preco) if preco is not None else float(row["preco"])
-            lucro = float(lucro) if lucro is not None else float(row["lucro"])
-    
+            estoque_inicial = int(estoque_inicial)
+            estoque_atual = int(estoque_atual)
+            preco = float(preco)
+            lucro = float(lucro)
+
+            # 🔥 NOVO: GERAR CODIGO E FOTO
+            codigo = gerar_codigo_produto(produto, produto_id)
+            foto_path = str(BASE_DIR / f"{codigo}.jpg")
+
             cursor.execute("""
                 UPDATE public.produtos
                 SET produto=%s,
                     preco=%s,
                     lucro=%s,
                     estoque_inicial=%s,
-                    estoque_atual=%s
+                    estoque_atual=%s,
+                    codigo=%s,
+                    foto=%s
                 WHERE id=%s
             """, (
                 produto,
@@ -226,13 +232,16 @@ elif acao == "✏️ Alterar Produto":
                 lucro,
                 estoque_inicial,
                 estoque_atual,
+                codigo,
+                foto_path,
                 produto_id
             ))
-    
+
             conn.commit()
-            st.success("Produto atualizado!")
+
+            st.success(f"Produto atualizado! Novo código: {codigo}")
             st.rerun()
-    
+
         except Exception as e:
             conn.rollback()
             st.error(f"Erro: {e}")
