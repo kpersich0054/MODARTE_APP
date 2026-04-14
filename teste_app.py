@@ -105,6 +105,10 @@ df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"], errors="coerce
 # CRUD
 # =====================
 
+# =====================
+# INSERIR PRODUTO
+# =====================
+
 if acao == "➕ Inserir Produto":
     st.subheader("➕ Inserir novo produto")
 
@@ -161,6 +165,102 @@ if acao == "➕ Inserir Produto":
             st.success(f"Produto cadastrado! Código: {codigo}")
             st.rerun()
 
+# =====================
+# ALTERAR PRODUTO
+# =====================
+elif acao == "✏️ Alterar Produto":
+    st.subheader("✏️ Alterar produto")
+
+    produto_sel = st.selectbox("Selecione o produto", df["produto"])
+
+    row = df[df["produto"] == produto_sel].iloc[0]
+    produto_id = int(row["id"])
+
+    with st.form("form_editar"):
+        produto = st.text_input("Produto", row["produto"])
+        estoque_inicial = st.number_input("Estoque inicial", value=int(row["estoque_inicial"]))
+        estoque_atual = st.number_input("Estoque atual", value=int(row["estoque_atual"]))
+        preco = st.number_input("Preço", value=float(row["preco"]))
+        lucro = st.number_input("Lucro", value=float(row["lucro"]))
+
+        submit = st.form_submit_button("Atualizar")
+
+    if submit:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        UPDATE public.produtos
+        SET produto=%s, preco=%s, lucro=%s,
+            estoque_inicial=%s, estoque_atual=%s
+        WHERE id=%s
+        """, (
+            produto,
+            preco,
+            lucro,
+            estoque_inicial,
+            estoque_atual,
+            produto_id
+        ))
+
+        conn.commit()
+        st.success("Produto atualizado!")
+        st.rerun()
+
+
+# =====================
+# REGISTRAR VENDA
+# =====================
+elif acao == "💰 Registrar Venda":
+    st.subheader("💰 Registrar Venda")
+
+    data_venda = st.date_input("Data da venda", value=datetime.today())
+
+    produto_sel = st.selectbox("Produto", df["produto"])
+    row = df[df["produto"] == produto_sel].iloc[0]
+
+    estoque_disp = int(row["estoque_atual"])
+
+    quantidade = st.number_input(
+        "Quantidade",
+        min_value=1,
+        max_value=estoque_disp,
+        step=1
+    )
+
+    if st.button("Confirmar venda"):
+        registrar_venda(
+            produto_id=int(row["id"]),
+            quantidade=quantidade,
+            preco=float(row["preco"]),
+            lucro=float(row["lucro"]),
+            data_venda=datetime.combine(data_venda, datetime.min.time())
+        )
+
+        st.success("Venda registrada!")
+        st.rerun()
+
+
+# =====================
+# EXCLUIR PRODUTO
+# =====================
+elif acao == "🗑️ Excluir Produto":
+    st.subheader("🗑️ Excluir produto")
+
+    produto_sel = st.selectbox("Produto", df["produto"])
+
+    if st.checkbox("Confirmar exclusão"):
+        if st.button("Excluir"):
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "DELETE FROM public.produtos WHERE produto=%s",
+                (produto_sel,)
+            )
+
+            conn.commit()
+            st.success("Produto excluído!")
+            st.rerun()
+            
 # =====================
 # DASHBOARD
 # =====================
