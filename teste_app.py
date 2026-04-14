@@ -224,7 +224,10 @@ elif acao == "💰 Registrar Venda":
 
     produto_sel = st.selectbox(
         "Produto",
-        df_disponivel["produto"]
+        df_disponivel.apply(
+            lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
+            axis=1
+        )
     )
 
     row = df_disponivel[df_disponivel["produto"] == produto_sel].iloc[0]
@@ -238,14 +241,6 @@ elif acao == "💰 Registrar Venda":
         step=1
     )
     
-    produto_sel = st.selectbox(
-        "Produto",
-        df_disponivel.apply(
-            lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
-            axis=1
-        )
-    )
-
     if st.button("Confirmar venda"):
         registrar_venda(
             produto_id=int(row["id"]),
