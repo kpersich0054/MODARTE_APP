@@ -369,8 +369,8 @@ if acao == "📦 Visualizar Produtos":
     hoje = datetime.today()
 
     if tipo == "Hoje":
-        inicio = hoje.replace(hour=00, minute=00, second=00)
-        fim = hoje.replace(hour=23, minute=59, second=59)
+        inicio = hoje.replace(hour=0, minute=0, second=0, microsecond=0)
+        fim = hoje.replace(hour=23, minute=59, second=59, microsecond=999999)
     elif tipo == "7 dias":
         inicio = hoje - timedelta(days=7)
         fim = hoje
