@@ -23,7 +23,15 @@ def get_conn():
 
 st.set_page_config(page_title="MODARTE", layout="wide")
 
-conn = get_conn()
+# =====================
+# QUERY SEGURA
+# =====================
+def query_df(sql):
+    conn = get_conn()
+    try:
+        return pd.read_sql(sql, conn)
+    finally:
+        conn.close()
 
 # =====================
 # FUNÇÕES
@@ -41,21 +49,29 @@ def validar_produto(dados):
     return True, ""
 
 def registrar_venda(produto_id, quantidade, preco, lucro, data_venda):
-    cursor = conn.cursor()
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        INSERT INTO public.vendas_modarte
-        (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
-        VALUES (%s,%s,%s,%s,%s)
-    """, (produto_id, quantidade, data_venda, preco, lucro))
+        cursor.execute("""
+            INSERT INTO public.vendas_modarte
+            (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
+            VALUES (%s,%s,%s,%s,%s)
+        """, (produto_id, quantidade, data_venda, preco, lucro))
 
-    cursor.execute("""
-        UPDATE public.produtos
-        SET estoque_atual = estoque_atual - %s
-        WHERE id = %s
-    """, (quantidade, produto_id))
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual - %s
+            WHERE id = %s
+        """, (quantidade, produto_id))
 
-    conn.commit()
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
 
 # =====================
 # SIDEBAR
@@ -71,11 +87,11 @@ if st.sidebar.button("❌ Encerrar aplicação"):
     st.stop()
 
 # =====================
-# DADOS
+# DADOS (SEGURO)
 # =====================
-df = pd.read_sql("SELECT * FROM public.produtos", conn)
+df = query_df("SELECT * FROM public.produtos")
 
-df_vendas = pd.read_sql("""
+df_vendas = query_df("""
 SELECT
     v.id,
     v.produto_id,
@@ -86,7 +102,7 @@ SELECT
     v.lucro_unit
 FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
-""", conn)
+""")
 
 # =====================
 # NORMALIZAÇÃO
@@ -102,13 +118,8 @@ df_vendas["lucro_unit"] = pd.to_numeric(df_vendas["lucro_unit"], errors="coerce"
 df_vendas["data_venda"] = pd.to_datetime(df_vendas["data_venda"], errors="coerce")
 
 # =====================
-# CRUD
-# =====================
-
-# =====================
 # INSERIR PRODUTO
 # =====================
-
 if acao == "➕ Inserir Produto":
     st.subheader("➕ Inserir novo produto")
 
@@ -135,41 +146,38 @@ if acao == "➕ Inserir Produto":
         if not valido:
             st.error(msg)
         else:
+            conn = get_conn()
             try:
                 cursor = conn.cursor()
-            
+
                 cursor.execute("""
                     INSERT INTO public.produtos
                     (produto, estoque_inicial, estoque_atual, preco, lucro)
                     VALUES (%s,%s,%s,%s,%s)
                     RETURNING id
-                """, (
-                    produto,
-                    estoque_inicial,
-                    estoque_atual,
-                    preco,
-                    lucro
-                ))
-            
+                """, (produto, estoque_inicial, estoque_atual, preco, lucro))
+
                 produto_id = cursor.fetchone()[0]
-            
+
                 codigo = gerar_codigo_produto(produto, produto_id)
                 foto_path = str(BASE_DIR / f"{codigo}.jpg")
-            
+
                 cursor.execute("""
                     UPDATE public.produtos
                     SET codigo=%s, foto=%s
                     WHERE id=%s
                 """, (codigo, foto_path, produto_id))
-            
+
                 conn.commit()
-            
+
                 st.success(f"Produto cadastrado! Código: {codigo}")
                 st.rerun()
-            
+
             except Exception as e:
-                conn.rollback()  # 🔥 ESSENCIAL
+                conn.rollback()
                 st.error(f"Erro ao inserir produto: {e}")
+            finally:
+                conn.close()
 
 # =====================
 # ALTERAR PRODUTO
@@ -192,26 +200,26 @@ elif acao == "✏️ Alterar Produto":
         submit = st.form_submit_button("Atualizar")
 
     if submit:
-        cursor = conn.cursor()
+        conn = get_conn()
+        try:
+            cursor = conn.cursor()
 
-        cursor.execute("""
-        UPDATE public.produtos
-        SET produto=%s, preco=%s, lucro=%s,
-            estoque_inicial=%s, estoque_atual=%s
-        WHERE id=%s
-        """, (
-            produto,
-            preco,
-            lucro,
-            estoque_inicial,
-            estoque_atual,
-            produto_id
-        ))
+            cursor.execute("""
+                UPDATE public.produtos
+                SET produto=%s, preco=%s, lucro=%s,
+                    estoque_inicial=%s, estoque_atual=%s
+                WHERE id=%s
+            """, (produto, preco, lucro, estoque_inicial, estoque_atual, produto_id))
 
-        conn.commit()
-        st.success("Produto atualizado!")
-        st.rerun()
+            conn.commit()
+            st.success("Produto atualizado!")
+            st.rerun()
 
+        except Exception as e:
+            conn.rollback()
+            st.error(f"Erro: {e}")
+        finally:
+            conn.close()
 
 # =====================
 # REGISTRAR VENDA
@@ -221,46 +229,40 @@ elif acao == "💰 Registrar Venda":
 
     data_venda = st.date_input("Data da venda", value=datetime.today())
 
-    df_disponivel = df[df["estoque_atual"] > 0]
+    df_disponivel = df[df["estoque_atual"] > 0].copy()
 
     if df_disponivel.empty:
         st.warning("⚠️ Nenhum produto com estoque disponível.")
         st.stop()
 
-    # 🔥 cria label com estoque
     df_disponivel["label"] = df_disponivel.apply(
         lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
         axis=1
     )
 
-    produto_sel = st.selectbox(
-        "Produto",
-        df_disponivel["label"]
-    )
+    produto_sel = st.selectbox("Produto", df_disponivel["label"])
 
-    # 🔥 agora sim pega a linha correta
     row = df_disponivel[df_disponivel["label"] == produto_sel].iloc[0]
 
     estoque_disp = int(row["estoque_atual"])
 
-    quantidade = st.number_input(
-        "Quantidade",
-        min_value=1,
-        max_value=estoque_disp,
-        step=1
-    )
+    quantidade = st.number_input("Quantidade", min_value=1, max_value=estoque_disp, step=1)
 
     if st.button("Confirmar venda"):
-        registrar_venda(
-            produto_id=int(row["id"]),
-            quantidade=quantidade,
-            preco=float(row["preco"]),
-            lucro=float(row["lucro"]),
-            data_venda=datetime.combine(data_venda, datetime.min.time())
-        )
+        try:
+            registrar_venda(
+                produto_id=int(row["id"]),
+                quantidade=quantidade,
+                preco=float(row["preco"]),
+                lucro=float(row["lucro"]),
+                data_venda=datetime.combine(data_venda, datetime.min.time())
+            )
 
-        st.success("Venda registrada!")
-        st.rerun()
+            st.success("Venda registrada!")
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"Erro na venda: {e}")
 
 # =====================
 # EXCLUIR PRODUTO
@@ -272,17 +274,25 @@ elif acao == "🗑️ Excluir Produto":
 
     if st.checkbox("Confirmar exclusão"):
         if st.button("Excluir"):
-            cursor = conn.cursor()
+            conn = get_conn()
+            try:
+                cursor = conn.cursor()
 
-            cursor.execute(
-                "DELETE FROM public.produtos WHERE produto=%s",
-                (produto_sel,)
-            )
+                cursor.execute(
+                    "DELETE FROM public.produtos WHERE produto=%s",
+                    (produto_sel,)
+                )
 
-            conn.commit()
-            st.success("Produto excluído!")
-            st.rerun()
-            
+                conn.commit()
+                st.success("Produto excluído!")
+                st.rerun()
+
+            except Exception as e:
+                conn.rollback()
+                st.error(f"Erro: {e}")
+            finally:
+                conn.close()
+
 # =====================
 # DASHBOARD
 # =====================
@@ -336,9 +346,6 @@ if acao == "📦 Visualizar Produtos":
 
     st.markdown("---")
 
-    # =====================
-    # LISTA COMPLETA
-    # =====================
     st.subheader("🧾 Lista de Produtos")
 
     for _, row in df.iterrows():
@@ -349,9 +356,9 @@ if acao == "📦 Visualizar Produtos":
             img_logo = BASE_DIR / "Logo_Modarte.jpg"
 
             if img_path.exists():
-                st.image(str(img_path), use_container_width=True)
+                st.image(str(img_path), width="stretch")
             else:
-                st.image(str(img_logo), use_container_width=True)
+                st.image(str(img_logo), width="stretch")
 
         with col2:
             st.subheader(row["produto"])
@@ -368,12 +375,12 @@ if acao == "📦 Visualizar Produtos":
             renda_real = vendidos_real * preco
             lucro_real = vendidos_real * lucro_unit
 
-            st.write(f"📦 **Estoque Inicial:** {estoque_inicial}")
-            st.write(f"📦 **Estoque Atual:** {estoque_atual}")
-            st.write(f"🛒 **Vendidos:** {int(vendidos_real)}")
-            st.write(f"💰 **Preço:** R$ {preco:,.2f}")
-            st.write(f"📈 **Lucro unidade:** R$ {lucro_unit:,.2f}")
-            st.write(f"💵 **Renda Total:** R$ {renda_real:,.2f}")
-            st.write(f"🏆 **Lucro Total:** R$ {lucro_real:,.2f}")
+            st.write(f"📦 Estoque Inicial: {estoque_inicial}")
+            st.write(f"📦 Estoque Atual: {estoque_atual}")
+            st.write(f"🛒 Vendidos: {int(vendidos_real)}")
+            st.write(f"💰 Preço: R$ {preco:,.2f}")
+            st.write(f"📈 Lucro unidade: R$ {lucro_unit:,.2f}")
+            st.write(f"💵 Renda Total: R$ {renda_real:,.2f}")
+            st.write(f"🏆 Lucro Total: R$ {lucro_real:,.2f}")
 
         st.markdown("---")
