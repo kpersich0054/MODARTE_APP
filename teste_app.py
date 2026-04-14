@@ -222,6 +222,10 @@ elif acao == "💰 Registrar Venda":
         st.warning("⚠️ Nenhum produto com estoque disponível.")
         st.stop()
 
+    row = df_disponivel[df_disponivel["produto"] == produto_sel].iloc[0]
+
+    estoque_disp = int(row["estoque_atual"])
+
     produto_sel = st.selectbox(
         "Produto",
         df_disponivel.apply(
@@ -229,11 +233,7 @@ elif acao == "💰 Registrar Venda":
             axis=1
         )
     )
-
-    row = df_disponivel[df_disponivel["produto"] == produto_sel].iloc[0]
-
-    estoque_disp = int(row["estoque_atual"])
-
+    
     quantidade = st.number_input(
         "Quantidade",
         min_value=1,
