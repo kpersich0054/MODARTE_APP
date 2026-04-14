@@ -202,18 +202,37 @@ elif acao == "✏️ Alterar Produto":
         conn = get_conn()
         try:
             cursor = conn.cursor()
-
+    
+            # 🔥 SANITIZAÇÃO (CRÍTICO)
+            produto = produto if produto else row["produto"]
+    
+            estoque_inicial = int(estoque_inicial) if estoque_inicial is not None else int(row["estoque_inicial"])
+            estoque_atual = int(estoque_atual) if estoque_atual is not None else int(row["estoque_atual"])
+    
+            preco = float(preco) if preco is not None else float(row["preco"])
+            lucro = float(lucro) if lucro is not None else float(row["lucro"])
+    
             cursor.execute("""
                 UPDATE public.produtos
-                SET produto=%s, preco=%s, lucro=%s,
-                    estoque_inicial=%s, estoque_atual=%s
+                SET produto=%s,
+                    preco=%s,
+                    lucro=%s,
+                    estoque_inicial=%s,
+                    estoque_atual=%s
                 WHERE id=%s
-            """, (produto, preco, lucro, estoque_inicial, estoque_atual, produto_id))
-
+            """, (
+                produto,
+                preco,
+                lucro,
+                estoque_inicial,
+                estoque_atual,
+                produto_id
+            ))
+    
             conn.commit()
             st.success("Produto atualizado!")
             st.rerun()
-
+    
         except Exception as e:
             conn.rollback()
             st.error(f"Erro: {e}")
