@@ -41,93 +41,6 @@ def validar_produto(dados):
     return True, ""
 
 # =====================
-# REGISTRAR VENDA (COM PAGAMENTO)
-# =====================
-elif acao == "💰 Registrar Venda":
-    st.subheader("💰 Registrar Venda")
-
-    data_venda = st.date_input("Data da venda", value=datetime.today())
-
-    # Produtos com estoque
-    df_disponivel = df[df["estoque_atual"] > 0].copy()
-
-    if df_disponivel.empty:
-        st.warning("⚠️ Nenhum produto com estoque disponível.")
-        st.stop()
-
-    # Label com estoque
-    df_disponivel["label"] = df_disponivel.apply(
-        lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
-        axis=1
-    )
-
-    produto_sel = st.selectbox("Produto", df_disponivel["label"])
-
-    row = df_disponivel[df_disponivel["label"] == produto_sel].iloc[0]
-
-    estoque_disp = int(row["estoque_atual"])
-
-    quantidade = st.number_input(
-        "Quantidade",
-        min_value=1,
-        max_value=estoque_disp,
-        step=1
-    )
-
-    # 💰 CALCULO
-    valor_total = quantidade * float(row["preco"])
-    st.info(f"💵 Valor total: R$ {valor_total:,.2f}")
-
-    # 💳 FORMA DE PAGAMENTO
-    forma_pagamento = st.selectbox(
-        "Forma de pagamento",
-        ["Pix", "Cartão (Maquininha)", "Dinheiro"]
-    )
-
-    pagamento_confirmado = False
-
-    # =====================
-    # PIX (FASE 1 SIMULADO)
-    # =====================
-    if forma_pagamento == "Pix":
-        st.warning("⚠️ Pix ainda não integrado (fase futura)")
-        
-        pagamento_confirmado = st.checkbox("Confirmar pagamento via Pix?")
-
-    # =====================
-    # CARTÃO (MANUAL)
-    # =====================
-    elif forma_pagamento == "Cartão (Maquininha)":
-        st.info("Passe o cartão na maquininha")
-
-        pagamento_confirmado = st.checkbox("Pagamento aprovado na maquininha?")
-
-    # =====================
-    # DINHEIRO
-    # =====================
-    elif forma_pagamento == "Dinheiro":
-        pagamento_confirmado = st.checkbox("Pagamento recebido?")
-
-    # =====================
-    # CONFIRMA VENDA
-    # =====================
-    if st.button("✅ Finalizar venda"):
-        if not pagamento_confirmado:
-            st.error("❌ Confirme o pagamento antes de continuar.")
-            st.stop()
-
-        registrar_venda(
-            produto_id=int(row["id"]),
-            quantidade=quantidade,
-            preco=float(row["preco"]),
-            lucro=float(row["lucro"]),
-            data_venda=datetime.combine(data_venda, datetime.min.time())
-        )
-
-        st.success("✅ Venda registrada com sucesso!")
-        st.rerun()
-
-# =====================
 # SIDEBAR
 # =====================
 st.sidebar.title("⚙️ Gerenciamento")
@@ -278,31 +191,28 @@ elif acao == "✏️ Alterar Produto":
 
 
 # =====================
-# REGISTRAR VENDA
+# REGISTRAR VENDA (COM PAGAMENTO)
 # =====================
 elif acao == "💰 Registrar Venda":
     st.subheader("💰 Registrar Venda")
 
     data_venda = st.date_input("Data da venda", value=datetime.today())
 
-    df_disponivel = df[df["estoque_atual"] > 0]
+    # Produtos com estoque
+    df_disponivel = df[df["estoque_atual"] > 0].copy()
 
     if df_disponivel.empty:
         st.warning("⚠️ Nenhum produto com estoque disponível.")
         st.stop()
 
-    # 🔥 cria label com estoque
+    # Label com estoque
     df_disponivel["label"] = df_disponivel.apply(
         lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
         axis=1
     )
 
-    produto_sel = st.selectbox(
-        "Produto",
-        df_disponivel["label"]
-    )
+    produto_sel = st.selectbox("Produto", df_disponivel["label"])
 
-    # 🔥 agora sim pega a linha correta
     row = df_disponivel[df_disponivel["label"] == produto_sel].iloc[0]
 
     estoque_disp = int(row["estoque_atual"])
@@ -314,7 +224,48 @@ elif acao == "💰 Registrar Venda":
         step=1
     )
 
-    if st.button("Confirmar venda"):
+    # 💰 CALCULO
+    valor_total = quantidade * float(row["preco"])
+    st.info(f"💵 Valor total: R$ {valor_total:,.2f}")
+
+    # 💳 FORMA DE PAGAMENTO
+    forma_pagamento = st.selectbox(
+        "Forma de pagamento",
+        ["Pix", "Cartão (Maquininha)", "Dinheiro"]
+    )
+
+    pagamento_confirmado = False
+
+    # =====================
+    # PIX (FASE 1 SIMULADO)
+    # =====================
+    if forma_pagamento == "Pix":
+        st.warning("⚠️ Pix ainda não integrado (fase futura)")
+        
+        pagamento_confirmado = st.checkbox("Confirmar pagamento via Pix?")
+
+    # =====================
+    # CARTÃO (MANUAL)
+    # =====================
+    elif forma_pagamento == "Cartão (Maquininha)":
+        st.info("Passe o cartão na maquininha")
+
+        pagamento_confirmado = st.checkbox("Pagamento aprovado na maquininha?")
+
+    # =====================
+    # DINHEIRO
+    # =====================
+    elif forma_pagamento == "Dinheiro":
+        pagamento_confirmado = st.checkbox("Pagamento recebido?")
+
+    # =====================
+    # CONFIRMA VENDA
+    # =====================
+    if st.button("✅ Finalizar venda"):
+        if not pagamento_confirmado:
+            st.error("❌ Confirme o pagamento antes de continuar.")
+            st.stop()
+
         registrar_venda(
             produto_id=int(row["id"]),
             quantidade=quantidade,
@@ -323,7 +274,7 @@ elif acao == "💰 Registrar Venda":
             data_venda=datetime.combine(data_venda, datetime.min.time())
         )
 
-        st.success("Venda registrada!")
+        st.success("✅ Venda registrada com sucesso!")
         st.rerun()
 
 # =====================
