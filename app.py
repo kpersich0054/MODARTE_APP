@@ -3,6 +3,68 @@ import pandas as pd
 import psycopg2
 from pathlib import Path
 from datetime import datetime, timedelta
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import io
+
+def gerar_pdf(df_vendas, df_produtos, inicio, fim):
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    # Título
+    elements.append(Paragraph(f"Relatório de Vendas", styles["Title"]))
+    elements.append(Spacer(1, 10))
+
+    elements.append(Paragraph(
+        f"Período: {inicio.strftime('%d/%m/%Y')} até {fim.strftime('%d/%m/%Y')}",
+        styles["Normal"]
+    ))
+
+    elements.append(Spacer(1, 20))
+
+    # =====================
+    # RESUMO POR PAGAMENTO
+    # =====================
+    elements.append(Paragraph("Resumo por Forma de Pagamento", styles["Heading2"]))
+
+    resumo_pag = df_vendas.copy()
+    resumo_pag["total"] = resumo_pag["quantidade"] * resumo_pag["preco_unit"]
+
+    resumo = resumo_pag.groupby("forma_pagamento")["total"].sum()
+
+    for forma, valor in resumo.items():
+        elements.append(Paragraph(f"{forma}: R$ {valor:,.2f}", styles["Normal"]))
+
+    elements.append(Spacer(1, 20))
+
+    # =====================
+    # VENDAS DETALHADAS
+    # =====================
+    elements.append(Paragraph("Vendas", styles["Heading2"]))
+
+    for _, row in df_vendas.iterrows():
+        texto = f"{row['produto']} | QTD: {int(row['quantidade'])} | R$ {row['preco_unit']:,.2f} | {row['forma_pagamento']}"
+        elements.append(Paragraph(texto, styles["Normal"]))
+
+    elements.append(Spacer(1, 20))
+
+    # =====================
+    # ESTOQUE
+    # =====================
+    elements.append(Paragraph("Estoque Atual", styles["Heading2"]))
+
+    for _, row in df_produtos.iterrows():
+        texto = f"{row['produto']} - Estoque: {int(row['estoque_atual'])}"
+        elements.append(Paragraph(texto, styles["Normal"]))
+
+    doc.build(elements)
+
+    buffer.seek(0)
+    return buffer
 
 # =====================
 # CONFIG
@@ -47,14 +109,14 @@ def validar_produto(dados):
         return False, "Preço inválido"
     return True, ""
 
-def registrar_venda(produto_id, quantidade, preco, lucro, data_venda):
+def registrar_venda(produto_id, quantidade, preco, lucro, data_venda, forma_pagamento):
     conn = get_conn()
     try:
         cursor = conn.cursor()
 
         cursor.execute("""
             INSERT INTO public.vendas_modarte
-            (produto_id, quantidade, data_venda, preco_unit, lucro_unit)
+            (produto_id, quantidade, data_venda, preco_unit, forma_pagamento)
             VALUES (%s,%s,%s,%s,%s)
         """, (produto_id, quantidade, data_venda, preco, lucro))
 
@@ -410,7 +472,20 @@ if acao == "📦 Visualizar Produtos":
 
     st.markdown("---")
 
-    st.subheader("🧾 Lista de Produtos")
+    st.markdown("### 📄 Exportar Relatório")
+
+    if not df_f.empty:
+        pdf_file = gerar_pdf(df_f, df, inicio, fim)
+
+        st.download_button(
+            label="📥 Baixar PDF",
+            data=pdf_file,
+            file_name=f"relatorio_{inicio.strftime('%Y%m%d')}_{fim.strftime('%Y%m%d')}.pdf",
+            mime="application/pdf"
+        )
+    else:
+        st.info("Sem vendas para gerar PDF.")
+        st.subheader("🧾 Lista de Produtos")
 
     for _, row in df.iterrows():
         col1, col2 = st.columns([1, 3])
