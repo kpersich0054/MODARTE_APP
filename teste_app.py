@@ -215,8 +215,19 @@ elif acao == "💰 Registrar Venda":
 
     data_venda = st.date_input("Data da venda", value=datetime.today())
 
-    produto_sel = st.selectbox("Produto", df["produto"])
-    row = df[df["produto"] == produto_sel].iloc[0]
+    # 🔥 FILTRO IMPORTANTE
+    df_disponivel = df[df["estoque_atual"] > 0]
+
+    if df_disponivel.empty:
+        st.warning("⚠️ Nenhum produto com estoque disponível.")
+        st.stop()
+
+    produto_sel = st.selectbox(
+        "Produto",
+        df_disponivel["produto"]
+    )
+
+    row = df_disponivel[df_disponivel["produto"] == produto_sel].iloc[0]
 
     estoque_disp = int(row["estoque_atual"])
 
@@ -238,7 +249,6 @@ elif acao == "💰 Registrar Venda":
 
         st.success("Venda registrada!")
         st.rerun()
-
 
 # =====================
 # EXCLUIR PRODUTO
