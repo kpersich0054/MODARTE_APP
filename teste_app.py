@@ -237,6 +237,14 @@ elif acao == "💰 Registrar Venda":
         max_value=estoque_disp,
         step=1
     )
+    
+    produto_sel = st.selectbox(
+        "Produto",
+        df_disponivel.apply(
+            lambda x: f"{x['produto']} (Estoque: {int(x['estoque_atual'])})",
+            axis=1
+        )
+    )
 
     if st.button("Confirmar venda"):
         registrar_venda(
