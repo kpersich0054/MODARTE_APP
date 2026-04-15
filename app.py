@@ -622,20 +622,32 @@ elif acao == "↩️ Estornar Venda":
 
     st.subheader("↩️ Estornar Venda (Parcial)")
 
+    # SELECT
+    venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
+
+    # 🔥 extrai ID
+    venda_id = int(venda_sel.split(" - ")[0])
+
+    filtro = df_vendas_view[df_vendas_view["id"] == venda_id]
+
+    if filtro.empty:
+        st.error("Venda não encontrada")
+        st.stop()
+
+    venda_row = filtro.iloc[0]
+
+    # 🔥 agora sim pode usar
     quantidade_estorno = st.number_input(
         "Quantidade a estornar",
         min_value=1,
-        max_value=int(venda_row["quantidade"]),
+        max_value=int(abs(venda_row["quantidade"])),  # 🔥 abs pra evitar negativo
         step=1
     )
 
     if st.button("❌ Estornar parcialmente"):
-        try:
-            estornar_parcial(venda_id, quantidade_estorno)
-            st.success("✅ Estorno parcial realizado!")
-            st.rerun()
-        except Exception as e:
-            st.error(f"Erro: {e}")
+        estornar_parcial(venda_id, quantidade_estorno)
+        st.success("Estorno parcial realizado!")
+        st.rerun()
             
 # =====================
 # EXCLUIR PRODUTO
