@@ -221,7 +221,7 @@ def registrar_venda(produto_id, quantidade, preco, lucro, data_venda, forma_paga
             INSERT INTO public.vendas_modarte
             (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento, status)
             VALUES (%s,%s,%s,%s,%s,%s,%s)
-        """, (produto_id, quantidade, data_venda, preco, lucro, "pago"))
+        """, (produto_id, quantidade, data_venda, preco, lucro, forma_pagamento, "pago"))
 
         cursor.execute("""
             UPDATE public.produtos
@@ -616,7 +616,8 @@ if acao == "📦 Visualizar Produtos":
 
     df_f = df_vendas[
         (df_vendas["data_venda"] >= inicio) &
-        (df_vendas["data_venda"] <= fim)
+        (df_vendas["data_venda"] <= fim) &
+        (df_vendas["status"] == "pago")
     ]
 
     renda = (df_f["quantidade"] * df_f["preco_unit"]).sum()
