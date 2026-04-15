@@ -7,6 +7,50 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+def calcular_dre(df_vendas):
+    if df_vendas.empty:
+        return None
+
+    df = df_vendas.copy()
+
+    # =====================
+    # BASE
+    # =====================
+    df["receita"] = df["quantidade"] * df["preco_unit"]
+    df["custo"] = df["quantidade"] * (df["preco_unit"] - df["lucro_unit"])
+    df["lucro_bruto"] = df["quantidade"] * df["lucro_unit"]
+
+    # =====================
+    # TAXAS (simulação)
+    # =====================
+    def taxa(row):
+        if row["forma_pagamento"] == "Cartão (Maquininha)":
+            return row["receita"] * 0.05  # 5%
+        elif row["forma_pagamento"] == "Pix":
+            return row["receita"] * 0.01  # 1%
+        else:
+            return 0
+
+    df["taxa"] = df.apply(taxa, axis=1)
+
+    # =====================
+    # AGREGADOS
+    # =====================
+    receita_bruta = df["receita"].sum()
+    custo_total = df["custo"].sum()
+    lucro_bruto = df["lucro_bruto"].sum()
+    taxas = df["taxa"].sum()
+
+    lucro_operacional = lucro_bruto - taxas
+
+    return {
+        "receita_bruta": receita_bruta,
+        "custo_total": custo_total,
+        "lucro_bruto": lucro_bruto,
+        "taxas": taxas,
+        "lucro_operacional": lucro_operacional
+    }
+    
 def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     buffer = io.BytesIO()
 
@@ -52,6 +96,20 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
 
     elements.append(Spacer(1, 20))
 
+    # =====================
+    # DRE Vendas
+    # =====================
+    
+    dre = calcular_dre(df_vendas)
+
+    elements.append(Paragraph("DRE - Resultado", styles["Heading2"]))
+
+    elements.append(Paragraph(f"Receita Bruta: R$ {dre['receita_bruta']:,.2f}", styles["Normal"]))
+    elements.append(Paragraph(f"Custo (CPV): R$ {dre['custo_total']:,.2f}", styles["Normal"]))
+    elements.append(Paragraph(f"Lucro Bruto: R$ {dre['lucro_bruto']:,.2f}", styles["Normal"]))
+    elements.append(Paragraph(f"Taxas: R$ {dre['taxas']:,.2f}", styles["Normal"]))
+    elements.append(Paragraph(f"Lucro Operacional: R$ {dre['lucro_operacional']:,.2f}", styles["Normal"]))
+    
     # =====================
     # ESTOQUE
     # =====================
@@ -471,6 +529,28 @@ if acao == "📦 Visualizar Produtos":
     if not df_f.empty:
         st.line_chart(df_f.groupby(df_f["data_venda"].dt.date)["quantidade"].sum())
 
+    dre = calcular_dre(df_f)
+
+    if dre:
+        st.markdown("## 📊 DRE (Resultado do Período)")
+
+        c1, c2, c3 = st.columns(3)
+
+        c1.metric("💰 Receita Bruta", f"R$ {dre['receita_bruta']:,.2f}")
+        c2.metric("📉 Custo (CPV)", f"R$ {dre['custo_total']:,.2f}")
+        c3.metric("📈 Lucro Bruto", f"R$ {dre['lucro_bruto']:,.2f}")
+
+        c4, c5 = st.columns(2)
+
+        c4.metric("💳 Taxas", f"R$ {dre['taxas']:,.2f}")
+        c5.metric("🏆 Lucro Real", f"R$ {dre['lucro_operacional']:,.2f}")
+
+        margem = 0
+        if dre["receita_bruta"] > 0:
+            margem = (dre["lucro_operacional"] / dre["receita_bruta"]) * 100
+
+        st.metric("📊 Margem Líquida", f"{margem:.2f}%")
+        
     st.markdown("---")
 
     st.markdown("### 📄 Exportar Relatório")
