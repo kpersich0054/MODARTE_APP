@@ -7,11 +7,56 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+def estornar_venda(venda_id):
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+
+        # 🔥 pega dados da venda (e status)
+        cursor.execute("""
+            SELECT produto_id, quantidade, status
+            FROM public.vendas_modarte
+            WHERE id = %s
+        """, (venda_id,))
+
+        venda = cursor.fetchone()
+
+        if not venda:
+            raise Exception("Venda não encontrada")
+
+        produto_id, quantidade, status = venda
+
+        # 🔥 evita estorno duplicado
+        if status == "estornado":
+            raise Exception("Essa venda já foi estornada")
+
+        # 🔥 devolve estoque
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (quantidade, produto_id))
+
+        # 🔥 marca como estornada (AO INVÉS DE DELETAR)
+        cursor.execute("""
+            UPDATE public.vendas_modarte
+            SET status = 'estornado'
+            WHERE id = %s
+        """, (venda_id,))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+        
 def calcular_dre(df_vendas):
     if df_vendas.empty:
         return None
 
-    df = df_vendas.copy()
+    df = df_vendas[df_vendas["status"] == "pago"].copy()
 
     # =====================
     # BASE
@@ -75,7 +120,7 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     elements.append(Paragraph("Resumo por Forma de Pagamento", styles["Heading2"]))
 
-    resumo_pag = df_vendas.copy()
+    resumo_pag = df_vendas[df_vendas["status"] == "pago"].copy()
     resumo_pag["total"] = resumo_pag["quantidade"] * resumo_pag["preco_unit"]
 
     resumo = resumo_pag.groupby("forma_pagamento")["total"].sum()
@@ -174,9 +219,9 @@ def registrar_venda(produto_id, quantidade, preco, lucro, data_venda, forma_paga
 
         cursor.execute("""
             INSERT INTO public.vendas_modarte
-            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento)
-            VALUES (%s,%s,%s,%s,%s,%s)
-        """, (produto_id, quantidade, data_venda, preco, lucro, forma_pagamento))
+            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento, status)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+        """, (produto_id, quantidade, data_venda, preco, lucro, "pago"))
 
         cursor.execute("""
             UPDATE public.produtos
@@ -463,7 +508,56 @@ elif acao == "💰 Registrar Venda":
 
         st.success("✅ Venda registrada com sucesso!")
         st.rerun()
+
+        st.markdown("---")
         
+        st.subheader("↩️ Estornar Venda")
+
+        df_vendas_view = query_df("""
+        SELECT 
+            v.id, 
+            p.produto, 
+            v.quantidade, 
+            v.data_venda,
+            v.status
+        FROM public.vendas_modarte v
+        JOIN public.produtos p ON p.id = v.produto_id
+        ORDER BY v.data_venda DESC
+        """)
+
+        # 🔥 opcional: mostrar TODAS ou só ativas
+        mostrar_estornadas = st.checkbox("Mostrar vendas estornadas", value=False)
+
+        if not mostrar_estornadas:
+            df_vendas_view = df_vendas_view[df_vendas_view["status"] == "ATIVA"]
+
+        if not df_vendas_view.empty:
+
+            # 🔥 label mais completo
+            df_vendas_view["label"] = df_vendas_view.apply(
+                lambda x: f"{x['id']} - {x['produto']} | QTD: {x['quantidade']} | {x['status']}",
+                axis=1
+            )
+
+            venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
+
+            venda_id = int(venda_sel.split(" - ")[0])
+
+            # 🔥 pega status da venda selecionada
+            venda_row = df_vendas_view[df_vendas_view["id"] == venda_id].iloc[0]
+
+            if venda_row["status"] == "ESTORNADA":
+                st.warning("⚠️ Essa venda já foi estornada")
+            else:
+                if st.button("❌ Estornar venda"):
+                    try:
+                        estornar_venda(venda_id)
+                        st.success("✅ Venda estornada com sucesso!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Erro ao estornar: {e}")
+        else:
+            st.info("Nenhuma venda encontrada.")
 # =====================
 # EXCLUIR PRODUTO
 # =====================
