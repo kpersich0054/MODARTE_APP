@@ -264,7 +264,8 @@ SELECT
     v.quantidade,
     v.preco_unit,
     v.lucro_unit,
-    v.forma_pagamento
+    v.forma_pagamento,
+    v.status
 FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
 """)
