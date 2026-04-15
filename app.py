@@ -568,6 +568,8 @@ if acao == "📦 Visualizar Produtos":
         st.info("Sem vendas para gerar PDF.")
         st.subheader("🧾 Lista de Produtos")
 
+    st.markdown("---")
+    
     for _, row in df.iterrows():
         col1, col2 = st.columns([1, 3])
 
