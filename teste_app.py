@@ -7,48 +7,144 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+def estornar_parcial(venda_id, quantidade_estorno):
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT produto_id, quantidade, preco_unit, lucro_unit, status, qtd_estornada
+            FROM public.vendas_modarte
+            WHERE id = %s
+        """, (venda_id,))
+
+        venda = cursor.fetchone()
+
+        if not venda:
+            raise Exception("Venda não encontrada")
+
+        produto_id, qtd_original, preco, lucro, status, qtd_estornada = venda
+
+        if status not in ["pago", "estornado_parcialmente"]:
+            raise Exception("Venda não pode ser estornada")
+
+        restante = qtd_original - qtd_estornada
+
+        if quantidade_estorno > restante:
+            raise Exception("Estorno maior que o restante disponível")
+
+        # 🔥 devolve estoque
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (quantidade_estorno, produto_id))
+
+        # 🔥 atualiza quantidade estornada
+        nova_qtd_estornada = qtd_estornada + quantidade_estorno
+
+        novo_status = "estornado_parcialmente"
+        if nova_qtd_estornada == qtd_original:
+            novo_status = "estornado total"
+
+        cursor.execute("""
+            UPDATE public.vendas_modarte
+            SET qtd_estornada = %s,
+                status = %s
+            WHERE id = %s
+        """, (nova_qtd_estornada, novo_status, venda_id))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+        
+def estornar_venda(venda_id):
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            produto_id, quantidade, qtd_estornada
+            FROM public.vendas_modarte
+            WHERE id = %s
+        """, (venda_id,))
+
+        venda = cursor.fetchone()
+
+        if not venda:
+            raise Exception("Venda não encontrada")
+
+        produto_id, quantidade, qtd_estornada = venda
+
+        restante = quantidade - qtd_estornada
+
+        if restante <= 0:
+            raise Exception("Nada restante para estornar")
+
+        # 🔥 devolve estoque do restante
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (restante, produto_id))
+
+        # 🔥 marca como totalmente estornada
+        cursor.execute("""
+            UPDATE public.vendas_modarte
+            SET qtd_estornada = quantidade,
+                status = 'estornado total'
+            WHERE id = %s
+        """, (venda_id,))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+        
 def calcular_dre(df_vendas):
     if df_vendas.empty:
         return None
 
     df = df_vendas.copy()
 
+    # 🔥 NOVO: quantidade líquida
+    df["qtd_liquida"] = df["quantidade"] - df.get("qtd_estornada", 0)
+
+    # remove vendas zeradas
+    df = df[df["qtd_liquida"] != 0]
+
     # =====================
     # BASE
     # =====================
-    df["receita"] = df["quantidade"] * df["preco_unit"]
-    df["custo"] = df["quantidade"] * (df["preco_unit"] - df["lucro_unit"])
-    df["lucro_bruto"] = df["quantidade"] * df["lucro_unit"]
+    df["receita"] = df["qtd_liquida"] * df["preco_unit"]
+    df["custo"] = df["qtd_liquida"] * (df["preco_unit"] - df["lucro_unit"])
+    df["lucro_bruto"] = df["qtd_liquida"] * df["lucro_unit"]
 
     # =====================
-    # TAXAS (simulação)
+    # TAXAS
     # =====================
     def taxa(row):
         if row["forma_pagamento"] == "Cartão (Maquininha)":
-            return row["receita"] * 0.05  # 5%
+            return row["receita"] * 0.05
         elif row["forma_pagamento"] == "Pix":
-            return row["receita"] * 0.01  # 1%
-        else:
-            return 0
+            return row["receita"] * 0.01
+        return 0
 
     df["taxa"] = df.apply(taxa, axis=1)
 
-    # =====================
-    # AGREGADOS
-    # =====================
-    receita_bruta = df["receita"].sum()
-    custo_total = df["custo"].sum()
-    lucro_bruto = df["lucro_bruto"].sum()
-    taxas = df["taxa"].sum()
-
-    lucro_operacional = lucro_bruto - taxas
-
     return {
-        "receita_bruta": receita_bruta,
-        "custo_total": custo_total,
-        "lucro_bruto": lucro_bruto,
-        "taxas": taxas,
-        "lucro_operacional": lucro_operacional
+        "receita_bruta": df["receita"].sum(),
+        "custo_total": df["custo"].sum(),
+        "lucro_bruto": df["lucro_bruto"].sum(),
+        "taxas": df["taxa"].sum(),
+        "lucro_operacional": df["lucro_bruto"].sum() - df["taxa"].sum()
     }
     
 def gerar_pdf(df_vendas, df_produtos, inicio, fim):
@@ -59,7 +155,21 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
 
     elements = []
 
-    # Título
+    # =====================
+    # FILTRO BASE (🔥 IMPORTANTE)
+    # =====================
+    df = df_vendas.copy()
+
+    df["qtd_estornada"] = df.get("qtd_estornada", 0)
+    df["qtd_liquida"] = df["quantidade"] - df["qtd_estornada"]
+
+    df = df[df["qtd_liquida"] != 0]
+
+    df["total"] = df["qtd_liquida"] * df["preco_unit"]
+
+    # =====================
+    # TÍTULO
+    # =====================
     elements.append(Paragraph(f"Relatório de Vendas", styles["Title"]))
     elements.append(Spacer(1, 10))
 
@@ -75,10 +185,7 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     elements.append(Paragraph("Resumo por Forma de Pagamento", styles["Heading2"]))
 
-    resumo_pag = df_vendas.copy()
-    resumo_pag["total"] = resumo_pag["quantidade"] * resumo_pag["preco_unit"]
-
-    resumo = resumo_pag.groupby("forma_pagamento")["total"].sum()
+    resumo = df.groupby("forma_pagamento")["total"].sum()
 
     for forma, valor in resumo.items():
         elements.append(Paragraph(f"{forma}: R$ {valor:,.2f}", styles["Normal"]))
@@ -88,19 +195,24 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     # VENDAS DETALHADAS
     # =====================
-    elements.append(Paragraph("Vendas", styles["Heading2"]))
+    elements.append(Paragraph("Vendas (com estornos)", styles["Heading2"]))
 
-    for _, row in df_vendas.iterrows():
-        texto = f"{row['produto']} | QTD: {int(row['quantidade'])} | R$ {row['preco_unit']:,.2f} | {row['forma_pagamento']}"
+    for _, row in df.iterrows():
+        texto = (
+            f"{row['produto']} | "
+            f"Vend: {int(row['quantidade'])} | "
+            f"Estornado: {int(row['qtd_estornada'])} | "
+            f"Líquido: {int(row['qtd_liquida'])} | "
+            f"Total: R$ {row['total']:,.2f}"
+        )
         elements.append(Paragraph(texto, styles["Normal"]))
 
     elements.append(Spacer(1, 20))
 
     # =====================
-    # DRE Vendas
+    # DRE
     # =====================
-    
-    dre = calcular_dre(df_vendas)
+    dre = calcular_dre(df)
 
     elements.append(Paragraph("DRE - Resultado", styles["Heading2"]))
 
@@ -109,7 +221,9 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     elements.append(Paragraph(f"Lucro Bruto: R$ {dre['lucro_bruto']:,.2f}", styles["Normal"]))
     elements.append(Paragraph(f"Taxas: R$ {dre['taxas']:,.2f}", styles["Normal"]))
     elements.append(Paragraph(f"Lucro Operacional: R$ {dre['lucro_operacional']:,.2f}", styles["Normal"]))
-    
+
+    elements.append(Spacer(1, 20))
+
     # =====================
     # ESTOQUE
     # =====================
@@ -174,9 +288,9 @@ def registrar_venda(produto_id, quantidade, preco, lucro, data_venda, forma_paga
 
         cursor.execute("""
             INSERT INTO public.vendas_modarte
-            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento)
-            VALUES (%s,%s,%s,%s,%s,%s)
-        """, (produto_id, quantidade, data_venda, preco, lucro, forma_pagamento))
+            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento, status)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+        """, (produto_id, quantidade, data_venda, preco, lucro, forma_pagamento, "pago"))
 
         cursor.execute("""
             UPDATE public.produtos
@@ -199,7 +313,14 @@ st.sidebar.title("⚙️ Gerenciamento")
 
 acao = st.sidebar.radio(
     "Escolha uma ação:",
-    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "💰 Registrar Venda", "🗑️ Excluir Produto"]
+    [
+        "📦 Visualizar Produtos",
+        "➕ Inserir Produto",
+        "✏️ Alterar Produto",
+        "💰 Registrar Venda",
+        "↩️ Estornar Venda", 
+        "🗑️ Excluir Produto"
+    ]
 )
 
 if st.sidebar.button("❌ Encerrar aplicação"):
@@ -217,9 +338,11 @@ SELECT
     p.produto,
     v.data_venda,
     v.quantidade,
+    COALESCE(v.qtd_estornada, 0) as qtd_estornada,
     v.preco_unit,
     v.lucro_unit,
-    v.forma_pagamento
+    v.forma_pagamento,
+    v.status
 FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
 """)
@@ -397,7 +520,21 @@ elif acao == "💰 Registrar Venda":
     quantidade = st.number_input("Quantidade", min_value=1, max_value=estoque_disp, step=1)
 
     # 💰 CALCULO
-    valor_total = quantidade * float(row["preco"])
+    preco_base = float(row["preco"])
+    lucro_base = float(row["lucro"])
+
+    # 🔥 REGRA ATACADO
+    if quantidade >= 3:
+        desconto = 5
+        preco_final = preco_base - desconto
+        lucro_final = lucro_base - desconto
+        st.success(f"💸 Desconto atacado aplicado: -R$ {desconto} por peça")
+    else:
+        preco_final = preco_base
+        lucro_final = lucro_base
+
+    valor_total = quantidade * preco_final
+
     st.info(f"💵 Valor total: R$ {valor_total:,.2f}")
 
     # 💳 FORMA DE PAGAMENTO
@@ -441,14 +578,114 @@ elif acao == "💰 Registrar Venda":
         registrar_venda(
             produto_id=int(row["id"]),
             quantidade=quantidade,
-            preco=float(row["preco"]),
-            lucro=float(row["lucro"]),
-            data_venda=datetime.combine(data_venda, datetime.min.time())
+            preco=preco_final,
+            lucro=lucro_final,
+            data_venda=datetime.combine(data_venda, datetime.min.time()),
+            forma_pagamento=forma_pagamento
         )
 
         st.success("✅ Venda registrada com sucesso!")
         st.rerun()
-        
+# =====================
+# ESTORNAR PRODUTO
+# =====================
+
+elif acao == "↩️ Estornar Venda":
+    st.subheader("↩️ Estornar Venda")
+
+    df_vendas_view = query_df("""
+    SELECT 
+        v.id, 
+        p.produto, 
+        v.quantidade, 
+        v.qtd_estornada,
+        v.preco_unit,
+        v.data_venda,
+        v.status
+    FROM public.vendas_modarte v
+    JOIN public.produtos p ON p.id = v.produto_id
+    ORDER BY v.data_venda DESC
+    """)
+
+    if df_vendas_view.empty:
+        st.info("Nenhuma venda encontrada.")
+        st.stop()
+
+    # =====================
+    # CALCULOS
+    # =====================
+    df_vendas_view["valor_unit"] = df_vendas_view["preco_unit"]
+    df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
+
+    # =====================
+    # LABEL
+    # =====================
+    df_vendas_view["restante"] = df_vendas_view["quantidade"] - df_vendas_view["qtd_estornada"]
+
+    df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
+
+    df_vendas_view["label"] = df_vendas_view.apply(
+        lambda x: (
+            f"{x['id']} | {x['produto']} | "
+            f"Vend: {x['quantidade']} | "
+            f"Estornado: {x['qtd_estornada']} | "
+            f"Restante: {x['restante']} | "
+            f"R$ {x['preco_unit']:,.2f} → R$ {x['valor_total']:,.2f} | "
+            f"{x['status']}"
+        ),
+        axis=1
+    )
+
+    # =====================
+    # SELECT UNICO (🔥 FIX)
+    # =====================
+
+    venda_sel = st.selectbox(
+        "Selecione a venda",
+        df_vendas_view["label"],
+        key="select_venda_estorno"
+    )
+
+    venda_id = int(venda_sel.split(" | ")[0])
+
+    venda_row = df_vendas_view[df_vendas_view["id"] == venda_id].iloc[0]
+
+    restante = int(venda_row["quantidade"] - venda_row["qtd_estornada"])
+
+    # =====================
+    # ESTORNO TOTAL
+    # =====================
+    st.markdown("### ❌ Estorno Total")
+
+    if restante <= 0:
+        st.warning("Venda já totalmente estornada")
+    else:
+        if st.button("Estornar venda total", key="btn_total"):
+            estornar_venda(venda_id)
+            st.success("Estorno total realizado!")
+            st.rerun()
+
+    # =====================
+    # ESTORNO PARCIAL
+    # =====================
+    st.markdown("### ↩️ Estorno Parcial")
+
+    if restante <= 0:
+        st.info("Sem quantidade restante para estorno")
+    else:
+        qtd = st.number_input(
+            "Quantidade a estornar",
+            min_value=1,
+            max_value=restante,
+            step=1,
+            key="qtd_estorno"
+        )
+
+        if st.button("Estornar parcialmente", key="btn_parcial"):
+            estornar_parcial(venda_id, qtd)
+            st.success("Estorno parcial realizado!")
+            st.rerun()
+            
 # =====================
 # EXCLUIR PRODUTO
 # =====================
@@ -507,11 +744,17 @@ if acao == "📦 Visualizar Produtos":
     df_f = df_vendas[
         (df_vendas["data_venda"] >= inicio) &
         (df_vendas["data_venda"] <= fim)
-    ]
+    ].copy()
 
-    renda = (df_f["quantidade"] * df_f["preco_unit"]).sum()
-    lucro = (df_f["quantidade"] * df_f["lucro_unit"]).sum()
-    vendidos = df_f["quantidade"].sum()
+    # 🔥 NOVO
+    df_f["qtd_estornada"] = df_f.get("qtd_estornada", 0)
+    df_f["qtd_liquida"] = df_f["quantidade"] - df_f["qtd_estornada"]
+
+    df_f = df_f[df_f["qtd_liquida"] != 0]
+
+    renda = (df_f["qtd_liquida"] * df_f["preco_unit"]).sum()
+    lucro = (df_f["qtd_liquida"] * df_f["lucro_unit"]).sum()
+    vendidos = df_f["qtd_liquida"].sum()
     estoque = df["estoque_atual"].sum()
 
     st.title("📦 Painel de Produtos")
