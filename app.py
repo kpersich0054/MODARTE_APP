@@ -113,7 +113,7 @@ def calcular_dre(df_vendas):
         return None
 
     df = df_vendas[
-        df_vendas["status"].isin(["pago", "estorno_parcial"])
+        df_vendas["status"].isin(["pago", "estornado parcialmente"])
     ].copy()
 
     # =====================
@@ -166,7 +166,7 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # FILTRO BASE (🔥 IMPORTANTE)
     # =====================
     df = df_vendas[
-        df_vendas["status"].isin(["pago", "estorno_parcial"])
+        df_vendas["status"].isin(["pago", "estornado parcialmente"])
     ].copy()
 
     df["total"] = df["quantidade"] * df["preco_unit"]
