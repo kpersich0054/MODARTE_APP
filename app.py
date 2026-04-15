@@ -116,9 +116,9 @@ def registrar_venda(produto_id, quantidade, preco, lucro, data_venda, forma_paga
 
         cursor.execute("""
             INSERT INTO public.vendas_modarte
-            (produto_id, quantidade, data_venda, preco_unit, forma_pagamento)
-            VALUES (%s,%s,%s,%s,%s)
-        """, (produto_id, quantidade, data_venda, preco, lucro))
+            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento)
+            VALUES (%s,%s,%s,%s,%s,%s)
+        """, (produto_id, quantidade, data_venda, preco, lucro, forma_pagamento))
 
         cursor.execute("""
             UPDATE public.produtos
