@@ -25,7 +25,7 @@ def estornar_parcial(venda_id, quantidade_estorno):
 
         produto_id, qtd_original, preco, lucro, status, qtd_estornada = venda
 
-        if status not in ["pago", "parcial"]:
+        if status not in ["pago", "estornado parcialmente"]:
             raise Exception("Venda não pode ser estornada")
 
         restante = qtd_original - qtd_estornada
