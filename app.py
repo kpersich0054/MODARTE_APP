@@ -12,9 +12,8 @@ def estornar_parcial(venda_id, quantidade_estorno):
     try:
         cursor = conn.cursor()
 
-        # 🔥 pega dados da venda original
         cursor.execute("""
-            SELECT produto_id, quantidade, preco_unit, lucro_unit, status
+            SELECT produto_id, quantidade, preco_unit, lucro_unit, status, qtd_estornada
             FROM public.vendas_modarte
             WHERE id = %s
         """, (venda_id,))
@@ -24,16 +23,15 @@ def estornar_parcial(venda_id, quantidade_estorno):
         if not venda:
             raise Exception("Venda não encontrada")
 
-        produto_id, qtd_original, preco, lucro, status = venda
+        produto_id, qtd_original, preco, lucro, status, qtd_estornada = venda
 
-        if status != "pago":
-            raise Exception("Só é possível estornar vendas pagas")
+        if status not in ["pago", "parcial"]:
+            raise Exception("Venda não pode ser estornada")
 
-        if quantidade_estorno <= 0:
-            raise Exception("Quantidade inválida")
+        restante = qtd_original - qtd_estornada
 
-        if quantidade_estorno > qtd_original:
-            raise Exception("Não pode estornar mais que o vendido")
+        if quantidade_estorno > restante:
+            raise Exception("Estorno maior que o restante disponível")
 
         # 🔥 devolve estoque
         cursor.execute("""
@@ -42,20 +40,19 @@ def estornar_parcial(venda_id, quantidade_estorno):
             WHERE id = %s
         """, (quantidade_estorno, produto_id))
 
-        # 🔥 cria nova linha de estorno
+        # 🔥 atualiza quantidade estornada
+        nova_qtd_estornada = qtd_estornada + quantidade_estorno
+
+        novo_status = "estornado parcialmente"
+        if nova_qtd_estornada == qtd_original:
+            novo_status = "estornado total"
+
         cursor.execute("""
-            INSERT INTO public.vendas_modarte
-            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento, status, venda_origem_id)
-            VALUES (%s, %s, NOW(), %s, %s, %s, %s, %s)
-        """, (
-            produto_id,
-            -quantidade_estorno,  # 🔥 negativo
-            preco,
-            lucro,
-            "Estorno",
-            "estorno_parcial",
-            venda_id
-        ))
+            UPDATE public.vendas_modarte
+            SET qtd_estornada = %s,
+                status = %s
+            WHERE id = %s
+        """, (nova_qtd_estornada, novo_status, venda_id))
 
         conn.commit()
 
@@ -70,9 +67,8 @@ def estornar_venda(venda_id):
     try:
         cursor = conn.cursor()
 
-        # 🔥 pega dados da venda (e status)
         cursor.execute("""
-            SELECT produto_id, quantidade, status
+            produto_id, quantidade, qtd_estornada
             FROM public.vendas_modarte
             WHERE id = %s
         """, (venda_id,))
@@ -82,23 +78,25 @@ def estornar_venda(venda_id):
         if not venda:
             raise Exception("Venda não encontrada")
 
-        produto_id, quantidade, status = venda
+        produto_id, quantidade, qtd_estornada = venda
 
-        # 🔥 evita estorno duplicado
-        if status == "estornado":
-            raise Exception("Essa venda já foi estornada")
+        restante = quantidade - qtd_estornada
 
-        # 🔥 devolve estoque
+        if restante <= 0:
+            raise Exception("Nada restante para estornar")
+
+        # 🔥 devolve estoque do restante
         cursor.execute("""
             UPDATE public.produtos
             SET estoque_atual = estoque_atual + %s
             WHERE id = %s
-        """, (quantidade, produto_id))
+        """, (restante, produto_id))
 
-        # 🔥 marca como estornada (AO INVÉS DE DELETAR)
+        # 🔥 marca como totalmente estornada
         cursor.execute("""
             UPDATE public.vendas_modarte
-            SET status = 'estornado'
+            SET qtd_estornada = quantidade,
+                status = 'estornado total'
             WHERE id = %s
         """, (venda_id,))
 
@@ -588,6 +586,7 @@ elif acao == "↩️ Estornar Venda":
         v.id, 
         p.produto, 
         v.quantidade, 
+        v.qtd_estornada,
         v.preco_unit,
         v.data_venda,
         v.status
@@ -609,11 +608,17 @@ elif acao == "↩️ Estornar Venda":
     # =====================
     # LABEL
     # =====================
+    df_vendas_view["restante"] = df_vendas_view["quantidade"] - df_vendas_view["qtd_estornada"]
+
+    df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
+
     df_vendas_view["label"] = df_vendas_view.apply(
         lambda x: (
             f"{x['id']} | {x['produto']} | "
-            f"QTD: {x['quantidade']} | "
-            f"R$ {x['valor_unit']:,.2f} → R$ {x['valor_total']:,.2f} | "
+            f"Vend: {x['quantidade']} | "
+            f"Estornado: {x['qtd_estornada']} | "
+            f"Restante: {x['restante']} | "
+            f"R$ {x['preco_unit']:,.2f} → R$ {x['valor_total']:,.2f} | "
             f"{x['status']}"
         ),
         axis=1
@@ -622,6 +627,7 @@ elif acao == "↩️ Estornar Venda":
     # =====================
     # SELECT UNICO (🔥 FIX)
     # =====================
+
     venda_sel = st.selectbox(
         "Selecione a venda",
         df_vendas_view["label"],
@@ -630,55 +636,43 @@ elif acao == "↩️ Estornar Venda":
 
     venda_id = int(venda_sel.split(" | ")[0])
 
-    filtro = df_vendas_view[df_vendas_view["id"] == venda_id]
+    venda_row = df_vendas_view[df_vendas_view["id"] == venda_id].iloc[0]
 
-    if filtro.empty:
-        st.error("Venda não encontrada")
-        st.stop()
-
-    venda_row = filtro.iloc[0]
+    restante = int(venda_row["quantidade"] - venda_row["qtd_estornada"])
 
     # =====================
     # ESTORNO TOTAL
     # =====================
     st.markdown("### ❌ Estorno Total")
 
-    if venda_row["status"] == "estornado":
-        st.warning("Essa venda já foi estornada")
+    if restante <= 0:
+        st.warning("Venda já totalmente estornada")
     else:
-        if st.button("Estornar venda total", key="btn_estorno_total"):
-            try:
-                estornar_venda(venda_id)
-                st.success("Venda estornada com sucesso!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Erro: {e}")
+        if st.button("Estornar venda total", key="btn_total"):
+            estornar_venda(venda_id)
+            st.success("Estorno total realizado!")
+            st.rerun()
 
     # =====================
     # ESTORNO PARCIAL
     # =====================
     st.markdown("### ↩️ Estorno Parcial")
 
-    quantidade_max = int(abs(venda_row["quantidade"]))
-
-    if quantidade_max <= 0:
-        st.warning("Essa venda não possui quantidade disponível para estorno")
+    if restante <= 0:
+        st.info("Sem quantidade restante para estorno")
     else:
-        quantidade_estorno = st.number_input(
+        qtd = st.number_input(
             "Quantidade a estornar",
             min_value=1,
-            max_value=quantidade_max,
+            max_value=restante,
             step=1,
-            key="input_qtd_estorno"
+            key="qtd_estorno"
         )
 
-        if st.button("Estornar parcialmente", key="btn_estorno_parcial"):
-            try:
-                estornar_parcial(venda_id, quantidade_estorno)
-                st.success("Estorno parcial realizado!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Erro: {e}")
+        if st.button("Estornar parcialmente", key="btn_parcial"):
+            estornar_parcial(venda_id, qtd)
+            st.success("Estorno parcial realizado!")
+            st.rerun()
             
 # =====================
 # EXCLUIR PRODUTO
