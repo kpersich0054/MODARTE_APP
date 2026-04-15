@@ -162,7 +162,18 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
 
     elements = []
 
-    # Título
+    # =====================
+    # FILTRO BASE (🔥 IMPORTANTE)
+    # =====================
+    df = df_vendas[
+        df_vendas["status"].isin(["pago", "estorno_parcial"])
+    ].copy()
+
+    df["total"] = df["quantidade"] * df["preco_unit"]
+
+    # =====================
+    # TÍTULO
+    # =====================
     elements.append(Paragraph(f"Relatório de Vendas", styles["Title"]))
     elements.append(Spacer(1, 10))
 
@@ -178,10 +189,7 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     elements.append(Paragraph("Resumo por Forma de Pagamento", styles["Heading2"]))
 
-    resumo_pag = df_vendas[df_vendas["status"] == "pago"].copy()
-    resumo_pag["total"] = resumo_pag["quantidade"] * resumo_pag["preco_unit"]
-
-    resumo = resumo_pag.groupby("forma_pagamento")["total"].sum()
+    resumo = df.groupby("forma_pagamento")["total"].sum()
 
     for forma, valor in resumo.items():
         elements.append(Paragraph(f"{forma}: R$ {valor:,.2f}", styles["Normal"]))
@@ -191,19 +199,29 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     # VENDAS DETALHADAS
     # =====================
-    elements.append(Paragraph("Vendas", styles["Heading2"]))
+    elements.append(Paragraph("Vendas (com estornos)", styles["Heading2"]))
 
-    for _, row in df_vendas.iterrows():
-        texto = f"{row['produto']} | QTD: {int(row['quantidade'])} | R$ {row['preco_unit']:,.2f} | {row['forma_pagamento']}"
+    for _, row in df.iterrows():
+        tipo = "VENDA"
+        if row["quantidade"] < 0:
+            tipo = "ESTORNO"
+
+        texto = (
+            f"{tipo} | {row['produto']} | "
+            f"QTD: {int(row['quantidade'])} | "
+            f"R$ {row['preco_unit']:,.2f} | "
+            f"Total: R$ {row['total']:,.2f} | "
+            f"{row['forma_pagamento']}"
+        )
+
         elements.append(Paragraph(texto, styles["Normal"]))
 
     elements.append(Spacer(1, 20))
 
     # =====================
-    # DRE Vendas
+    # DRE
     # =====================
-    
-    dre = calcular_dre(df_vendas)
+    dre = calcular_dre(df)
 
     elements.append(Paragraph("DRE - Resultado", styles["Heading2"]))
 
@@ -212,7 +230,9 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     elements.append(Paragraph(f"Lucro Bruto: R$ {dre['lucro_bruto']:,.2f}", styles["Normal"]))
     elements.append(Paragraph(f"Taxas: R$ {dre['taxas']:,.2f}", styles["Normal"]))
     elements.append(Paragraph(f"Lucro Operacional: R$ {dre['lucro_operacional']:,.2f}", styles["Normal"]))
-    
+
+    elements.append(Spacer(1, 20))
+
     # =====================
     # ESTOQUE
     # =====================
