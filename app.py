@@ -7,6 +7,64 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+def estornar_parcial(venda_id, quantidade_estorno):
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+
+        # 🔥 pega dados da venda original
+        cursor.execute("""
+            SELECT produto_id, quantidade, preco_unit, lucro_unit, status
+            FROM public.vendas_modarte
+            WHERE id = %s
+        """, (venda_id,))
+
+        venda = cursor.fetchone()
+
+        if not venda:
+            raise Exception("Venda não encontrada")
+
+        produto_id, qtd_original, preco, lucro, status = venda
+
+        if status != "pago":
+            raise Exception("Só é possível estornar vendas pagas")
+
+        if quantidade_estorno <= 0:
+            raise Exception("Quantidade inválida")
+
+        if quantidade_estorno > qtd_original:
+            raise Exception("Não pode estornar mais que o vendido")
+
+        # 🔥 devolve estoque
+        cursor.execute("""
+            UPDATE public.produtos
+            SET estoque_atual = estoque_atual + %s
+            WHERE id = %s
+        """, (quantidade_estorno, produto_id))
+
+        # 🔥 cria nova linha de estorno
+        cursor.execute("""
+            INSERT INTO public.vendas_modarte
+            (produto_id, quantidade, data_venda, preco_unit, lucro_unit, forma_pagamento, status, venda_origem_id)
+            VALUES (%s, %s, NOW(), %s, %s, %s, %s, %s)
+        """, (
+            produto_id,
+            -quantidade_estorno,  # 🔥 negativo
+            preco,
+            lucro,
+            "Estorno",
+            "estorno_parcial",
+            venda_id
+        ))
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
+        
 def estornar_venda(venda_id):
     conn = get_conn()
     try:
@@ -56,7 +114,9 @@ def calcular_dre(df_vendas):
     if df_vendas.empty:
         return None
 
-    df = df_vendas[df_vendas["status"] == "pago"].copy()
+    df = df_vendas[
+        df_vendas["status"].isin(["pago", "estorno_parcial"])
+    ].copy()
 
     # =====================
     # BASE
@@ -560,6 +620,23 @@ elif acao == "↩️ Estornar Venda":
             st.success("Venda estornada!")
             st.rerun()
 
+    st.subheader("↩️ Estornar Venda (Parcial)")
+
+    quantidade_estorno = st.number_input(
+        "Quantidade a estornar",
+        min_value=1,
+        max_value=int(venda_row["quantidade"]),
+        step=1
+    )
+
+    if st.button("❌ Estornar parcialmente"):
+        try:
+            estornar_parcial(venda_id, quantidade_estorno)
+            st.success("✅ Estorno parcial realizado!")
+            st.rerun()
+        except Exception as e:
+            st.error(f"Erro: {e}")
+            
 # =====================
 # EXCLUIR PRODUTO
 # =====================
