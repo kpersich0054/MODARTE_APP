@@ -112,46 +112,39 @@ def calcular_dre(df_vendas):
     if df_vendas.empty:
         return None
 
-    df = df_vendas[
-        df_vendas["status"].isin(["pago", "estornado_parcialmente"])
-    ].copy()
+    df = df_vendas.copy()
+
+    # 🔥 NOVO: quantidade líquida
+    df["qtd_liquida"] = df["quantidade"] - df.get("qtd_estornada", 0)
+
+    # remove vendas zeradas
+    df = df[df["qtd_liquida"] != 0]
 
     # =====================
     # BASE
     # =====================
-    df["receita"] = df["quantidade"] * df["preco_unit"]
-    df["custo"] = df["quantidade"] * (df["preco_unit"] - df["lucro_unit"])
-    df["lucro_bruto"] = df["quantidade"] * df["lucro_unit"]
+    df["receita"] = df["qtd_liquida"] * df["preco_unit"]
+    df["custo"] = df["qtd_liquida"] * (df["preco_unit"] - df["lucro_unit"])
+    df["lucro_bruto"] = df["qtd_liquida"] * df["lucro_unit"]
 
     # =====================
-    # TAXAS (simulação)
+    # TAXAS
     # =====================
     def taxa(row):
         if row["forma_pagamento"] == "Cartão (Maquininha)":
-            return row["receita"] * 0.05  # 5%
+            return row["receita"] * 0.05
         elif row["forma_pagamento"] == "Pix":
-            return row["receita"] * 0.01  # 1%
-        else:
-            return 0
+            return row["receita"] * 0.01
+        return 0
 
     df["taxa"] = df.apply(taxa, axis=1)
 
-    # =====================
-    # AGREGADOS
-    # =====================
-    receita_bruta = df["receita"].sum()
-    custo_total = df["custo"].sum()
-    lucro_bruto = df["lucro_bruto"].sum()
-    taxas = df["taxa"].sum()
-
-    lucro_operacional = lucro_bruto - taxas
-
     return {
-        "receita_bruta": receita_bruta,
-        "custo_total": custo_total,
-        "lucro_bruto": lucro_bruto,
-        "taxas": taxas,
-        "lucro_operacional": lucro_operacional
+        "receita_bruta": df["receita"].sum(),
+        "custo_total": df["custo"].sum(),
+        "lucro_bruto": df["lucro_bruto"].sum(),
+        "taxas": df["taxa"].sum(),
+        "lucro_operacional": df["lucro_bruto"].sum() - df["taxa"].sum()
     }
     
 def gerar_pdf(df_vendas, df_produtos, inicio, fim):
@@ -165,11 +158,14 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # =====================
     # FILTRO BASE (🔥 IMPORTANTE)
     # =====================
-    df = df_vendas[
-        df_vendas["status"].isin(["pago", "estornado_parcialmente"])
-    ].copy()
+    df = df_vendas.copy()
 
-    df["total"] = df["quantidade"] * df["preco_unit"]
+    df["qtd_estornada"] = df.get("qtd_estornada", 0)
+    df["qtd_liquida"] = df["quantidade"] - df["qtd_estornada"]
+
+    df = df[df["qtd_liquida"] != 0]
+
+    df["total"] = df["qtd_liquida"] * df["preco_unit"]
 
     # =====================
     # TÍTULO
@@ -202,18 +198,13 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     elements.append(Paragraph("Vendas (com estornos)", styles["Heading2"]))
 
     for _, row in df.iterrows():
-        tipo = "VENDA"
-        if row["quantidade"] < 0:
-            tipo = "ESTORNO"
-
         texto = (
-            f"{tipo} | {row['produto']} | "
-            f"QTD: {int(row['quantidade'])} | "
-            f"R$ {row['preco_unit']:,.2f} | "
-            f"Total: R$ {row['total']:,.2f} | "
-            f"{row['forma_pagamento']}"
+            f"{row['produto']} | "
+            f"Vend: {int(row['quantidade'])} | "
+            f"Estornado: {int(row['qtd_estornada'])} | "
+            f"Líquido: {int(row['qtd_liquida'])} | "
+            f"Total: R$ {row['total']:,.2f}"
         )
-
         elements.append(Paragraph(texto, styles["Normal"]))
 
     elements.append(Spacer(1, 20))
@@ -347,6 +338,7 @@ SELECT
     p.produto,
     v.data_venda,
     v.quantidade,
+    COALESCE(v.qtd_estornada, 0) as qtd_estornada,
     v.preco_unit,
     v.lucro_unit,
     v.forma_pagamento,
@@ -751,13 +743,18 @@ if acao == "📦 Visualizar Produtos":
 
     df_f = df_vendas[
         (df_vendas["data_venda"] >= inicio) &
-        (df_vendas["data_venda"] <= fim) &
-        (df_vendas["status"] == "pago")
-    ]
+        (df_vendas["data_venda"] <= fim)
+    ].copy()
 
-    renda = (df_f["quantidade"] * df_f["preco_unit"]).sum()
-    lucro = (df_f["quantidade"] * df_f["lucro_unit"]).sum()
-    vendidos = df_f["quantidade"].sum()
+    # 🔥 NOVO
+    df_f["qtd_estornada"] = df_f.get("qtd_estornada", 0)
+    df_f["qtd_liquida"] = df_f["quantidade"] - df_f["qtd_estornada"]
+
+    df_f = df_f[df_f["qtd_liquida"] != 0]
+
+    renda = (df_f["qtd_liquida"] * df_f["preco_unit"]).sum()
+    lucro = (df_f["qtd_liquida"] * df_f["lucro_unit"]).sum()
+    vendidos = df_f["qtd_liquida"].sum()
     estoque = df["estoque_atual"].sum()
 
     st.title("📦 Painel de Produtos")
