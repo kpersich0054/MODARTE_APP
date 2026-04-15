@@ -244,7 +244,14 @@ st.sidebar.title("⚙️ Gerenciamento")
 
 acao = st.sidebar.radio(
     "Escolha uma ação:",
-    ["📦 Visualizar Produtos", "➕ Inserir Produto", "✏️ Alterar Produto", "💰 Registrar Venda", "🗑️ Excluir Produto"]
+    [
+        "📦 Visualizar Produtos",
+        "➕ Inserir Produto",
+        "✏️ Alterar Produto",
+        "💰 Registrar Venda",
+        "↩️ Estornar Venda", 
+        "🗑️ Excluir Produto"
+    ]
 )
 
 if st.sidebar.button("❌ Encerrar aplicação"):
@@ -509,56 +516,40 @@ elif acao == "💰 Registrar Venda":
 
         st.success("✅ Venda registrada com sucesso!")
         st.rerun()
+# =====================
+# ESTORNAR PRODUTO
+# =====================
 
-        st.markdown("---")
-        
-        st.subheader("↩️ Estornar Venda")
+elif acao == "↩️ Estornar Venda":
+    st.subheader("↩️ Estornar Venda")
 
-        df_vendas_view = query_df("""
-        SELECT 
-            v.id, 
-            p.produto, 
-            v.quantidade, 
-            v.data_venda,
-            v.status
-        FROM public.vendas_modarte v
-        JOIN public.produtos p ON p.id = v.produto_id
-        ORDER BY v.data_venda DESC
-        """)
+    df_vendas_view = query_df("""
+    SELECT 
+        v.id, 
+        p.produto, 
+        v.quantidade, 
+        v.data_venda,
+        v.status
+    FROM public.vendas_modarte v
+    JOIN public.produtos p ON p.id = v.produto_id
+    ORDER BY v.data_venda DESC
+    """)
 
-        # 🔥 opcional: mostrar TODAS ou só ativas
-        mostrar_estornadas = st.checkbox("Mostrar vendas estornadas", value=False)
+    if not df_vendas_view.empty:
 
-        if not mostrar_estornadas:
-            df_vendas_view = df_vendas_view[df_vendas_view["status"] == "pago"]
+        df_vendas_view["label"] = df_vendas_view.apply(
+            lambda x: f"{x['id']} - {x['produto']} | QTD: {x['quantidade']} | {x['status']}",
+            axis=1
+        )
 
-        if not df_vendas_view.empty:
+        venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
+        venda_id = int(venda_sel.split(" - ")[0])
 
-            # 🔥 label mais completo
-            df_vendas_view["label"] = df_vendas_view.apply(
-                lambda x: f"{x['id']} - {x['produto']} | QTD: {x['quantidade']} | {x['status']}",
-                axis=1
-            )
+        if st.button("❌ Estornar venda"):
+            estornar_venda(venda_id)
+            st.success("Venda estornada!")
+            st.rerun()
 
-            venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
-
-            venda_id = int(venda_sel.split(" - ")[0])
-
-            # 🔥 pega status da venda selecionada
-            venda_row = df_vendas_view[df_vendas_view["id"] == venda_id].iloc[0]
-
-            if venda_row["status"] == "estornado":
-                st.warning("⚠️ Essa venda já foi estornada")
-            else:
-                if st.button("❌ Estornar venda"):
-                    try:
-                        estornar_venda(venda_id)
-                        st.success("✅ Venda estornada com sucesso!")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Erro ao estornar: {e}")
-        else:
-            st.info("Nenhuma venda encontrada.")
 # =====================
 # EXCLUIR PRODUTO
 # =====================
