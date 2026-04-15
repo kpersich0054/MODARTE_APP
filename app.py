@@ -528,6 +528,7 @@ elif acao == "↩️ Estornar Venda":
         v.id, 
         p.produto, 
         v.quantidade, 
+        v.preco_unit,
         v.data_venda,
         v.status
     FROM public.vendas_modarte v
@@ -537,8 +538,17 @@ elif acao == "↩️ Estornar Venda":
 
     if not df_vendas_view.empty:
 
+        df_vendas_view["valor_unit"] = df_vendas_view["preco_unit"]
+        df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
+
         df_vendas_view["label"] = df_vendas_view.apply(
-            lambda x: f"{x['id']} - {x['produto']} | QTD: {x['quantidade']} | {x['status']}",
+            lambda x: (
+                f"{x['id']} - {x['produto']} | "
+                f"QTD: {x['quantidade']} | "
+                f"Unit: R$ {x['valor_unit']:,.2f} | "
+                f"Total: R$ {x['valor_total']:,.2f} | "
+                f"{x['status']}"
+            ),
             axis=1
         )
 
