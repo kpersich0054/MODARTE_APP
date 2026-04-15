@@ -160,7 +160,8 @@ SELECT
     v.data_venda,
     v.quantidade,
     v.preco_unit,
-    v.lucro_unit
+    v.lucro_unit,
+    v.forma_pagamento
 FROM public.vendas_modarte v
 JOIN public.produtos p ON p.id = v.produto_id
 """)
