@@ -529,7 +529,7 @@ elif acao == "💰 Registrar Venda":
         mostrar_estornadas = st.checkbox("Mostrar vendas estornadas", value=False)
 
         if not mostrar_estornadas:
-            df_vendas_view = df_vendas_view[df_vendas_view["status"] == "ATIVA"]
+            df_vendas_view = df_vendas_view[df_vendas_view["status"] == "pago"]
 
         if not df_vendas_view.empty:
 
@@ -546,7 +546,7 @@ elif acao == "💰 Registrar Venda":
             # 🔥 pega status da venda selecionada
             venda_row = df_vendas_view[df_vendas_view["id"] == venda_id].iloc[0]
 
-            if venda_row["status"] == "ESTORNADA":
+            if venda_row["status"] == "estornado":
                 st.warning("⚠️ Essa venda já foi estornada")
             else:
                 if st.button("❌ Estornar venda"):
