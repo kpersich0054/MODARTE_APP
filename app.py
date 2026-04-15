@@ -397,7 +397,21 @@ elif acao == "💰 Registrar Venda":
     quantidade = st.number_input("Quantidade", min_value=1, max_value=estoque_disp, step=1)
 
     # 💰 CALCULO
-    valor_total = quantidade * float(row["preco"])
+    preco_base = float(row["preco"])
+    lucro_base = float(row["lucro"])
+
+    # 🔥 REGRA ATACADO
+    if quantidade >= 3:
+        desconto = 5
+        preco_final = preco_base - desconto
+        lucro_final = lucro_base - desconto
+        st.success(f"💸 Desconto atacado aplicado: -R$ {desconto} por peça")
+    else:
+        preco_final = preco_base
+        lucro_final = lucro_base
+
+    valor_total = quantidade * preco_final
+
     st.info(f"💵 Valor total: R$ {valor_total:,.2f}")
 
     # 💳 FORMA DE PAGAMENTO
@@ -441,9 +455,10 @@ elif acao == "💰 Registrar Venda":
         registrar_venda(
             produto_id=int(row["id"]),
             quantidade=quantidade,
-            preco=float(row["preco"]),
-            lucro=float(row["lucro"]),
-            data_venda=datetime.combine(data_venda, datetime.min.time())
+            preco=preco_final,
+            lucro=lucro_final,
+            data_venda=datetime.combine(data_venda, datetime.min.time()),
+            forma_pagamento=forma_pagamento
         )
 
         st.success("✅ Venda registrada com sucesso!")
