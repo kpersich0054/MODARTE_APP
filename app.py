@@ -25,7 +25,7 @@ def estornar_parcial(venda_id, quantidade_estorno):
 
         produto_id, qtd_original, preco, lucro, status, qtd_estornada = venda
 
-        if status not in ["pago", "estornado parcialmente"]:
+        if status not in ["pago", "estornado_parcialmente"]:
             raise Exception("Venda não pode ser estornada")
 
         restante = qtd_original - qtd_estornada
@@ -43,7 +43,7 @@ def estornar_parcial(venda_id, quantidade_estorno):
         # 🔥 atualiza quantidade estornada
         nova_qtd_estornada = qtd_estornada + quantidade_estorno
 
-        novo_status = "estornado parcialmente"
+        novo_status = "estornado_parcialmente"
         if nova_qtd_estornada == qtd_original:
             novo_status = "estornado total"
 
@@ -113,7 +113,7 @@ def calcular_dre(df_vendas):
         return None
 
     df = df_vendas[
-        df_vendas["status"].isin(["pago", "estornado parcialmente"])
+        df_vendas["status"].isin(["pago", "estornado_parcialmente"])
     ].copy()
 
     # =====================
@@ -166,7 +166,7 @@ def gerar_pdf(df_vendas, df_produtos, inicio, fim):
     # FILTRO BASE (🔥 IMPORTANTE)
     # =====================
     df = df_vendas[
-        df_vendas["status"].isin(["pago", "estornado parcialmente"])
+        df_vendas["status"].isin(["pago", "estornado_parcialmente"])
     ].copy()
 
     df["total"] = df["quantidade"] * df["preco_unit"]
