@@ -596,37 +596,39 @@ elif acao == "↩️ Estornar Venda":
     ORDER BY v.data_venda DESC
     """)
 
-    if not df_vendas_view.empty:
+    if df_vendas_view.empty:
+        st.info("Nenhuma venda encontrada.")
+        st.stop()
 
-        df_vendas_view["valor_unit"] = df_vendas_view["preco_unit"]
-        df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
+    # =====================
+    # CALCULOS
+    # =====================
+    df_vendas_view["valor_unit"] = df_vendas_view["preco_unit"]
+    df_vendas_view["valor_total"] = df_vendas_view["quantidade"] * df_vendas_view["preco_unit"]
 
-        df_vendas_view["label"] = df_vendas_view.apply(
-            lambda x: (
-                f"{x['id']} - {x['produto']} | "
-                f"QTD: {x['quantidade']} | "
-                f"Unit: R$ {x['valor_unit']:,.2f} | "
-                f"Total: R$ {x['valor_total']:,.2f} | "
-                f"{x['status']}"
-            ),
-            axis=1
-        )
+    # =====================
+    # LABEL
+    # =====================
+    df_vendas_view["label"] = df_vendas_view.apply(
+        lambda x: (
+            f"{x['id']} | {x['produto']} | "
+            f"QTD: {x['quantidade']} | "
+            f"R$ {x['valor_unit']:,.2f} → R$ {x['valor_total']:,.2f} | "
+            f"{x['status']}"
+        ),
+        axis=1
+    )
 
-        venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
-        venda_id = int(venda_sel.split(" - ")[0])
+    # =====================
+    # SELECT UNICO (🔥 FIX)
+    # =====================
+    venda_sel = st.selectbox(
+        "Selecione a venda",
+        df_vendas_view["label"],
+        key="select_venda_estorno"
+    )
 
-        if st.button("❌ Estornar venda"):
-            estornar_venda(venda_id)
-            st.success("Venda estornada!")
-            st.rerun()
-
-    st.subheader("↩️ Estornar Venda (Parcial)")
-
-    # SELECT
-    venda_sel = st.selectbox("Selecione a venda", df_vendas_view["label"])
-
-    # 🔥 extrai ID
-    venda_id = int(venda_sel.split(" - ")[0])
+    venda_id = int(venda_sel.split(" | ")[0])
 
     filtro = df_vendas_view[df_vendas_view["id"] == venda_id]
 
@@ -636,18 +638,47 @@ elif acao == "↩️ Estornar Venda":
 
     venda_row = filtro.iloc[0]
 
-    # 🔥 agora sim pode usar
-    quantidade_estorno = st.number_input(
-        "Quantidade a estornar",
-        min_value=1,
-        max_value=int(abs(venda_row["quantidade"])),  # 🔥 abs pra evitar negativo
-        step=1
-    )
+    # =====================
+    # ESTORNO TOTAL
+    # =====================
+    st.markdown("### ❌ Estorno Total")
 
-    if st.button("❌ Estornar parcialmente"):
-        estornar_parcial(venda_id, quantidade_estorno)
-        st.success("Estorno parcial realizado!")
-        st.rerun()
+    if venda_row["status"] == "estornado":
+        st.warning("Essa venda já foi estornada")
+    else:
+        if st.button("Estornar venda total", key="btn_estorno_total"):
+            try:
+                estornar_venda(venda_id)
+                st.success("Venda estornada com sucesso!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro: {e}")
+
+    # =====================
+    # ESTORNO PARCIAL
+    # =====================
+    st.markdown("### ↩️ Estorno Parcial")
+
+    quantidade_max = int(abs(venda_row["quantidade"]))
+
+    if quantidade_max <= 0:
+        st.warning("Essa venda não possui quantidade disponível para estorno")
+    else:
+        quantidade_estorno = st.number_input(
+            "Quantidade a estornar",
+            min_value=1,
+            max_value=quantidade_max,
+            step=1,
+            key="input_qtd_estorno"
+        )
+
+        if st.button("Estornar parcialmente", key="btn_estorno_parcial"):
+            try:
+                estornar_parcial(venda_id, quantidade_estorno)
+                st.success("Estorno parcial realizado!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Erro: {e}")
             
 # =====================
 # EXCLUIR PRODUTO
