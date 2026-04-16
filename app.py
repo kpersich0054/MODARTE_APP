@@ -457,7 +457,7 @@ elif acao == "✏️ Alterar Produto":
             lucro = float(lucro)
 
             # 🔥 NOVO: GERAR CODIGO E FOTO
-            codigo = gerar_codigo_produto(produto, produto_id)
+            codigo = gerar_codigo_produto(produto)
             foto_path = str(BASE_DIR / f"{codigo}.jpg")
 
             cursor.execute("""
