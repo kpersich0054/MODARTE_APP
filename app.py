@@ -269,10 +269,10 @@ def query_df(sql):
 # =====================
 # FUNÇÕES
 # =====================
-def gerar_codigo_produto(nome_produto, produto_id):
+def gerar_codigo_produto(nome_produto):
     palavras = nome_produto.strip().split()
     iniciais = ''.join([p[0].upper() for p in palavras if p])
-    return f"{iniciais}{produto_id}"
+    return f"{iniciais}"
 
 def validar_produto(dados):
     if not dados["produto"]:
@@ -402,7 +402,7 @@ if acao == "➕ Inserir Produto":
 
                 produto_id = cursor.fetchone()[0]
 
-                codigo = gerar_codigo_produto(produto, produto_id)
+                codigo = gerar_codigo_produto(produto)
                 foto_path = str(BASE_DIR / f"{codigo}.jpg")
 
                 cursor.execute("""
