@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import psycopg2
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -68,7 +69,7 @@ def estornar_venda(venda_id):
         cursor = conn.cursor()
 
         cursor.execute("""
-            produto_id, quantidade, qtd_estornada
+            SELECT produto_id, quantidade, qtd_estornada
             FROM public.vendas_modarte
             WHERE id = %s
         """, (venda_id,))
@@ -270,9 +271,8 @@ def query_df(sql):
 # FUNÇÕES
 # =====================
 def gerar_codigo_produto(nome_produto):
-    palavras = nome_produto.strip().split()
-    iniciais = ''.join([p[0].upper() for p in palavras if p])
-    return f"{iniciais}"
+    iniciais = ''.join([p[0].upper() for p in nome_produto.split()])
+    return f"{iniciais}_{uuid.uuid4().hex[:4]}"
 
 def validar_produto(dados):
     if not dados["produto"]:
