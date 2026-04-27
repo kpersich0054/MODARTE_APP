@@ -229,7 +229,6 @@ if st.session_state.carrinho:
         try:
             cursor = conn.cursor()
 
-            # 🔥 salva cada item como um "pedido"
             for item in st.session_state.carrinho:
                 cursor.execute("""
                     INSERT INTO pedidos (produto_id, quantidade, status)
@@ -238,18 +237,16 @@ if st.session_state.carrinho:
 
             conn.commit()
 
+            # 🔥 MOSTRA antes de limpar
             st.success("Pedido enviado!")
 
-            # 🔥 abre WhatsApp
             st.markdown(f"""
-                <script>
-                    window.open("{link}", "_blank");
-                </script>
-            """, unsafe_allow_html=True)
+            ### 📲 Finalizar no WhatsApp
+            [Clique aqui para enviar seu pedido]({link})
+            """)
 
-            # limpa carrinho
+            # limpa carrinho DEPOIS
             st.session_state.carrinho = []
-            st.rerun()
 
         except Exception as e:
             conn.rollback()
