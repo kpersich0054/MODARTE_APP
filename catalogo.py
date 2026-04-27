@@ -213,10 +213,14 @@ def registrar_pre_compra(produto_id, quantidade):
 # =====================
 # GRID
 # =====================
-cols = st.columns(4)
+n_cols = 4
+rows = [df[i:i+n_cols] for i in range(0, len(df), n_cols)]
 
-for i, (_, row) in enumerate(df.iterrows()):
-    col = cols[i % 4]
+for row_group in rows:
+    cols = st.columns(n_cols)
+
+    for col, (_, row) in zip(cols, row_group.iterrows()):
+        with col:
 
     with col:
         img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
@@ -239,16 +243,18 @@ for i, (_, row) in enumerate(df.iterrows()):
                 unsafe_allow_html=True
             )
             qtd = st.number_input(
-                "Qtd",
                 min_value=1,
                 max_value=int(row["estoque_atual"]),
                 value=1,
                 key=f"qtd_{row['id']}"
             )
         else:
-            st.markdown(
-                "<div class='stock' style='color:#ff5252'>Sem estoque</div>",
-                unsafe_allow_html=True
+            qtd = st.number_input(
+                min_value=0,
+                max_value=0,
+                value=0,
+                disabled=True,
+                key=f"qtd_{row['id']}"
             )
             qtd = 0
 
