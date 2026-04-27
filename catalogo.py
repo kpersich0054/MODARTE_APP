@@ -219,7 +219,7 @@ st.sidebar.write(f"**Total: R$ {total:.2f}**")
 if st.session_state.carrinho:
     pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
     msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
-    link = f"https://wa.me/5511999999999?text={msg}"
+    link = f"https://wa.me/5511964336480?text={msg}"
     st.sidebar.markdown(f"[📲 Finalizar pedido]({link})")
 
 # =====================
