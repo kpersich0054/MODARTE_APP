@@ -220,7 +220,7 @@ if st.session_state.carrinho:
 
     if st.sidebar.button("📦 Confirmar pedido"):
 
-        # 🔗 monta mensagem ANTES
+        # 🔗 mensagem WhatsApp
         pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
         msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido_txt}")
         link = f"https://wa.me/5511964336480?text={msg}"
@@ -229,26 +229,18 @@ if st.session_state.carrinho:
         try:
             cursor = conn.cursor()
 
-            # 1️⃣ cria pedido
-            cursor.execute("""
-                INSERT INTO pedidos (status)
-                VALUES ('pendente')
-                RETURNING id
-            """)
-            pedido_id = cursor.fetchone()[0]
-
-            # 2️⃣ salva itens
+            # 🔥 salva cada item como um "pedido"
             for item in st.session_state.carrinho:
                 cursor.execute("""
-                    INSERT INTO pedidos (pedido_id, produto_id, quantidade)
-                    VALUES (%s, %s, %s)
-                """, (pedido_id, item["id"], item["qtd"]))
+                    INSERT INTO pedidos (produto_id, quantidade, status)
+                    VALUES (%s, %s, 'pendente')
+                """, (item["id"], item["qtd"]))
 
             conn.commit()
 
-            st.success(f"Pedido #{pedido_id} enviado!")
+            st.success("Pedido enviado!")
 
-            # 🔥 abre WhatsApp automaticamente
+            # 🔥 abre WhatsApp
             st.markdown(f"""
                 <script>
                     window.open("{link}", "_blank");
