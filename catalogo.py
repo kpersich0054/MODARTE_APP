@@ -190,6 +190,20 @@ for i, (_, row) in enumerate(df.iterrows()):
             st.markdown(f"**{row['produto']}**")
             st.markdown(f"💰 R$ {float(row['preco']):,.2f}")
 
+            # QUANTIDADE (🔥 trava se estoque zerado)
+            if row["estoque_atual"] > 0:
+                qtd = st.number_input(
+                    "Qtd",
+                    min_value=1,
+                    max_value=int(row["estoque_atual"]),
+                    value=1,
+                    key=f"qtd_{row['id']}"
+                )
+            else:
+                qtd = 0
+                st.warning("Sem estoque")
+
+            # BOTÕES
             b1, b2, b3 = st.columns(3)
 
             # ❤️ FAVORITO
@@ -202,18 +216,8 @@ for i, (_, row) in enumerate(df.iterrows()):
                         st.session_state.favoritos.add(row["id"])
 
             # 🛒 CARRINHO
-
-            # QUANTIDADE
-            qtd = st.number_input(
-                "Qtd",
-                min_value=1,
-                max_value=int(row["estoque_atual"]),  # 🔥 estoque real
-                value=1,
-                key=f"qtd_{row['id']}"
-            )
-            
             with b2:
-                if st.button("🛒", key=f"cart_{row['id']}"):
+                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
 
                     item_existente = next(
                         (i for i in st.session_state.carrinho if i["id"] == row["id"]),
@@ -221,31 +225,33 @@ for i, (_, row) in enumerate(df.iterrows()):
                     )
 
                     if item_existente:
-                        item_existente["qtd"] += qtd  # 🔥 usa o valor escolhido
+                        item_existente["qtd"] += qtd
                     else:
                         st.session_state.carrinho.append({
-                        "id": row["id"],
-                        "produto": row["produto"],
-                        "preco": float(row["preco"]),
-                        "qtd": qtd  # 🔥 salva quantidade
-                    })
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        })
 
-            # 📲 WHATS
+                    st.success("Adicionado ao carrinho!")
+
+            # 📲 WHATS + PRÉ-COMPRA
             with b3:
-                if st.button("📲 Comprar", key=f"buy_{row['id']}"):
+                if st.button("📲 Comprar", key=f"buy_{row['id']}") and qtd > 0:
 
-                # 🔥 registra pré-compra
-                registrar_pre_compra(row["id"], qtd)
+                    try:
+                        registrar_pre_compra(row["id"], qtd)
 
-                # 🔥 mensagem
-                msg = urllib.parse.quote(
-                    f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
-                )
+                        msg = urllib.parse.quote(
+                            f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
+                        )
 
-                link = f"https://wa.me/5511964336480?text={msg}"
+                        link = f"https://wa.me/5511964336480?text={msg}"
 
-                st.success("Produto reservado! Redirecionando...")
+                        st.success("Produto reservado!")
 
-                st.markdown(f"[👉 Clique aqui para abrir o WhatsApp]({link})")
+                        st.markdown(f"[👉 Abrir WhatsApp]({link})")
 
-                st.markdown('</div>', unsafe_allow_html=True)
+                    except Exception as e:
+                        st.error(f"Erro ao reservar: {e}")
