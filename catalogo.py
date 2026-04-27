@@ -9,40 +9,52 @@ import urllib.parse
 # =====================
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
-# 🔥 CSS COMPATÍVEL COM DARK MODE
+# 🔥 CSS GLOBAL CORRETO
 st.markdown("""
 <style>
+
+/* CARD */
 .card {
     border-radius: 15px;
-    padding: 10px;
+    padding: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    background-color: var(--background-color);
+    background-color: var(--secondary-background-color);
     margin-bottom: 15px;
 }
 
-/* layout horizontal */
-.card-container {
+/* CONTAINER IMAGEM PADRÃO */
+.img-container {
+    width: 100%;
+    height: 220px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 
-/* texto */
-.card-text {
-    flex: 1;
+/* IMAGEM PADRONIZADA */
+.img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
-/* botões */
-.card-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-/* garante visibilidade no dark */
+/* TEXTO */
 .card h4, .card p {
     color: var(--text-color);
+    margin: 0;
 }
+
+/* BOTÕES */
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -130,7 +142,6 @@ if st.session_state.carrinho:
     pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
     msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
     link = f"https://wa.me/5511999999999?text={msg}"
-
     st.sidebar.markdown(f"[📲 Finalizar pedido]({link})")
 
 # =====================
@@ -153,62 +164,54 @@ for i, (_, row) in enumerate(df.iterrows()):
         img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
         img_logo = BASE_DIR / "Logo_Modarte.jpg"
 
-        if img_path.exists():
-            img = str(img_path)
-        else:
-            img = str(img_logo)
+        img = str(img_path) if img_path.exists() else str(img_logo)
 
-        # 🔥 CARD HORIZONTAL
-        c_img, c_info = st.columns([1, 2])
+        # 🔥 CARD
+        st.markdown('<div class="card">', unsafe_allow_html=True)
 
-        with c_img:
-            st.image(img, use_container_width=True)
-            st.markdown("""
-            <style>
-            img {
-                height: 180px !important;
-                object-fit: cover;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+        # 🔥 IMAGEM (STREAMLIT, não HTML!)
+        st.markdown('<div class="img-container">', unsafe_allow_html=True)
+        st.image(img, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with c_info:
-            st.markdown(f"**{row['produto']}**")
-            st.markdown(f"💰 R$ {float(row['preco']):,.2f}")
+        # 🔥 TEXTO
+        st.markdown(f"<h4>{row['produto']}</h4>", unsafe_allow_html=True)
+        st.markdown(f"<p><b>R$ {float(row['preco']):,.2f}</b></p>", unsafe_allow_html=True)
 
-            b1, b2, b3 = st.columns(3)
+        # 🔥 BOTÕES
+        b1, b2, b3 = st.columns(3)
 
-            # ❤️ FAVORITO
-            with b1:
-                icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
-                if st.button(icone, key=f"fav_{row['id']}"):
-                    if row["id"] in st.session_state.favoritos:
-                        st.session_state.favoritos.remove(row["id"])
-                    else:
-                        st.session_state.favoritos.add(row["id"])
+        # ❤️ FAVORITO
+        with b1:
+            icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
+            if st.button(icone, key=f"fav_{row['id']}"):
+                if row["id"] in st.session_state.favoritos:
+                    st.session_state.favoritos.remove(row["id"])
+                else:
+                    st.session_state.favoritos.add(row["id"])
 
-            # 🛒 CARRINHO
-            with b2:
-                if st.button("🛒", key=f"cart_{row['id']}"):
-                    item_existente = next(
-                        (i for i in st.session_state.carrinho if i["id"] == row["id"]),
-                        None
-                    )
+        # 🛒 CARRINHO
+        with b2:
+            if st.button("🛒", key=f"cart_{row['id']}"):
+                item_existente = next(
+                    (i for i in st.session_state.carrinho if i["id"] == row["id"]),
+                    None
+                )
 
-                    if item_existente:
-                        item_existente["qtd"] += 1
-                    else:
-                        st.session_state.carrinho.append({
-                            "id": row["id"],
-                            "produto": row["produto"],
-                            "preco": float(row["preco"]),
-                            "qtd": 1
-                        })
+                if item_existente:
+                    item_existente["qtd"] += 1
+                else:
+                    st.session_state.carrinho.append({
+                        "id": row["id"],
+                        "produto": row["produto"],
+                        "preco": float(row["preco"]),
+                        "qtd": 1
+                    })
 
-            # 📲 WHATS
-            with b3:
-                msg = urllib.parse.quote(f"Olá! Quero o produto: {row['produto']}")
-                link = f"https://wa.me/5511999999999?text={msg}"
-                st.markdown(f"[💬]({link})")
+        # 📲 WHATS
+        with b3:
+            msg = urllib.parse.quote(f"Olá! Quero o produto: {row['produto']}")
+            link = f"https://wa.me/5511999999999?text={msg}"
+            st.markdown(f"[💬]({link})")
 
-        st.markdown("---")
+        st.markdown('</div>', unsafe_allow_html=True)
