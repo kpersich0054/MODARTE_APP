@@ -10,16 +10,25 @@ import urllib.parse
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
-# CSS CORRIGIDO
+# CSS FINAL (LIGHT/DARK CORRIGIDO)
 # =====================
 st.markdown("""
 <style>
 
-/* REMOVE FUNDO DOS BLOCOS DAS COLUNAS (retângulo cinza) */
-div[data-testid="column"] > div {
+/* =========================
+   RESET GERAL
+========================= */
+div[data-testid="column"] > div,
+div[data-testid="stVerticalBlock"] > div,
+div[data-testid="element-container"] {
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
+}
+
+/* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
+div[data-testid="stNumberInput"] > div {
+    background: transparent !important;
 }
 
 /* REMOVE PADDING DAS COLUNAS */
@@ -27,12 +36,26 @@ div[data-testid="column"] {
     padding: 0 !important;
 }
 
-/* CARD */
+/* =========================
+   CARD (LIGHT / DARK)
+========================= */
+
+/* 🌞 LIGHT MODE */
+html[data-theme="light"] .card {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 🌙 DARK MODE */
+html[data-theme="dark"] .card {
+    background: linear-gradient(145deg, #1e1e1e, #252525);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+/* CARD BASE */
 .card {
     border-radius: 18px;
     padding: 16px;
-    background: linear-gradient(145deg, #1e1e1e, #252525);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 
     display: flex;
     flex-direction: column;
@@ -87,13 +110,13 @@ div[data-testid="column"] {
 .price {
     font-size: 20px;
     font-weight: bold;
-    color: #00e676;
+    color: #00c853;
 }
 
 /* ESTOQUE */
 .stock {
     font-size: 12px;
-    color: #bbb;
+    color: #888;
 }
 
 /* BOTÃO PRINCIPAL */
@@ -208,33 +231,6 @@ if mostrar_fav:
     df = df[df["id"].isin(st.session_state.favoritos)]
 
 # =====================
-# FUNÇÃO
-# =====================
-def registrar_pre_compra(produto_id, quantidade):
-    conn = get_conn()
-    try:
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            INSERT INTO public.pre_compras (produto_id, quantidade, status)
-            VALUES (%s, %s, 'pendente')
-        """, (produto_id, quantidade))
-
-        cursor.execute("""
-            UPDATE public.produtos
-            SET estoque_atual = estoque_atual - %s
-            WHERE id = %s
-        """, (quantidade, produto_id))
-
-        conn.commit()
-
-    except Exception as e:
-        conn.rollback()
-        raise e
-    finally:
-        conn.close()
-
-# =====================
 # GRID
 # =====================
 n_cols = 4
@@ -252,7 +248,6 @@ for row_group in rows:
 
             st.markdown('<div class="card">', unsafe_allow_html=True)
 
-            # CONTEÚDO
             st.markdown('<div class="card-content">', unsafe_allow_html=True)
 
             st.image(img, use_container_width=True)
@@ -273,7 +268,7 @@ for row_group in rows:
             # AÇÕES
             st.markdown('<div class="card-actions">', unsafe_allow_html=True)
 
-            b1, b2 = st.columns([1,1], gap="small")
+            b1, b2 = st.columns([1,1])
 
             with b1:
                 icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
@@ -302,17 +297,11 @@ for row_group in rows:
             st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
 
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-                try:
-                    registrar_pre_compra(row["id"], qtd)
+                msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
+                link = f"https://wa.me/5511964336480?text={msg}"
 
-                    msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
-                    link = f"https://wa.me/5511964336480?text={msg}"
-
-                    st.success("Reservado!")
-                    st.markdown(f"[👉 Abrir WhatsApp]({link})")
-
-                except Exception as e:
-                    st.error(f"Erro: {e}")
+                st.success("Reservado!")
+                st.markdown(f"[👉 Abrir WhatsApp]({link})")
 
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
