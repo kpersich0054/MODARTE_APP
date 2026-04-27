@@ -266,35 +266,35 @@ for row_group in rows:
             st.markdown('</div>', unsafe_allow_html=True)
 
             # AÇÕES
-            st.markdown('<div class="actions-inline">', unsafe_allow_html=True)
+            st.markdown('<div class="card-actions">', unsafe_allow_html=True)
 
-            col1, col2 = st.columns([1,1])
+            b1, b2 = st.columns([1,1])
 
-            with col1:
+            with b1:
                 icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
                 if st.button(icone, key=f"fav_{row['id']}"):
                     if row["id"] in st.session_state.favoritos:
                         st.session_state.favoritos.remove(row["id"])
                     else:
                         st.session_state.favoritos.add(row["id"])
-   
-            with col2:
-               if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+
+            with b2:
+                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
                     item_existente = next((i for i in st.session_state.carrinho if i["id"] == row["id"]), None)
 
-               if item_existente:
-                    item_existente["qtd"] += qtd
-              else:
-                  st.session_state.carrinho.append({
-                      "id": row["id"],
-                      "produto": row["produto"],
-                      "preco": float(row["preco"]),
-                      "qtd": qtd
-                  })
+                    if item_existente:
+                        item_existente["qtd"] += qtd
+                    else:
+                        st.session_state.carrinho.append({
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        })
 
-              st.success("Adicionado!")
+                    st.success("Adicionado!")
 
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
 
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
                 msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
