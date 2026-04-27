@@ -217,29 +217,38 @@ st.sidebar.markdown("---")
 st.sidebar.write(f"**Total: R$ {total:.2f}**")
 
 if st.session_state.carrinho:
-    conn = get_conn()
-    try:
-        cursor = conn.cursor()
 
-        cursor.execute("""
-            INSERT INTO pedidos (produto_id, quantidade)
-            VALUES (%s, %s)
-        """, (row["id"], qtd))
-
-        conn.commit()
-
-        st.success("Pedido enviado para aprovação!")
-
-    except Exception as e:
-        conn.rollback()
-        st.error(f"Erro: {e}")
-    finally:
-        conn.close()
-
+    # 🔗 LINK WHATSAPP (ANTES de limpar)
     pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
     msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
     link = f"https://wa.me/5511964336480?text={msg}"
-    st.sidebar.markdown(f"[📲 Finalizar pedido]({link})")
+
+    st.sidebar.markdown(f"[📲 Enviar pedido]({link})")
+
+    # 💾 BOTÃO FINALIZAR
+    if st.sidebar.button("📦 Confirmar pedido"):
+        conn = get_conn()
+        try:
+            cursor = conn.cursor()
+
+            for item in st.session_state.carrinho:
+                cursor.execute("""
+                    INSERT INTO pedidos (produto_id, quantidade)
+                    VALUES (%s, %s)
+                """, (item["id"], item["qtd"]))
+
+            conn.commit()
+
+            st.success("Pedido enviado para aprovação!")
+
+            st.session_state.carrinho = []  # limpa depois
+            st.rerun()
+
+        except Exception as e:
+            conn.rollback()
+            st.error(f"Erro: {e}")
+        finally:
+            conn.close()
 
 # =====================
 # FAVORITOS
