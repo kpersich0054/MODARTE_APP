@@ -11,13 +11,21 @@ import io
 st.markdown("""
 <style>
 
-/* container do checkbox */
+/* 🔥 ESCONDE checkbox padrão REAL */
+div[data-testid="stCheckbox"] input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+/* container */
 div[data-testid="stCheckbox"] {
     display: flex;
     align-items: center;
 }
 
-/* label alinhado */
+/* label */
 div[data-testid="stCheckbox"] > label {
     display: flex;
     align-items: center;
@@ -25,12 +33,7 @@ div[data-testid="stCheckbox"] > label {
     cursor: pointer;
 }
 
-/* esconder checkbox padrão */
-div[data-testid="stCheckbox"] input {
-    display: none;
-}
-
-/* trilho do switch */
+/* trilho */
 div[data-testid="stCheckbox"] div[role="checkbox"] {
     width: 52px;
     height: 28px;
@@ -55,17 +58,17 @@ div[data-testid="stCheckbox"] div[role="checkbox"]::before {
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
-/* quando ativo */
+/* ativo */
 div[data-testid="stCheckbox"] div[aria-checked="true"] {
     background: linear-gradient(135deg, #00c853, #00e676);
 }
 
-/* bolinha quando ativo */
+/* bolinha ativa */
 div[data-testid="stCheckbox"] div[aria-checked="true"]::before {
     left: 26px;
 }
 
-/* texto "Ativo" mais bonito */
+/* texto */
 div[data-testid="stCheckbox"] label p {
     margin: 0;
     font-weight: 500;
