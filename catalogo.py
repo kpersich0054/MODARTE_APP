@@ -17,15 +17,13 @@ st.markdown("""
 
 .popup-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0; /* melhor que top/left/width/height */
     background: rgba(0,0,0,0.75);
     z-index: 999999;
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(4px); /* 🔥 efeito premium */
 }
 
 .popup-box {
@@ -54,11 +52,11 @@ st.markdown("""
 ========================= */
 div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"] > div,
-div[data-testid="element-container"] {
+/*div[data-testid="element-container"] {
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
-}
+}*/
 
 /* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
 div[data-testid="stNumberInput"] > div {
