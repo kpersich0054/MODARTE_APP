@@ -128,10 +128,10 @@ if mostrar_fav:
 # =====================
 # GRID
 # =====================
-cols = st.columns(4)
+cols = st.columns(3)
 
 for i, (_, row) in enumerate(df.iterrows()):
-    col = cols[i % 4]
+    col = cols[i % 3]
 
     with col:
         img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
