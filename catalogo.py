@@ -33,7 +33,9 @@ section.main > div:has(.popup-overlay) {
    RESET GERAL
 ========================= */
 div[data-testid="column"] > div,
-div[data-testid="stVerticalBlock"] > div,
+div[data-testid="stVerticalBlock"] > div {
+    background: transparent !important;
+}
 
 /* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
 div[data-testid="stNumberInput"] > div {
