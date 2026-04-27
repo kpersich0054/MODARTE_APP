@@ -78,8 +78,6 @@ div[data-testid="stCheckbox"] label p {
 </style>
 """, unsafe_allow_html=True)
 
-st.write("")
-
 def estornar_parcial(venda_id, quantidade_estorno):
     conn = get_conn()
     try:
@@ -911,6 +909,8 @@ if acao == "📦 Visualizar Produtos":
                 value=status,
                 key=f"toggle_{row['id']}"
             )
+            
+            st.write("")
 
             if toggle != status:
                 conn = get_conn()
