@@ -15,6 +15,10 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 st.markdown("""
 <style>
 
+body {
+    overflow: hidden;
+}
+
 .popup-overlay {
     position: fixed;
     inset: 0; /* melhor que top/left/width/height */
