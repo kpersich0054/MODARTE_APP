@@ -133,19 +133,6 @@ html[data-theme="dark"] .card {
     min-height: 70px;
 }
 
-/* WHATSAP */
-<a href="{st.session_state.link_whatsapp}" target="_blank">
-        <button style="
-            background:#25D366;
-            color:white;
-            padding:12px 20px;
-            border:none;
-            border-radius:8px;
-            font-weight:bold;
-        ">
-            📲 Abrir WhatsApp
-        </button>
-    </a>
 </style>
 """, unsafe_allow_html=True)
 
@@ -261,23 +248,50 @@ if st.session_state.carrinho:
 
 if "link_whatsapp" in st.session_state:
 
-    st.markdown("""
+    st.markdown(f"""
     <div style="
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #1e1e1e;
-        padding: 20px;
-        border-radius: 12px;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
         z-index: 9999;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     ">
+        <div style="
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 320px;
+        ">
+            <h3 style="color:white;">Pedido enviado! 🎉</h3>
+
+            <a href="{st.session_state.link_whatsapp}" target="_blank">
+                <button style="
+                    background:#25D366;
+                    color:white;
+                    padding:12px;
+                    border:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                    width:100%;
+                    margin-top:10px;
+                ">
+                    📲 Abrir WhatsApp
+                </button>
+            </a>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-    st.success("Pedido enviado!")
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    # botão separado (limpar estado)
+    if st.button("❌ Fechar pedido"):
+        del st.session_state["link_whatsapp"]
+        st.rerun()
     
 # =====================
 # FAVORITOS
