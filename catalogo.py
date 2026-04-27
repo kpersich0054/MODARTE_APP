@@ -218,30 +218,45 @@ st.sidebar.write(f"**Total: R$ {total:.2f}**")
 
 if st.session_state.carrinho:
 
-    # 🔗 LINK WHATSAPP (ANTES de limpar)
-    pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
-    msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
-    link = f"https://wa.me/5511964336480?text={msg}"
-
-    st.sidebar.markdown(f"[📲 Enviar pedido]({link})")
-
-    # 💾 BOTÃO FINALIZAR
     if st.sidebar.button("📦 Confirmar pedido"):
+
+        # 🔗 monta mensagem ANTES
+        pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
+        msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido_txt}")
+        link = f"https://wa.me/5511964336480?text={msg}"
+
         conn = get_conn()
         try:
             cursor = conn.cursor()
 
+            # 1️⃣ cria pedido
+            cursor.execute("""
+                INSERT INTO pedidos (status)
+                VALUES ('pendente')
+                RETURNING id
+            """)
+            pedido_id = cursor.fetchone()[0]
+
+            # 2️⃣ salva itens
             for item in st.session_state.carrinho:
                 cursor.execute("""
-                    INSERT INTO pedidos (produto_id, quantidade)
-                    VALUES (%s, %s)
-                """, (item["id"], item["qtd"]))
+                    INSERT INTO pedidos_itens (pedido_id, produto_id, quantidade)
+                    VALUES (%s, %s, %s)
+                """, (pedido_id, item["id"], item["qtd"]))
 
             conn.commit()
 
-            st.success("Pedido enviado para aprovação!")
+            st.success(f"Pedido #{pedido_id} enviado!")
 
-            st.session_state.carrinho = []  # limpa depois
+            # 🔥 abre WhatsApp automaticamente
+            st.markdown(f"""
+                <script>
+                    window.open("{link}", "_blank");
+                </script>
+            """, unsafe_allow_html=True)
+
+            # limpa carrinho
+            st.session_state.carrinho = []
             st.rerun()
 
         except Exception as e:
