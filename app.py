@@ -500,7 +500,10 @@ elif acao == "💰 Registrar Venda":
 
     data_venda = st.date_input("Data da venda", value=datetime.today())
 
-    df_disponivel = df[df["estoque_atual"] > 0].copy()
+    df_disponivel = df[
+        (df["estoque_atual"] > 0) &
+        (df["ativo"] == True)
+    ].copy()
 
     if df_disponivel.empty:
         st.warning("⚠️ Nenhum produto com estoque disponível.")
@@ -812,7 +815,7 @@ if acao == "📦 Visualizar Produtos":
         st.subheader("🧾 Lista de Produtos")
 
     st.markdown("---")
-    
+
     for _, row in df.iterrows():
         col1, col2 = st.columns([1, 3])
 
@@ -828,6 +831,39 @@ if acao == "📦 Visualizar Produtos":
         with col2:
             st.subheader(row["produto"])
 
+            # 🔥 STATUS
+            status = bool(row.get("ativo", True))
+
+            col_btn1, col_btn2 = st.columns(2)
+
+            with col_btn1:
+                if status:
+                    st.success("🟢 Ativo")
+                else:
+                    st.error("🔴 Inativo")
+
+            with col_btn2:
+                if st.button(
+                    "Desativar" if status else "Ativar",
+                    key=f"toggle_{row['id']}"
+                ):
+                    conn = get_conn()
+                    try:
+                        cursor = conn.cursor()
+
+                        cursor.execute("""
+                            UPDATE public.produtos
+                            SET ativo = NOT ativo
+                            WHERE id = %s
+                        """, (row["id"],))
+
+                        conn.commit()
+                        st.rerun()
+
+                    finally:
+                        conn.close()
+
+            # resto das infos
             estoque_inicial = int(row["estoque_inicial"])
             estoque_atual = int(row["estoque_atual"])
             preco = float(row["preco"])
