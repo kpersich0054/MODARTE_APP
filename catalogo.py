@@ -40,7 +40,6 @@ st.markdown("""
 }
 
 /* IMAGEM */
-<style>
 
 [data-testid="stImage"] img {
     height: 280px !important;
@@ -48,8 +47,6 @@ st.markdown("""
     object-fit: cover !important;  /* corta bonito */
     border-radius: 12px;
 }
-
-</style>
 
 /* TITULO */
 .prod-title {
