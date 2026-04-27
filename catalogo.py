@@ -238,6 +238,7 @@ if st.session_state.carrinho:
             conn.commit()
 
             st.session_state.link_whatsapp = link
+            st.session_state.mostrar_popup = True
             st.session_state.carrinho = []
             st.rerun()
 
@@ -250,63 +251,21 @@ if st.session_state.carrinho:
 # =====================
 # POPUP WHATSAPP
 # =====================
-if "link_whatsapp" in st.session_state:
+if "mostrar_popup" not in st.session_state:
+    st.session_state.mostrar_popup = False
 
-    components.html(f"""
-    <div style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    ">
-        <div style="
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            width: 320px;
-            color:white;
-        ">
-            <h2>Pedido enviado 🎉</h2>
+if st.session_state.get("mostrar_popup"):
 
-            <a href="{st.session_state.link_whatsapp}" target="_blank">
-                <button style="
-                    background:#25D366;
-                    color:white;
-                    padding:12px;
-                    border:none;
-                    border-radius:8px;
-                    font-weight:bold;
-                    width:100%;
-                    margin-top:10px;
-                    cursor:pointer;
-                ">
-                    📲 Abrir WhatsApp
-                </button>
-            </a>
+    st.markdown("## 🎉 Pedido enviado!")
 
-            <br><br>
+    st.success("Clique abaixo para finalizar:")
 
-            <button onclick="window.location.reload()" style="
-                background:#444;
-                color:white;
-                padding:8px;
-                border:none;
-                border-radius:6px;
-                width:100%;
-            ">
-                Fechar
-            </button>
-        </div>
-    </div>
-    """, height=0)
-    
+    st.link_button("📲 Abrir WhatsApp", st.session_state.link_whatsapp)
+
+    if st.button("Fechar"):
+        st.session_state.mostrar_popup = False
+        st.rerun()
+       
 # =====================
 # FAVORITOS
 # =====================
