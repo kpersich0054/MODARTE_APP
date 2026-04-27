@@ -15,6 +15,40 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 st.markdown("""
 <style>
 
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.75);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-box {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 320px;
+    color: white;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.popup-btn {
+    display: block;
+    background:#25D366;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    font-weight:bold;
+    margin-top:15px;
+    text-decoration:none;
+}
+
 /* =========================
    RESET GERAL
 ========================= */
@@ -253,45 +287,6 @@ if st.session_state.carrinho:
 if st.session_state.get("mostrar_popup"):
 
     st.markdown(f"""
-    <style>
-    .popup-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.75);
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }}
-
-    .popup-box {{
-        background: #1e1e1e;
-        padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-        width: 320px;
-        color: white;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }}
-
-    .popup-btn {{
-        background:#25D366;
-        color:white;
-        padding:12px;
-        border:none;
-        border-radius:8px;
-        font-weight:bold;
-        width:100%;
-        margin-top:15px;
-        cursor:pointer;
-        text-decoration:none;
-        display:block;
-    }}
-    </style>
-
     <div class="popup-overlay">
         <div class="popup-box">
             <h2>🎉 Pedido enviado!</h2>
@@ -303,7 +298,6 @@ if st.session_state.get("mostrar_popup"):
     </div>
     """, unsafe_allow_html=True)
 
-    # BOTÃO REAL DO STREAMLIT (fora do HTML)
     if st.button("❌ Fechar"):
         st.session_state.mostrar_popup = False
         st.rerun()
