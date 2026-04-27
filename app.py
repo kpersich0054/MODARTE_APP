@@ -8,76 +8,6 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
-st.markdown("""
-<style>
-
-/* 🔥 ESCONDE checkbox padrão REAL */
-div[data-testid="stCheckbox"] input[type="checkbox"] {
-    opacity: 0;
-    position: absolute;
-    width: 0;
-    height: 0;
-}
-
-/* container */
-div[data-testid="stCheckbox"] {
-    display: flex;
-    align-items: center;
-}
-
-/* label */
-div[data-testid="stCheckbox"] > label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-}
-
-/* trilho */
-div[data-testid="stCheckbox"] div[role="checkbox"] {
-    width: 52px;
-    height: 28px;
-    border-radius: 999px;
-    background: #2b2b2b;
-    position: relative;
-    transition: all 0.3s ease;
-    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
-}
-
-/* bolinha */
-div[data-testid="stCheckbox"] div[role="checkbox"]::before {
-    content: "";
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: white;
-    top: 3px;
-    left: 4px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-}
-
-/* ativo */
-div[data-testid="stCheckbox"] div[aria-checked="true"] {
-    background: linear-gradient(135deg, #00c853, #00e676);
-}
-
-/* bolinha ativa */
-div[data-testid="stCheckbox"] div[aria-checked="true"]::before {
-    left: 26px;
-}
-
-/* texto */
-div[data-testid="stCheckbox"] label p {
-    margin: 0;
-    font-weight: 500;
-    color: #ddd;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 def estornar_parcial(venda_id, quantidade_estorno):
     conn = get_conn()
     try:
@@ -904,7 +834,7 @@ if acao == "📦 Visualizar Produtos":
             # 🔥 STATUS
             status = bool(row.get("ativo", True))
 
-            toggle = st.checkbox(
+            toggle = st.toggle(
                 "Ativo",
                 value=status,
                 key=f"toggle_{row['id']}"
