@@ -52,11 +52,6 @@ st.markdown("""
 ========================= */
 div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"] > div,
-/*div[data-testid="element-container"] {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-}*/
 
 /* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
 div[data-testid="stNumberInput"] > div {
