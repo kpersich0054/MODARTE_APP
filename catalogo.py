@@ -15,43 +15,15 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 st.markdown("""
 <style>
 
-body {
-    overflow: hidden;
+/* 🔥 FAZ O POPUP SAIR DO CONTAINER DO STREAMLIT */
+section.main > div:has(.popup-overlay) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
 }
 
+/* GARANTE QUE FICA ACIMA DE TUDO */
 .popup-overlay {
-    position: fixed;
-    inset: 0; /* melhor que top/left/width/height */
-    background: rgba(0,0,0,0.75);
-    z-index: 999999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px); /* 🔥 efeito premium */
-}
-
-.popup-box {
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    width: 320px;
-    color: white;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
-
-.popup-btn {
-    display: block;
-    background:#25D366;
-    color:white;
-    padding:12px;
-    border-radius:8px;
-    font-weight:bold;
-    margin-top:15px;
-    text-decoration:none;
-}
-
-div[data-testid="stVerticalBlock"] > div:has(.popup-overlay) {
     position: fixed !important;
     inset: 0 !important;
     z-index: 999999 !important;
@@ -301,7 +273,8 @@ if st.session_state.get("mostrar_popup"):
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("❌ Fechar"):
+    # BOTÃO FECHAR FORA DO HTML (IMPORTANTE)
+    if st.button("❌ Fechar popup", key="fechar_popup"):
         st.session_state.mostrar_popup = False
         st.rerun()
 
