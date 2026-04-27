@@ -8,6 +8,15 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+st.markdown("""
+<style>
+div[data-testid="column"] > div {
+    display: flex;
+    align-items: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
 def estornar_parcial(venda_id, quantidade_estorno):
     conn = get_conn()
     try:
@@ -829,18 +838,19 @@ if acao == "📦 Visualizar Produtos":
                 st.image(str(img_logo), width="stretch")
 
         with col2:
-            st.subheader(row["produto"])
+            c_nome, c_toggle = st.columns([4, 1])
 
-            # 🔥 STATUS
-            status = bool(row.get("ativo", True))
+            with c_nome:
+                st.subheader(row["produto"])
 
-            toggle = st.toggle(
-                "Ativo",
-                value=status,
-                key=f"toggle_{row['id']}"
-            )
-            
-            st.write("")
+            with c_toggle:
+                status = bool(row.get("ativo", True))
+
+                toggle = st.toggle(
+                    "",
+                    value=status,
+                    key=f"toggle_{row['id']}"
+                )
 
             if toggle != status:
                 conn = get_conn()
