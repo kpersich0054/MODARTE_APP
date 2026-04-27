@@ -42,8 +42,8 @@ st.markdown("""
 /* IMAGEM */
 
 [data-testid="stImage"] img {
-    height: 280px !important;
-    width: 180% !important;
+    height: 200px !important;
+    width: 100% !important;
     object-fit: cover !important;  /* corta bonito */
     border-radius: 12px;
 }
