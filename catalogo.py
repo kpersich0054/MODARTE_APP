@@ -10,25 +10,21 @@ import urllib.parse
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
-# CSS MELHORADO + ALINHAMENTO
+# CSS CORRIGIDO
 # =====================
 st.markdown("""
 <style>
 
-/* REMOVE / SUAVIZA BLOCOS CINZA DO STREAMLIT */
-div[data-testid="stHorizontalBlock"] > div {
+/* REMOVE FUNDO DOS BLOCOS DAS COLUNAS (retângulo cinza) */
+div[data-testid="column"] > div {
     background: transparent !important;
     box-shadow: none !important;
+    border: none !important;
 }
 
-/* OU MAIS AGRESSIVO (caso não resolva) */
-div[data-testid="stBlock"] {
-    background: transparent !important;
-}
-
-div[data-testid="stHorizontalBlock"] > div {
-    background: rgba(255,255,255,0.03) !important;
-    border-radius: 12px;
+/* REMOVE PADDING DAS COLUNAS */
+div[data-testid="column"] {
+    padding: 0 !important;
 }
 
 /* CARD */
@@ -43,24 +39,40 @@ div[data-testid="stHorizontalBlock"] > div {
     justify-content: space-between;
 
     height: 100%;
+    transition: 0.2s;
 }
 
-/* CONTEÚDO FLEX */
+.card:hover {
+    transform: translateY(-4px);
+}
+
+/* CONTEÚDO */
 .card-content {
     flex-grow: 1;
 }
 
-/* AÇÕES FIXAS EMBAIXO */
+/* AÇÕES */
 .card-actions {
     margin-top: 10px;
 }
 
-/* IMAGEM */
+/* BOTÕES COLADOS */
+.card-actions > div {
+    gap: 6px !important;
+}
 
+/* BOTÕES PEQUENOS */
+.card-actions button {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+}
+
+/* IMAGEM */
 [data-testid="stImage"] img {
     height: 200px !important;
     width: 100% !important;
-    object-fit: cover !important;  /* corta bonito */
+    object-fit: cover !important;
     border-radius: 12px;
 }
 
@@ -82,14 +94,6 @@ div[data-testid="stHorizontalBlock"] > div {
 .stock {
     font-size: 12px;
     color: #bbb;
-    min-height: 18px;
-}
-
-/* BOTÕES */
-.stButton > button {
-    border-radius: 10px;
-    width: 100%;
-    height: 38px;
 }
 
 /* BOTÃO PRINCIPAL */
@@ -97,9 +101,11 @@ div[data-testid="stHorizontalBlock"] > div {
     background-color: #00c853;
     color: white;
     font-weight: bold;
+    border-radius: 10px;
+    height: 38px;
 }
 
-/* INPUT QUANTIDADE MAIS ESTÁVEL */
+/* INPUT */
 .stNumberInput {
     min-height: 70px;
 }
@@ -202,7 +208,7 @@ if mostrar_fav:
     df = df[df["id"].isin(st.session_state.favoritos)]
 
 # =====================
-# FUNÇÃO PRÉ-COMPRA
+# FUNÇÃO
 # =====================
 def registrar_pre_compra(produto_id, quantidade):
     conn = get_conn()
@@ -255,30 +261,11 @@ for row_group in rows:
             st.markdown(f"<div class='price'>R$ {float(row['preco']):,.2f}</div>", unsafe_allow_html=True)
 
             if row["estoque_atual"] > 0:
-                st.markdown(
-                    f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>",
-                    unsafe_allow_html=True
-                )
-                qtd = st.number_input(
-                    "",
-                    min_value=1,
-                    max_value=int(row["estoque_atual"]),
-                    value=1,
-                    key=f"qtd_{row['id']}"
-                )
+                st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
+                qtd = st.number_input("", min_value=1, max_value=int(row["estoque_atual"]), value=1, key=f"qtd_{row['id']}")
             else:
-                st.markdown(
-                    "<div class='stock' style='color:#ff5252'>Sem estoque</div>",
-                    unsafe_allow_html=True
-                )
-                st.number_input(
-                    "",
-                    min_value=0,
-                    max_value=0,
-                    value=0,
-                    disabled=True,
-                    key=f"qtd_{row['id']}"
-                )
+                st.markdown("<div class='stock' style='color:#ff5252'>Sem estoque</div>", unsafe_allow_html=True)
+                st.number_input("", min_value=0, max_value=0, value=0, disabled=True, key=f"qtd_{row['id']}")
                 qtd = 0
 
             st.markdown('</div>', unsafe_allow_html=True)
@@ -298,10 +285,7 @@ for row_group in rows:
 
             with b2:
                 if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-                    item_existente = next(
-                        (i for i in st.session_state.carrinho if i["id"] == row["id"]),
-                        None
-                    )
+                    item_existente = next((i for i in st.session_state.carrinho if i["id"] == row["id"]), None)
 
                     if item_existente:
                         item_existente["qtd"] += qtd
@@ -316,14 +300,12 @@ for row_group in rows:
                     st.success("Adicionado!")
 
             st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
+
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
                 try:
                     registrar_pre_compra(row["id"], qtd)
 
-                    msg = urllib.parse.quote(
-                        f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
-                    )
-
+                    msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
                     link = f"https://wa.me/5511964336480?text={msg}"
 
                     st.success("Reservado!")
@@ -331,7 +313,7 @@ for row_group in rows:
 
                 except Exception as e:
                     st.error(f"Erro: {e}")
-            st.markdown('</div>', unsafe_allow_html=True)
 
+            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
