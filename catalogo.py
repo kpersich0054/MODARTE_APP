@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import psycopg2
 from pathlib import Path
@@ -238,6 +237,7 @@ if st.session_state.carrinho:
             conn.commit()
 
             st.session_state.link_whatsapp = link
+            st.session_state.mostrar_popup = True
             st.session_state.carrinho = []
             st.rerun()
 
@@ -248,65 +248,67 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (CORRETO)
+# POPUP WHATSAPP (CORRETO DE VERDADE)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
-    components.html(f"""
-    <div style="
+    st.markdown(f"""
+    <style>
+    .popup-overlay {{
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
         background: rgba(0,0,0,0.75);
+        z-index: 999999;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 999999;
-    ">
-        <div style="
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            width: 320px;
-            color: white;
-        ">
+    }}
+
+    .popup-box {{
+        background: #1e1e1e;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        width: 320px;
+        color: white;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }}
+
+    .popup-btn {{
+        background:#25D366;
+        color:white;
+        padding:12px;
+        border:none;
+        border-radius:8px;
+        font-weight:bold;
+        width:100%;
+        margin-top:15px;
+        cursor:pointer;
+        text-decoration:none;
+        display:block;
+    }}
+    </style>
+
+    <div class="popup-overlay">
+        <div class="popup-box">
             <h2>🎉 Pedido enviado!</h2>
 
-            <a href="{st.session_state.link_whatsapp}" target="_blank">
-                <button style="
-                    background:#25D366;
-                    color:white;
-                    padding:12px;
-                    border:none;
-                    border-radius:8px;
-                    font-weight:bold;
-                    width:100%;
-                    margin-top:15px;
-                ">
-                    📲 Abrir WhatsApp
-                </button>
+            <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
+                📲 Abrir WhatsApp
             </a>
-
-            <br><br>
-
-            <button onclick="window.location.reload()" style="
-                background:#444;
-                color:white;
-                padding:10px;
-                border:none;
-                border-radius:6px;
-                width:100%;
-            ">
-                Fechar
-            </button>
         </div>
     </div>
-    """, height=700)
+    """, unsafe_allow_html=True)
 
-    st.stop()  # 🔥 ISSO É O SEGREDO
+    # BOTÃO REAL DO STREAMLIT (fora do HTML)
+    if st.button("❌ Fechar"):
+        st.session_state.mostrar_popup = False
+        st.rerun()
+
+    st.stop()
        
 # =====================
 # FAVORITOS
