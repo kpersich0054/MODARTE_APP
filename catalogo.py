@@ -240,7 +240,7 @@ if st.session_state.carrinho:
             # 2️⃣ salva itens
             for item in st.session_state.carrinho:
                 cursor.execute("""
-                    INSERT INTO pedidos_itens (pedido_id, produto_id, quantidade)
+                    INSERT INTO pedidos (pedido_id, produto_id, quantidade)
                     VALUES (%s, %s, %s)
                 """, (pedido_id, item["id"], item["qtd"]))
 
