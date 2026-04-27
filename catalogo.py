@@ -10,7 +10,7 @@ import urllib.parse
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
-# CSS MELHORADO
+# CSS MELHORADO + ALINHAMENTO
 # =====================
 st.markdown("""
 <style>
@@ -21,11 +21,22 @@ st.markdown("""
     padding: 16px;
     background: linear-gradient(145deg, #1e1e1e, #252525);
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    transition: 0.2s;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
     height: 100%;
 }
-.card:hover {
-    transform: translateY(-4px);
+
+/* CONTEÚDO FLEX */
+.card-content {
+    flex-grow: 1;
+}
+
+/* AÇÕES FIXAS EMBAIXO */
+.card-actions {
+    margin-top: 10px;
 }
 
 /* IMAGEM */
@@ -39,7 +50,7 @@ st.markdown("""
 .prod-title {
     font-weight: 600;
     font-size: 14px;
-    min-height: 38px;
+    min-height: 42px;
 }
 
 /* PREÇO */
@@ -47,14 +58,13 @@ st.markdown("""
     font-size: 20px;
     font-weight: bold;
     color: #00e676;
-    margin-top: 5px;
 }
 
 /* ESTOQUE */
 .stock {
     font-size: 12px;
-    margin-top: 4px;
     color: #bbb;
+    min-height: 18px;
 }
 
 /* BOTÕES */
@@ -69,6 +79,11 @@ st.markdown("""
     background-color: #00c853;
     color: white;
     font-weight: bold;
+}
+
+/* INPUT QUANTIDADE MAIS ESTÁVEL */
+.stNumberInput {
+    min-height: 70px;
 }
 
 </style>
@@ -157,7 +172,7 @@ st.sidebar.write(f"**Total: R$ {total:.2f}**")
 if st.session_state.carrinho:
     pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
     msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
-    link = f"https://wa.me/5511964336480?text={msg}"
+    link = f"https://wa.me/5511999999999?text={msg}"
     st.sidebar.markdown(f"[📲 Finalizar pedido]({link})")
 
 # =====================
@@ -210,14 +225,14 @@ for i, (_, row) in enumerate(df.iterrows()):
 
         st.markdown('<div class="card">', unsafe_allow_html=True)
 
-        # IMAGEM
+        # CONTEÚDO
+        st.markdown('<div class="card-content">', unsafe_allow_html=True)
+
         st.image(img, use_container_width=True)
 
-        # INFO
         st.markdown(f"<div class='prod-title'>{row['produto']}</div>", unsafe_allow_html=True)
         st.markdown(f"<div class='price'>R$ {float(row['preco']):,.2f}</div>", unsafe_allow_html=True)
 
-        # ESTOQUE
         if row["estoque_atual"] > 0:
             st.markdown(
                 f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>",
@@ -237,7 +252,11 @@ for i, (_, row) in enumerate(df.iterrows()):
             )
             qtd = 0
 
-        # BOTÕES PEQUENOS
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # AÇÕES
+        st.markdown('<div class="card-actions">', unsafe_allow_html=True)
+
         b1, b2 = st.columns(2)
 
         with b1:
@@ -268,7 +287,6 @@ for i, (_, row) in enumerate(df.iterrows()):
 
                 st.success("Adicionado!")
 
-        # BOTÃO GRANDE
         st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
         if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
             try:
@@ -287,4 +305,5 @@ for i, (_, row) in enumerate(df.iterrows()):
                 st.error(f"Erro: {e}")
         st.markdown('</div>', unsafe_allow_html=True)
 
+        st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
