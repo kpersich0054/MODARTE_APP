@@ -35,6 +35,8 @@ section.main > div:has(.popup-overlay) {
 div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"] > div {
     background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 /* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
