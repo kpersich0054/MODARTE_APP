@@ -249,22 +249,65 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP
+# POPUP WHATSAPP (CORRETO)
 # =====================
-if "mostrar_popup" not in st.session_state:
-    st.session_state.mostrar_popup = False
-
 if st.session_state.get("mostrar_popup"):
 
-    st.markdown("## 🎉 Pedido enviado!")
+    components.html(f"""
+    <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+    ">
+        <div style="
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            width: 320px;
+            color: white;
+        ">
+            <h2>🎉 Pedido enviado!</h2>
 
-    st.success("Clique abaixo para finalizar:")
+            <a href="{st.session_state.link_whatsapp}" target="_blank">
+                <button style="
+                    background:#25D366;
+                    color:white;
+                    padding:12px;
+                    border:none;
+                    border-radius:8px;
+                    font-weight:bold;
+                    width:100%;
+                    margin-top:15px;
+                ">
+                    📲 Abrir WhatsApp
+                </button>
+            </a>
 
-    st.link_button("📲 Abrir WhatsApp", st.session_state.link_whatsapp)
+            <br><br>
 
-    if st.button("Fechar"):
-        st.session_state.mostrar_popup = False
-        st.rerun()
+            <button onclick="window.location.reload()" style="
+                background:#444;
+                color:white;
+                padding:10px;
+                border:none;
+                border-radius:6px;
+                width:100%;
+            ">
+                Fechar
+            </button>
+        </div>
+    </div>
+    """, height=700)
+
+    st.stop()  # 🔥 ISSO É O SEGREDO
        
 # =====================
 # FAVORITOS
