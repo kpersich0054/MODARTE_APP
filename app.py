@@ -10,45 +10,68 @@ import io
 
 st.markdown("""
 <style>
-/* deixa checkbox estilo switch */
+
+/* container do checkbox */
+div[data-testid="stCheckbox"] {
+    display: flex;
+    align-items: center;
+}
+
+/* label alinhado */
 div[data-testid="stCheckbox"] > label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    cursor: pointer;
 }
 
-/* caixa do switch */
+/* esconder checkbox padrão */
+div[data-testid="stCheckbox"] input {
+    display: none;
+}
+
+/* trilho do switch */
 div[data-testid="stCheckbox"] div[role="checkbox"] {
-    width: 50px;
-    height: 25px;
-    border-radius: 50px;
-    background-color: #555;
+    width: 52px;
+    height: 28px;
+    border-radius: 999px;
+    background: #2b2b2b;
     position: relative;
-    transition: 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5);
 }
 
 /* bolinha */
 div[data-testid="stCheckbox"] div[role="checkbox"]::before {
     content: "";
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: white;
-    top: 2.5px;
-    left: 3px;
-    transition: 0.3s;
+    top: 3px;
+    left: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 /* quando ativo */
 div[data-testid="stCheckbox"] div[aria-checked="true"] {
-    background-color: #00c853;
+    background: linear-gradient(135deg, #00c853, #00e676);
 }
 
 /* bolinha quando ativo */
 div[data-testid="stCheckbox"] div[aria-checked="true"]::before {
     left: 26px;
 }
+
+/* texto "Ativo" mais bonito */
+div[data-testid="stCheckbox"] label p {
+    margin: 0;
+    font-weight: 500;
+    color: #ddd;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
