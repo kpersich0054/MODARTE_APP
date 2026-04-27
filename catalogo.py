@@ -93,8 +93,8 @@ html[data-theme="dark"] .card {
 
 /* IMAGEM */
 [data-testid="stImage"] img {
-    height: 200px !important;
-    width: 100% !important;
+    height: 250px !important;
+    width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
 }
