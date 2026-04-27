@@ -222,94 +222,98 @@ for row_group in rows:
     for col, (_, row) in zip(cols, row_group.iterrows()):
         with col:
 
-    with col:
-        img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
-        img_logo = BASE_DIR / "Logo_Modarte.jpg"
-        img = str(img_path) if img_path.exists() else str(img_logo)
+            img_path = PASTA_IMAGENS / f"{row['codigo']}.jpg"
+            img_logo = BASE_DIR / "Logo_Modarte.jpg"
+            img = str(img_path) if img_path.exists() else str(img_logo)
 
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.markdown('<div class="card">', unsafe_allow_html=True)
 
-        # CONTEÚDO
-        st.markdown('<div class="card-content">', unsafe_allow_html=True)
+            # CONTEÚDO
+            st.markdown('<div class="card-content">', unsafe_allow_html=True)
 
-        st.image(img, use_container_width=True)
+            st.image(img, use_container_width=True)
 
-        st.markdown(f"<div class='prod-title'>{row['produto']}</div>", unsafe_allow_html=True)
-        st.markdown(f"<div class='price'>R$ {float(row['preco']):,.2f}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='prod-title'>{row['produto']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='price'>R$ {float(row['preco']):,.2f}</div>", unsafe_allow_html=True)
 
-        if row["estoque_atual"] > 0:
-            st.markdown(
-                f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>",
-                unsafe_allow_html=True
-            )
-            qtd = st.number_input(
-                min_value=1,
-                max_value=int(row["estoque_atual"]),
-                value=1,
-                key=f"qtd_{row['id']}"
-            )
-        else:
-            qtd = st.number_input(
-                min_value=0,
-                max_value=0,
-                value=0,
-                disabled=True,
-                key=f"qtd_{row['id']}"
-            )
-            qtd = 0
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # AÇÕES
-        st.markdown('<div class="card-actions">', unsafe_allow_html=True)
-
-        b1, b2 = st.columns(2)
-
-        with b1:
-            icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
-            if st.button(icone, key=f"fav_{row['id']}"):
-                if row["id"] in st.session_state.favoritos:
-                    st.session_state.favoritos.remove(row["id"])
-                else:
-                    st.session_state.favoritos.add(row["id"])
-
-        with b2:
-            if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-
-                item_existente = next(
-                    (i for i in st.session_state.carrinho if i["id"] == row["id"]),
-                    None
+            if row["estoque_atual"] > 0:
+                st.markdown(
+                    f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>",
+                    unsafe_allow_html=True
                 )
-
-                if item_existente:
-                    item_existente["qtd"] += qtd
-                else:
-                    st.session_state.carrinho.append({
-                        "id": row["id"],
-                        "produto": row["produto"],
-                        "preco": float(row["preco"]),
-                        "qtd": qtd
-                    })
-
-                st.success("Adicionado!")
-
-        st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
-        if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-            try:
-                registrar_pre_compra(row["id"], qtd)
-
-                msg = urllib.parse.quote(
-                    f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
+                qtd = st.number_input(
+                    "Qtd",
+                    min_value=1,
+                    max_value=int(row["estoque_atual"]),
+                    value=1,
+                    key=f"qtd_{row['id']}"
                 )
+            else:
+                st.markdown(
+                    "<div class='stock' style='color:#ff5252'>Sem estoque</div>",
+                    unsafe_allow_html=True
+                )
+                st.number_input(
+                    "Qtd",
+                    min_value=0,
+                    max_value=0,
+                    value=0,
+                    disabled=True,
+                    key=f"qtd_{row['id']}"
+                )
+                qtd = 0
 
-                link = f"https://wa.me/5511964336480?text={msg}"
+            st.markdown('</div>', unsafe_allow_html=True)
 
-                st.success("Reservado!")
-                st.markdown(f"[👉 Abrir WhatsApp]({link})")
+            # AÇÕES
+            st.markdown('<div class="card-actions">', unsafe_allow_html=True)
 
-            except Exception as e:
-                st.error(f"Erro: {e}")
-        st.markdown('</div>', unsafe_allow_html=True)
+            b1, b2 = st.columns(2)
 
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            with b1:
+                icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
+                if st.button(icone, key=f"fav_{row['id']}"):
+                    if row["id"] in st.session_state.favoritos:
+                        st.session_state.favoritos.remove(row["id"])
+                    else:
+                        st.session_state.favoritos.add(row["id"])
+
+            with b2:
+                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+                    item_existente = next(
+                        (i for i in st.session_state.carrinho if i["id"] == row["id"]),
+                        None
+                    )
+
+                    if item_existente:
+                        item_existente["qtd"] += qtd
+                    else:
+                        st.session_state.carrinho.append({
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        })
+
+                    st.success("Adicionado!")
+
+            st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
+            if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
+                try:
+                    registrar_pre_compra(row["id"], qtd)
+
+                    msg = urllib.parse.quote(
+                        f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
+                    )
+
+                    link = f"https://wa.me/5511964336480?text={msg}"
+
+                    st.success("Reservado!")
+                    st.markdown(f"[👉 Abrir WhatsApp]({link})")
+
+                except Exception as e:
+                    st.error(f"Erro: {e}")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
