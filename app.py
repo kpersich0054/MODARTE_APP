@@ -12,7 +12,7 @@ st.markdown("""
 <style>
 div[data-testid="column"] > div {
     display: flex;
-    align-items: center;
+    align-items: left;
 }
 </style>
 """, unsafe_allow_html=True)
