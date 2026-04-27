@@ -837,7 +837,7 @@ if acao == "📦 Visualizar Produtos":
 
     filtro = st.radio(
         "Filtrar por:",
-        ["Todos", "👗 Vestidos", "🩳 Macaquinhos", "✨ Vestidos Nina"],
+        ["Todos", "👗 Vestido", "🩳 Macaquinho", "✨ Vestido Nina"],
         horizontal=True
     )
     
