@@ -10,36 +10,65 @@ import urllib.parse
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
-# CSS AJUSTADO
+# CSS MELHORADO
 # =====================
 st.markdown("""
 <style>
 
 /* CARD */
 .card {
-    border-radius: 15px;
-    padding: 12px;
-    background-color: var(--secondary-background-color);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    margin-bottom: 15px;
+    border-radius: 18px;
+    padding: 16px;
+    background: linear-gradient(145deg, #1e1e1e, #252525);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    transition: 0.2s;
+    height: 100%;
+}
+.card:hover {
+    transform: translateY(-4px);
 }
 
-/* IMAGEM PADRÃO */
+/* IMAGEM */
 [data-testid="stImage"] img {
-    height: 180px !important;
-    object-fit: contain !important;
-    border-radius: 10px;
+    height: 200px !important;
+    object-fit: cover !important;
+    border-radius: 12px;
 }
 
-/* TEXTO */
-.card h4, .card p {
-    color: var(--text-color);
-    margin: 0;
+/* TITULO */
+.prod-title {
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 38px;
+}
+
+/* PREÇO */
+.price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00e676;
+    margin-top: 5px;
+}
+
+/* ESTOQUE */
+.stock {
+    font-size: 12px;
+    margin-top: 4px;
+    color: #bbb;
 }
 
 /* BOTÕES */
-.actions {
-    margin-top: 10px;
+.stButton > button {
+    border-radius: 10px;
+    width: 100%;
+    height: 38px;
+}
+
+/* BOTÃO PRINCIPAL */
+.buy-btn button {
+    background-color: #00c853;
+    color: white;
+    font-weight: bold;
 }
 
 </style>
@@ -128,7 +157,7 @@ st.sidebar.write(f"**Total: R$ {total:.2f}**")
 if st.session_state.carrinho:
     pedido = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
     msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido}")
-    link = f"https://wa.me/5511999999999?text={msg}"
+    link = f"https://wa.me/5511964336480?text={msg}"
     st.sidebar.markdown(f"[📲 Finalizar pedido]({link})")
 
 # =====================
@@ -140,9 +169,8 @@ if mostrar_fav:
     df = df[df["id"].isin(st.session_state.favoritos)]
 
 # =====================
-# GRID
+# FUNÇÃO PRÉ-COMPRA
 # =====================
-
 def registrar_pre_compra(produto_id, quantidade):
     conn = get_conn()
     try:
@@ -153,7 +181,6 @@ def registrar_pre_compra(produto_id, quantidade):
             VALUES (%s, %s, 'pendente')
         """, (produto_id, quantidade))
 
-        # 🔥 opcional: reserva estoque
         cursor.execute("""
             UPDATE public.produtos
             SET estoque_atual = estoque_atual - %s
@@ -167,7 +194,10 @@ def registrar_pre_compra(produto_id, quantidade):
         raise e
     finally:
         conn.close()
-        
+
+# =====================
+# GRID
+# =====================
 cols = st.columns(4)
 
 for i, (_, row) in enumerate(df.iterrows()):
@@ -180,78 +210,81 @@ for i, (_, row) in enumerate(df.iterrows()):
 
         st.markdown('<div class="card">', unsafe_allow_html=True)
 
-        # 🔥 LAYOUT HORIZONTAL
-        c_img, c_info = st.columns([1, 2])
+        # IMAGEM
+        st.image(img, use_container_width=True)
 
-        with c_img:
-            st.image(img, use_container_width=True)
+        # INFO
+        st.markdown(f"<div class='prod-title'>{row['produto']}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='price'>R$ {float(row['preco']):,.2f}</div>", unsafe_allow_html=True)
 
-        with c_info:
-            st.markdown(f"**{row['produto']}**")
-            st.markdown(f"💰 R$ {float(row['preco']):,.2f}")
+        # ESTOQUE
+        if row["estoque_atual"] > 0:
+            st.markdown(
+                f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>",
+                unsafe_allow_html=True
+            )
+            qtd = st.number_input(
+                "Qtd",
+                min_value=1,
+                max_value=int(row["estoque_atual"]),
+                value=1,
+                key=f"qtd_{row['id']}"
+            )
+        else:
+            st.markdown(
+                "<div class='stock' style='color:#ff5252'>Sem estoque</div>",
+                unsafe_allow_html=True
+            )
+            qtd = 0
 
-            # QUANTIDADE (🔥 trava se estoque zerado)
-            if row["estoque_atual"] > 0:
-                qtd = st.number_input(
-                    "Qtd",
-                    min_value=1,
-                    max_value=int(row["estoque_atual"]),
-                    value=1,
-                    key=f"qtd_{row['id']}"
+        # BOTÕES PEQUENOS
+        b1, b2 = st.columns(2)
+
+        with b1:
+            icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
+            if st.button(icone, key=f"fav_{row['id']}"):
+                if row["id"] in st.session_state.favoritos:
+                    st.session_state.favoritos.remove(row["id"])
+                else:
+                    st.session_state.favoritos.add(row["id"])
+
+        with b2:
+            if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+
+                item_existente = next(
+                    (i for i in st.session_state.carrinho if i["id"] == row["id"]),
+                    None
                 )
-            else:
-                qtd = 0
-                st.warning("Sem estoque")
 
-            # BOTÕES
-            b1, b2, b3 = st.columns(3)
+                if item_existente:
+                    item_existente["qtd"] += qtd
+                else:
+                    st.session_state.carrinho.append({
+                        "id": row["id"],
+                        "produto": row["produto"],
+                        "preco": float(row["preco"]),
+                        "qtd": qtd
+                    })
 
-            # ❤️ FAVORITO
-            with b1:
-                icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
-                if st.button(icone, key=f"fav_{row['id']}"):
-                    if row["id"] in st.session_state.favoritos:
-                        st.session_state.favoritos.remove(row["id"])
-                    else:
-                        st.session_state.favoritos.add(row["id"])
+                st.success("Adicionado!")
 
-            # 🛒 CARRINHO
-            with b2:
-                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+        # BOTÃO GRANDE
+        st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
+        if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
+            try:
+                registrar_pre_compra(row["id"], qtd)
 
-                    item_existente = next(
-                        (i for i in st.session_state.carrinho if i["id"] == row["id"]),
-                        None
-                    )
+                msg = urllib.parse.quote(
+                    f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
+                )
 
-                    if item_existente:
-                        item_existente["qtd"] += qtd
-                    else:
-                        st.session_state.carrinho.append({
-                            "id": row["id"],
-                            "produto": row["produto"],
-                            "preco": float(row["preco"]),
-                            "qtd": qtd
-                        })
+                link = f"https://wa.me/5511964336480?text={msg}"
 
-                    st.success("Adicionado ao carrinho!")
+                st.success("Reservado!")
+                st.markdown(f"[👉 Abrir WhatsApp]({link})")
 
-            # 📲 WHATS + PRÉ-COMPRA
-            with b3:
-                if st.button("📲 Comprar", key=f"buy_{row['id']}") and qtd > 0:
+            except Exception as e:
+                st.error(f"Erro: {e}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-                    try:
-                        registrar_pre_compra(row["id"], qtd)
-
-                        msg = urllib.parse.quote(
-                            f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}"
-                        )
-
-                        link = f"https://wa.me/5511964336480?text={msg}"
-
-                        st.success("Produto reservado!")
-
-                        st.markdown(f"[👉 Abrir WhatsApp]({link})")
-
-                    except Exception as e:
-                        st.error(f"Erro ao reservar: {e}")
+        st.markdown('</div>', unsafe_allow_html=True)
