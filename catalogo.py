@@ -133,6 +133,19 @@ html[data-theme="dark"] .card {
     min-height: 70px;
 }
 
+/* WHATSAP */
+<a href="{st.session_state.link_whatsapp}" target="_blank">
+        <button style="
+            background:#25D366;
+            color:white;
+            padding:12px 20px;
+            border:none;
+            border-radius:8px;
+            font-weight:bold;
+        ">
+            📲 Abrir WhatsApp
+        </button>
+    </a>
 </style>
 """, unsafe_allow_html=True)
 
@@ -220,7 +233,6 @@ if st.session_state.carrinho:
 
     if st.sidebar.button("📦 Confirmar pedido"):
 
-        # 🔗 mensagem WhatsApp
         pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
         msg = urllib.parse.quote(f"Olá! Quero fazer um pedido:\n{pedido_txt}")
         link = f"https://wa.me/5511964336480?text={msg}"
@@ -237,16 +249,9 @@ if st.session_state.carrinho:
 
             conn.commit()
 
-            # 🔥 MOSTRA antes de limpar
-            st.success("Pedido enviado!")
-
-            st.markdown(f"""
-            ### 📲 Finalizar no WhatsApp
-            [Clique aqui para enviar seu pedido]({link})
-            """)
-
-            # limpa carrinho DEPOIS
+            st.session_state.link_whatsapp = link
             st.session_state.carrinho = []
+            st.rerun()
 
         except Exception as e:
             conn.rollback()
@@ -254,6 +259,26 @@ if st.session_state.carrinho:
         finally:
             conn.close()
 
+if "link_whatsapp" in st.session_state:
+
+    st.markdown("""
+    <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 12px;
+        z-index: 9999;
+        text-align: center;
+    ">
+    """, unsafe_allow_html=True)
+
+    st.success("Pedido enviado!")
+
+    st.markdown("</div>", unsafe_allow_html=True)
+    
 # =====================
 # FAVORITOS
 # =====================
