@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import psycopg2
 from pathlib import Path
@@ -246,20 +247,23 @@ if st.session_state.carrinho:
         finally:
             conn.close()
 
+# =====================
+# POPUP WHATSAPP
+# =====================
 if "link_whatsapp" in st.session_state:
 
-    st.markdown(f"""
+    components.html(f"""
     <div style="
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 9999;
+        background: rgba(0,0,0,0.7);
         display: flex;
         align-items: center;
         justify-content: center;
+        z-index: 9999;
     ">
         <div style="
             background: #1e1e1e;
@@ -267,8 +271,9 @@ if "link_whatsapp" in st.session_state:
             border-radius: 12px;
             text-align: center;
             width: 320px;
+            color:white;
         ">
-            <h3 style="color:white;">Pedido enviado! 🎉</h3>
+            <h2>Pedido enviado 🎉</h2>
 
             <a href="{st.session_state.link_whatsapp}" target="_blank">
                 <button style="
@@ -280,18 +285,27 @@ if "link_whatsapp" in st.session_state:
                     font-weight:bold;
                     width:100%;
                     margin-top:10px;
+                    cursor:pointer;
                 ">
                     📲 Abrir WhatsApp
                 </button>
             </a>
+
+            <br><br>
+
+            <button onclick="window.location.reload()" style="
+                background:#444;
+                color:white;
+                padding:8px;
+                border:none;
+                border-radius:6px;
+                width:100%;
+            ">
+                Fechar
+            </button>
         </div>
     </div>
-    """, unsafe_allow_html=True)
-
-    # botão separado (limpar estado)
-    if st.button("❌ Fechar pedido"):
-        del st.session_state["link_whatsapp"]
-        st.rerun()
+    """, height=0)
     
 # =====================
 # FAVORITOS
