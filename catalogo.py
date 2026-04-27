@@ -51,6 +51,12 @@ body {
     text-decoration:none;
 }
 
+div[data-testid="stVerticalBlock"] > div:has(.popup-overlay) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+}
+
 /* =========================
    RESET GERAL
 ========================= */
