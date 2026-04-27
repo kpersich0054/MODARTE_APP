@@ -26,6 +26,11 @@ div[data-testid="stBlock"] {
     background: transparent !important;
 }
 
+div[data-testid="stHorizontalBlock"] > div {
+    background: rgba(255,255,255,0.03) !important;
+    border-radius: 12px;
+}
+
 /* CARD */
 .card {
     border-radius: 18px;
