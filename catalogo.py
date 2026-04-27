@@ -9,7 +9,9 @@ import urllib.parse
 # =====================
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
-# 🔥 CSS GLOBAL CORRETO
+# =====================
+# CSS CORRIGIDO (🔥 SEM FUNDO BRANCO + IMAGEM PADRÃO)
+# =====================
 st.markdown("""
 <style>
 
@@ -17,42 +19,39 @@ st.markdown("""
 .card {
     border-radius: 15px;
     padding: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     background-color: var(--secondary-background-color);
     margin-bottom: 15px;
 }
 
-/* CONTAINER IMAGEM PADRÃO */
-.img-container {
-    width: 100%;
-    height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
+/* IMAGEM PADRONIZADA (🔥 ISSO RESOLVE TUDO) */
+[data-testid="stImage"] img {
+    height: 220px !important;
+    width: 100% !important;
+    object-fit: contain !important;  /* 🔥 mantém proporção */
     border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-/* IMAGEM PADRONIZADA */
-.img-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
 }
 
 /* TEXTO */
-.card h4, .card p {
+.card h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
     color: var(--text-color);
+}
+
+.card p {
     margin: 0;
+    color: var(--text-color);
 }
 
 /* BOTÕES */
 .card-actions {
-    display: flex;
-    justify-content: space-between;
     margin-top: 10px;
+}
+
+/* REMOVE QUALQUER FUNDO BRANCO */
+img {
+    background: transparent !important;
 }
 
 </style>
@@ -169,10 +168,8 @@ for i, (_, row) in enumerate(df.iterrows()):
         # 🔥 CARD
         st.markdown('<div class="card">', unsafe_allow_html=True)
 
-        # 🔥 IMAGEM (STREAMLIT, não HTML!)
-        st.markdown('<div class="img-container">', unsafe_allow_html=True)
+        # 🔥 IMAGEM (AGORA PADRONIZADA)
         st.image(img, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
         # 🔥 TEXTO
         st.markdown(f"<h4>{row['produto']}</h4>", unsafe_allow_html=True)
