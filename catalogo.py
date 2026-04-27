@@ -15,6 +15,17 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 st.markdown("""
 <style>
 
+/* REMOVE / SUAVIZA BLOCOS CINZA DO STREAMLIT */
+div[data-testid="stHorizontalBlock"] > div {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* OU MAIS AGRESSIVO (caso não resolva) */
+div[data-testid="stBlock"] {
+    background: transparent !important;
+}
+
 /* CARD */
 .card {
     border-radius: 18px;
