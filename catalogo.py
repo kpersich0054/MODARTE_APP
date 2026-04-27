@@ -43,7 +43,7 @@ st.markdown("""
 
 [data-testid="stImage"] img {
     height: 280px !important;
-    width: 100% !important;
+    width: 120% !important;
     object-fit: cover !important;  /* corta bonito */
     border-radius: 12px;
 }
