@@ -40,11 +40,16 @@ st.markdown("""
 }
 
 /* IMAGEM */
+<style>
+
 [data-testid="stImage"] img {
-    height: 200px !important;
-    object-fit: cover !important;
+    height: 280px !important;
+    width: 100% !important;
+    object-fit: cover !important;  /* corta bonito */
     border-radius: 12px;
 }
+
+</style>
 
 /* TITULO */
 .prod-title {
