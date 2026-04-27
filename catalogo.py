@@ -286,7 +286,7 @@ for row_group in rows:
             # AÇÕES
             st.markdown('<div class="card-actions">', unsafe_allow_html=True)
 
-            b1, b2 = st.columns(2)
+            b1, b2 = st.columns([1,1], gap="small")
 
             with b1:
                 icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
