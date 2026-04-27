@@ -8,6 +8,50 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+st.markdown("""
+<style>
+/* deixa checkbox estilo switch */
+div[data-testid="stCheckbox"] > label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* caixa do switch */
+div[data-testid="stCheckbox"] div[role="checkbox"] {
+    width: 50px;
+    height: 25px;
+    border-radius: 50px;
+    background-color: #555;
+    position: relative;
+    transition: 0.3s;
+}
+
+/* bolinha */
+div[data-testid="stCheckbox"] div[role="checkbox"]::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    top: 2.5px;
+    left: 3px;
+    transition: 0.3s;
+}
+
+/* quando ativo */
+div[data-testid="stCheckbox"] div[aria-checked="true"] {
+    background-color: #00c853;
+}
+
+/* bolinha quando ativo */
+div[data-testid="stCheckbox"] div[aria-checked="true"]::before {
+    left: 26px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 def estornar_parcial(venda_id, quantidade_estorno):
     conn = get_conn()
     try:
@@ -834,34 +878,28 @@ if acao == "📦 Visualizar Produtos":
             # 🔥 STATUS
             status = bool(row.get("ativo", True))
 
-            col_btn1, col_btn2 = st.columns(2)
+            toggle = st.checkbox(
+                "Ativo",
+                value=status,
+                key=f"toggle_{row['id']}"
+            )
 
-            with col_btn1:
-                if status:
-                    st.success("🟢 Ativo")
-                else:
-                    st.error("🔴 Inativo")
+            if toggle != status:
+                conn = get_conn()
+                try:
+                    cursor = conn.cursor()
 
-            with col_btn2:
-                if st.button(
-                    "Desativar" if status else "Ativar",
-                    key=f"toggle_{row['id']}"
-                ):
-                    conn = get_conn()
-                    try:
-                        cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE public.produtos
+                        SET ativo = %s
+                        WHERE id = %s
+                    """, (toggle, row["id"]))
 
-                        cursor.execute("""
-                            UPDATE public.produtos
-                            SET ativo = NOT ativo
-                            WHERE id = %s
-                        """, (row["id"],))
+                    conn.commit()
+                    st.rerun()
 
-                        conn.commit()
-                        st.rerun()
-
-                    finally:
-                        conn.close()
+                finally:
+                    conn.close()
 
             # resto das infos
             estoque_inicial = int(row["estoque_inicial"])
