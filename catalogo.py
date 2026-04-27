@@ -297,6 +297,25 @@ for row_group in rows:
             st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
 
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
+                conn = get_conn()
+                try:
+                    cursor = conn.cursor()
+
+                    cursor.execute("""
+                        INSERT INTO pedidos (produto_id, quantidade)
+                        VALUES (%s, %s)
+                    """, (row["id"], qtd))
+
+                    conn.commit()
+
+                    st.success("Pedido enviado para aprovação!")
+
+                except Exception as e:
+                    conn.rollback()
+                    st.error(f"Erro: {e}")
+                finally:
+                    conn.close()
+               
                 msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
                 link = f"https://wa.me/5511964336480?text={msg}"
 
