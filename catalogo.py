@@ -238,7 +238,6 @@ if st.session_state.carrinho:
             conn.commit()
 
             st.session_state.link_whatsapp = link
-            st.session_state.mostrar_popup = True
             st.session_state.carrinho = []
             st.rerun()
 
