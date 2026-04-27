@@ -821,10 +821,42 @@ if acao == "📦 Visualizar Produtos":
         )
     else:
         st.info("Sem vendas para gerar PDF.")
-        st.subheader("🧾 Lista de Produtos")
 
     st.markdown("---")
 
+    c_title, c_search = st.columns([3, 2])
+
+    with c_title:
+        st.subheader("🧾 Lista de Produtos")
+
+    with c_search:
+        busca = st.text_input("🔎 Buscar produto", "")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    filtro = None
+
+    with c1:
+        if st.button("👗 Vestidos"):
+            filtro = "vestido"
+
+    with c2:
+        if st.button("🩳 Macaquinhos"):
+            filtro = "macaquinho"
+
+    with c3:
+        if st.button("✨ Vestidos Nina"):
+            filtro = "nina"
+
+    with c4:
+        if st.button("🔄 Limpar"):
+            filtro = None
+            
+    if busca:
+        df = df[df["produto"].str.contains(busca, case=False, na=False)]
+    else:
+        df = df.sort_values(by="produto", ascending=True)
+    
     for _, row in df.iterrows():
         col1, col2 = st.columns([1, 3])
 
