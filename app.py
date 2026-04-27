@@ -830,32 +830,24 @@ if acao == "📦 Visualizar Produtos":
         st.subheader("🧾 Lista de Produtos")
 
     with c_search:
-        busca = st.text_input("🔎 Buscar produto", "")
+        busca = st.text_input(
+            label="",
+            placeholder="🔎 Buscar produto..."
+        )
 
-    c1, c2, c3, c4 = st.columns(4)
-
-    filtro = None
-
-    with c1:
-        if st.button("👗 Vestidos"):
-            filtro = "vestido"
-
-    with c2:
-        if st.button("🩳 Macaquinhos"):
-            filtro = "macaquinho"
-
-    with c3:
-        if st.button("✨ Vestidos Nina"):
-            filtro = "nina"
-
-    with c4:
-        if st.button("🔄 Limpar"):
-            filtro = None
-            
+    filtro = st.radio(
+        "Filtrar por:",
+        ["Todos", "👗 Vestidos", "🩳 Macaquinhos", "✨ Vestidos Nina"],
+        horizontal=True
+    )
+    
+    df = df.sort_values(by="produto", ascending=True)
+    
     if busca:
         df = df[df["produto"].str.contains(busca, case=False, na=False)]
-    else:
-        df = df.sort_values(by="produto", ascending=True)
+
+    if filtro != "Todos":
+        df = df[df["produto"].str.contains(filtro.split(" ")[-1], case=False)]
     
     for _, row in df.iterrows():
         col1, col2 = st.columns([1, 3])
