@@ -163,14 +163,14 @@ for i, (_, row) in enumerate(df.iterrows()):
 
         with c_img:
             st.image(img, use_container_width=True)
-                st.markdown("""
-                <style>
-                img {
-                    height: 180px !important;
-                    object-fit: cover;
-                }
-                </style>
-                """, unsafe_allow_html=True)
+            st.markdown("""
+            <style>
+            img {
+                height: 180px !important;
+                object-fit: cover;
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
         with c_info:
             st.markdown(f"**{row['produto']}**")
