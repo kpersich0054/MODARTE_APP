@@ -267,7 +267,7 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (FIX REAL)
+# POPUP WHATSAPP (COM X FUNCIONAL)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
@@ -287,6 +287,7 @@ if st.session_state.get("mostrar_popup"):
 }
 
 .popup-box {
+    position: relative;
     background: #1e1e1e;
     padding: 30px;
     border-radius: 12px;
@@ -294,6 +295,20 @@ if st.session_state.get("mostrar_popup"):
     width: 320px;
     color: white;
     box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+/* BOTÃO X */
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.popup-close:hover {
+    color: white;
 }
 
 .popup-btn {
@@ -309,9 +324,12 @@ if st.session_state.get("mostrar_popup"):
 </style>
 """, unsafe_allow_html=True)
 
-    # ⚠️ SEM INDENTAÇÃO AQUI
+    # HTML SEM INDENTAÇÃO
     st.markdown(f"""<div class="popup-overlay">
 <div class="popup-box">
+
+<div class="popup-close" onclick="document.getElementById('fechar_real').click()">✖</div>
+
 <h2>🎉 Pedido enviado!</h2>
 
 <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
@@ -321,8 +339,8 @@ if st.session_state.get("mostrar_popup"):
 </div>
 </div>""", unsafe_allow_html=True)
 
-    # botão real do Streamlit (fora do HTML)
-    if st.button("❌ Fechar popup"):
+    # BOTÃO REAL (INVISÍVEL)
+    if st.button("fechar", key="fechar_real"):
         st.session_state.mostrar_popup = False
         st.rerun()
 
