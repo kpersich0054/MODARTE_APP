@@ -267,61 +267,61 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (FLUTUANTE REAL)
+# POPUP WHATSAPP (FIX REAL)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
     st.markdown("""
-    <style>
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.75);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999999;
-    }
+<style>
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
 
-    .popup-box {
-        background: #1e1e1e;
-        padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-        width: 320px;
-        color: white;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }
+.popup-box {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 320px;
+    color: white;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
 
-    .popup-btn {
-        display: block;
-        background:#25D366;
-        color:white;
-        padding:12px;
-        border-radius:8px;
-        font-weight:bold;
-        margin-top:15px;
-        text-decoration:none;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+.popup-btn {
+    display: block;
+    background:#25D366;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    font-weight:bold;
+    margin-top:15px;
+    text-decoration:none;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="popup-overlay">
-        <div class="popup-box">
-            <h2>🎉 Pedido enviado!</h2>
+    # ⚠️ SEM INDENTAÇÃO AQUI
+    st.markdown(f"""<div class="popup-overlay">
+<div class="popup-box">
+<h2>🎉 Pedido enviado!</h2>
 
-            <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
-                📲 Abrir WhatsApp
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+<a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
+📲 Abrir WhatsApp
+</a>
 
-    # botão fora do HTML (Streamlit precisa disso)
+</div>
+</div>""", unsafe_allow_html=True)
+
+    # botão real do Streamlit (fora do HTML)
     if st.button("❌ Fechar popup"):
         st.session_state.mostrar_popup = False
         st.rerun()
