@@ -244,7 +244,6 @@ for row_group in rows:
                     unsafe_allow_html=True
                 )
                 qtd = st.number_input(
-                    "Qtd",
                     min_value=1,
                     max_value=int(row["estoque_atual"]),
                     value=1,
@@ -256,7 +255,6 @@ for row_group in rows:
                     unsafe_allow_html=True
                 )
                 st.number_input(
-                    "Qtd",
                     min_value=0,
                     max_value=0,
                     value=0,
