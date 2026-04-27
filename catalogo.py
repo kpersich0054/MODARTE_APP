@@ -293,6 +293,7 @@ for row_group in rows:
                         })
 
                     st.success("Adicionado!")
+                    st.rerun()
 
             st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
 
