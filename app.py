@@ -328,6 +328,7 @@ acao = st.sidebar.radio(
         "✏️ Alterar Produto",
         "💰 Registrar Venda",
         "↩️ Estornar Venda", 
+        "📋 Aprovar Pedidos",
         "🗑️ Excluir Produto"
     ]
 )
@@ -697,7 +698,63 @@ elif acao == "↩️ Estornar Venda":
             estornar_parcial(venda_id, qtd)
             st.success("Estorno parcial realizado!")
             st.rerun()
-            
+
+# =====================
+# APROVAR PEDIDO
+# =====================
+
+elif acao == "📋 Aprovar Pedidos":
+    st.subheader("📋 Pedidos Pendentes")
+
+    pedidos = query_df("""
+        SELECT p.id, pr.produto, p.quantidade, p.produto_id
+        FROM pedidos p
+        JOIN produtos pr ON pr.id = p.produto_id
+        WHERE p.status = 'pendente'
+    """)
+
+    if pedidos.empty:
+        st.info("Nenhum pedido pendente")
+        st.stop()
+
+    for _, row in pedidos.iterrows():
+        st.write(f"{row['produto']} | Qtd: {row['quantidade']}")
+
+        c1, c2 = st.columns(2)
+
+        # ✅ APROVAR
+        with c1:
+            if st.button(f"Aprovar {row['id']}"):
+                registrar_venda(
+                    produto_id=row["produto_id"],
+                    quantidade=row["quantidade"],
+                    preco=0,  # você pode buscar do produto
+                    lucro=0,
+                    data_venda=datetime.now(),
+                    forma_pagamento="Pix"
+                )
+
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute("UPDATE pedidos SET status='aprovado' WHERE id=%s", (row["id"],))
+                conn.commit()
+                conn.close()
+
+                st.success("Pedido aprovado!")
+                st.rerun()
+
+        # ❌ REPROVAR
+        with c2:
+            if st.button(f"Reprovar {row['id']}"):
+                conn = get_conn()
+                cursor = conn.cursor()
+                cursor.execute("UPDATE pedidos SET status='reprovado' WHERE id=%s", (row["id"],))
+                conn.commit()
+                conn.close()
+
+                st.warning("Pedido reprovado!")
+                st.rerun()
+                
 # =====================
 # EXCLUIR PRODUTO
 # =====================
