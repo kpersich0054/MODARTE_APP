@@ -102,53 +102,34 @@ div[data-testid="column"] {{
 }}
 
 /* =========================
-   LIGHT MODE
+   FUNDO APP (CORRETO)
 ========================= */
-html[data-theme="light"] body {{
+section[data-testid="stAppViewContainer"] {{
     background: var(--bg-light);
     color: var(--text-light);
 }}
 
-html[data-theme="light"] .card {{
-    background: var(--card-light);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}}
-
-html[data-theme="light"] .price {{
-    color: var(--primary-light);
-}}
-
-html[data-theme="light"] .buy-btn button {{
-    background: var(--primary-light);
-    color: white;
-}}
-
-/* =========================
-   DARK MODE
-========================= */
-html[data-theme="dark"] body {{
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
     background: var(--bg-dark);
     color: var(--text-dark);
 }}
 
-html[data-theme="dark"] .card {{
-    background: var(--card-dark);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+/* =========================
+   SIDEBAR
+========================= */
+section[data-testid="stSidebar"] {{
+    background: var(--secondary-light);
 }}
 
-html[data-theme="dark"] .price {{
-    color: var(--primary-dark);
-}}
-
-html[data-theme="dark"] .buy-btn button {{
-    background: var(--primary-dark);
-    color: black;
+html[data-theme="dark"] section[data-testid="stSidebar"] {{
+    background: var(--secondary-dark);
 }}
 
 /* =========================
-   CARD BASE
+   CARDS
 ========================= */
 .card {{
+    background: var(--card-light);
     border-radius: 18px;
     padding: 16px;
     display: flex;
@@ -156,6 +137,10 @@ html[data-theme="dark"] .buy-btn button {{
     justify-content: space-between;
     height: 100%;
     transition: 0.2s;
+}}
+
+html[data-theme="dark"] .card {{
+    background: var(--card-dark);
 }}
 
 .card:hover {{
@@ -177,6 +162,34 @@ html[data-theme="dark"] .buy-btn button {{
 }}
 
 /* =========================
+   PREÇO
+========================= */
+.price {{
+    color: var(--primary-light);
+    font-size: 20px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .price {{
+    color: var(--primary-dark);
+}}
+
+/* =========================
+   BOTÃO
+========================= */
+.buy-btn button {{
+    background: var(--primary-light);
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .buy-btn button {{
+    background: var(--primary-dark);
+    color: black;
+}}
+
+/* =========================
    IMAGEM
 ========================= */
 [data-testid="stImage"] img {{
@@ -184,6 +197,17 @@ html[data-theme="dark"] .buy-btn button {{
     width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
+}}
+
+/* =========================
+   FORÇA TEXTO (IMPORTANTE)
+========================= */
+section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-light);
+}}
+
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-dark);
 }}
 
 </style>
