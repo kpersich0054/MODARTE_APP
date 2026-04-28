@@ -325,7 +325,7 @@ Total: R$ {total:.2f}
                 cur.execute("""
                     INSERT INTO pedidos 
                     (pedido_id, produto_id, quantidade, preco_unitario, desconto, total, status)
-                    VALUES (%s,%s,%s,%s,%s,%s)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s)
                 """, (
                     pedido_id,
                     item["id"],
