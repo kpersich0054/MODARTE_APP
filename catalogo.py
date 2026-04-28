@@ -169,7 +169,7 @@ def calcular_total(carrinho):
     total_bruto = sum(i["preco"] * i["qtd"] for i in carrinho)
     qtd_total = sum(i["qtd"] for i in carrinho)
 
-    desconto = 5 if qtd_total >= 3 else 0
+    desconto = 5 * qtd_total if qtd_total >= 3 else 0
     total = total_bruto - desconto
 
     return total_bruto, desconto, total
