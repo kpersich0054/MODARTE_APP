@@ -245,36 +245,47 @@ if st.session_state.carrinho:
             conn.close()
 
             st.session_state.link_whatsapp = link
-            st.session_state.pedido_confirmado = True
-            st.session_state.carrinho = []
+            st.session_state.aguardando_whatsapp = True
 
             st.rerun()
 
         except Exception as e:
             st.error(f"Erro ao finalizar pedido: {e}")
 
+# =====================
+# CONFIRMAR VIA WHATSAPP
+# =====================
+if st.session_state.get("aguardando_whatsapp"):
+
+    st.info("Finalize seu pedido no WhatsApp 👇")
+
+    col1, col2 = st.columns([1,1])
+
+    with col1:
+        if st.button("📲 Abrir WhatsApp"):
+            st.session_state.pedido_confirmado = True
+            st.session_state.aguardando_whatsapp = False
+            st.session_state.carrinho = []
+            st.markdown(f"""
+            <script>
+                window.open("{st.session_state.link_whatsapp}", "_blank");
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+
+    with col2:
+        if st.button("Cancelar"):
+            st.session_state.aguardando_whatsapp = False
+            st.rerun()
+            
+# =====================
+# SUCESSO FINAL
+# =====================
 if st.session_state.get("pedido_confirmado"):
 
-    st.sidebar.success("🎉 Pedido enviado com sucesso!")
+    st.success("🎉 Pedido enviado com sucesso!")
 
-    st.sidebar.markdown(f"""
-    <a href="{st.session_state.link_whatsapp}" target="_blank"
-       style="
-            display:block;
-            background:#25D366;
-            color:black;
-            padding:12px;
-            border-radius:10px;
-            font-weight:bold;
-            text-align:center;
-            text-decoration:none;
-            margin-top:10px;
-       ">
-       📲 Abrir WhatsApp
-    </a>
-    """, unsafe_allow_html=True)
-
-    if st.sidebar.button("Fechar", key="fechar_sidebar"):
+    if st.button("OK"):
         st.session_state.pedido_confirmado = False
         st.rerun()
 
