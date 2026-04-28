@@ -778,7 +778,7 @@ elif acao == "📋 Aprovar Pedidos":
                     lucro_base = float(prod["lucro"])
 
                     # 🔥 REGRA ATACADO
-                    if quantidade >= 3:
+                    if row["quantidade"] >= 3:
                         desconto = 5
                         preco_final = preco_base - desconto
                         lucro_final = lucro_base - desconto
