@@ -8,6 +8,30 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 import io
 
+def check_login():
+    if "logged" not in st.session_state:
+        st.session_state.logged = False
+
+    if st.session_state.logged:
+        return True
+
+    st.title("🔐 Login")
+
+    user = st.text_input("Usuário")
+    password = st.text_input("Senha", type="password")
+
+    if st.button("Entrar"):
+        users = st.secrets["auth"]["users"]
+
+        if user in users and users[user] == password:
+            st.session_state.logged = True
+            st.success("Login realizado!")
+            st.rerun()
+        else:
+            st.error("Usuário ou senha inválidos")
+
+    return False
+    
 st.markdown("""
 <style>
 div[data-testid="column"] > div {
@@ -266,6 +290,9 @@ def get_conn():
 
 st.set_page_config(page_title="MODARTE", layout="wide")
 
+if not check_login():
+    st.stop()
+    
 # =====================
 # QUERY SEGURA
 # =====================
@@ -333,8 +360,9 @@ acao = st.sidebar.radio(
     ]
 )
 
-if st.sidebar.button("❌ Encerrar aplicação"):
-    st.stop()
+if st.sidebar.button("🚪 Sair"):
+    st.session_state.logged = False
+    st.rerun()
 
 # =====================
 # DADOS (SEGURO)
