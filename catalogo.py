@@ -413,7 +413,7 @@ if st.session_state.show_cart:
 
     with st.container():
 
-        st.markdown("## 🛒 Carrinho")st.markdown('<div class="drawer">', unsafe_allow_html=True)
+        st.markdown('<div class="drawer">', unsafe_allow_html=True)
 
         st.markdown("## 🛒 Carrinho")
 
