@@ -775,8 +775,8 @@ elif acao == "📋 Aprovar Pedidos":
                     registrar_venda(
                         produto_id=row["produto_id"],
                         quantidade=row["quantidade"],
-                        preco=0,
-                        lucro=0,
+                        preco=preco_final,
+                        lucro=lucro_final,
                         data_venda=datetime.now(),
                         forma_pagamento="Pix"
                     )
