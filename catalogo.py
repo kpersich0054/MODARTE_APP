@@ -318,12 +318,15 @@ Total: R$ {total:.2f}
             conn = get_conn()
             cur = conn.cursor()
 
+            pedido_id = str(uuid.uuid4())
+            
             for item in carrinho:
                 cur.execute("""
                     INSERT INTO pedidos 
-                    (produto_id, quantidade, preco_unitario, desconto, total, status)
+                    (pedido_id, produto_id, quantidade, preco_unitario, desconto, total, status)
                     VALUES (%s,%s,%s,%s,%s,%s)
                 """, (
+                    pedido_id,
                     item["id"],
                     item["qtd"],
                     item["preco"],
