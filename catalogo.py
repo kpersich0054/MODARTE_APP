@@ -180,18 +180,6 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 
-section.main {{
-    background: transparent !important;
-}}
-
-.block-container {{
-    background: transparent !important;
-}}
-
-header {{
-    background: transparent !important;
-}}
-
 html[data-theme="light"] body {{
     background: radial-gradient(circle at top left,
         var(--secondary-light),
