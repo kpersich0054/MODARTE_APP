@@ -12,6 +12,32 @@ st_autorefresh(interval=3000, key="refresh_stock")
 
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
+BASE_DIR = Path(__file__).parent
+PASTA_IMAGENS = BASE_DIR
+
+# =====================
+# CONEXÃO SEGURA
+# =====================
+def get_conn():
+    return psycopg2.connect(
+        host=st.secrets["database"]["host"],
+        port=st.secrets["database"]["port"],
+        database=st.secrets["database"]["dbname"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        sslmode=st.secrets["database"]["sslmode"]
+    )
+
+def query_df(sql):
+    try:
+        conn = get_conn()
+        df = pd.read_sql(sql, conn)
+        conn.close()
+        return df
+    except Exception as e:
+        st.error(f"Erro ao conectar no banco: {e}")
+        return pd.DataFrame()
+
 # =====================
 # CSS
 # =====================
@@ -145,32 +171,6 @@ button:hover {{
 </style>
 """, unsafe_allow_html=True)
 
-BASE_DIR = Path(__file__).parent
-PASTA_IMAGENS = BASE_DIR
-
-# =====================
-# CONEXÃO SEGURA
-# =====================
-def get_conn():
-    return psycopg2.connect(
-        host=st.secrets["database"]["host"],
-        port=st.secrets["database"]["port"],
-        database=st.secrets["database"]["dbname"],
-        user=st.secrets["database"]["user"],
-        password=st.secrets["database"]["password"],
-        sslmode=st.secrets["database"]["sslmode"]
-    )
-
-def query_df(sql):
-    try:
-        conn = get_conn()
-        df = pd.read_sql(sql, conn)
-        conn.close()
-        return df
-    except Exception as e:
-        st.error(f"Erro ao conectar no banco: {e}")
-        return pd.DataFrame()
-       
 # =====================
 # FUNÇÃO DE CÁLCULO
 # =====================
