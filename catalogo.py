@@ -120,7 +120,7 @@ div[data-testid="column"] {{
 /* =========================
    HEADER FULL WIDTH
 ========================= */
-.header-modarte {
+.header-modarte {{
     position: relative;
     left: 50%;
     right: 50%;
@@ -140,10 +140,10 @@ div[data-testid="column"] {{
 
     margin-top: -20px;
     margin-bottom: 20px;
-}
+}}
 
 /* overlay escuro pra contraste */
-.header-overlay {
+.header-overlay {{
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.35);
@@ -151,10 +151,10 @@ div[data-testid="column"] {{
     display: flex;
     align-items: center;
     justify-content: center;
-}
+}}
 
 /* TEXTO */
-.header-overlay h1 {
+.header-overlay h1 {{
     color: white;
     font-size: 48px;
     font-weight: 900;
@@ -165,7 +165,7 @@ div[data-testid="column"] {{
          2px -2px 0 #016893,
         -2px  2px 0 #016893,
          2px  2px 0 #016893;
-}
+}}
 
 /* =========================
    LIGHT MODE
