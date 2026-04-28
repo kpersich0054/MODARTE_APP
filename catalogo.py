@@ -15,126 +15,130 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 # =====================
 # CSS
 # =====================
-st.markdown("""
+config = query_df("SELECT * FROM config_loja LIMIT 1").iloc[0]
+
+st.markdown(f"""
 <style>
 
 /* =========================
-   RESET GERAL
+   VARIÁVEIS
+========================= */
+:root {{
+    --primary-light: {config['primary_light']};
+    --secondary-light: {config['secondary_light']};
+    --bg-light: {config['background_light']};
+    --card-light: {config['card_light']};
+    --text-light: {config['text_light']};
+
+    --primary-dark: {config['primary_dark']};
+    --secondary-dark: {config['secondary_dark']};
+    --bg-dark: {config['background_dark']};
+    --card-dark: {config['card_dark']};
+    --text-dark: {config['text_dark']};
+}}
+
+/* =========================
+   RESET
 ========================= */
 div[data-testid="column"] > div,
-div[data-testid="stVerticalBlock"] > div {
+div[data-testid="stVerticalBlock"] > div {{
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
-}
+}}
 
-/* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
-div[data-testid="stNumberInput"] > div {
+div[data-testid="stNumberInput"] > div {{
     background: transparent !important;
-}
+}}
 
-/* REMOVE PADDING DAS COLUNAS */
-div[data-testid="column"] {
+div[data-testid="column"] {{
     padding: 0 !important;
-}
+}}
 
 /* =========================
-   CARD (LIGHT / DARK)
+   LIGHT MODE
 ========================= */
+html[data-theme="light"] body {{
+    background: var(--bg-light);
+    color: var(--text-light);
+}}
 
-/* 🌞 LIGHT MODE */
-html[data-theme="light"] .card {
-    background: #ffffff;
+html[data-theme="light"] .card {{
+    background: var(--card-light);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
+}}
 
-/* 🌙 DARK MODE */
-html[data-theme="dark"] .card {
-    background: linear-gradient(145deg, #1e1e1e, #252525);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-}
+html[data-theme="light"] .price {{
+    color: var(--primary-light);
+}}
 
-/* CARD BASE */
-.card {
+html[data-theme="light"] .buy-btn button {{
+    background: var(--primary-light);
+    color: white;
+}}
+
+/* =========================
+   DARK MODE
+========================= */
+html[data-theme="dark"] body {{
+    background: var(--bg-dark);
+    color: var(--text-dark);
+}}
+
+html[data-theme="dark"] .card {{
+    background: var(--card-dark);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}}
+
+html[data-theme="dark"] .price {{
+    color: var(--primary-dark);
+}}
+
+html[data-theme="dark"] .buy-btn button {{
+    background: var(--primary-dark);
+    color: black;
+}}
+
+/* =========================
+   CARD BASE
+========================= */
+.card {{
     border-radius: 18px;
     padding: 16px;
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
     height: 100%;
     transition: 0.2s;
-}
+}}
 
-.card:hover {
+.card:hover {{
     transform: translateY(-4px);
-}
+}}
 
-/* CONTEÚDO */
-.card-content {
-    flex-grow: 1;
-}
+/* =========================
+   TEXTO
+========================= */
+.prod-title {{
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 42px;
+}}
 
-/* AÇÕES */
-.card-actions {
-    margin-top: 10px;
-}
+.stock {{
+    font-size: 14px;
+    color: #888;
+}}
 
-/* BOTÕES COLADOS */
-.card-actions > div {
-    gap: 6px !important;
-}
-
-/* BOTÕES PEQUENOS */
-.card-actions button {
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-}
-
-/* IMAGEM */
-[data-testid="stImage"] img {
+/* =========================
+   IMAGEM
+========================= */
+[data-testid="stImage"] img {{
     height: 250px !important;
     width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
-}
-
-/* TITULO */
-.prod-title {
-    font-weight: 600;
-    font-size: 14px;
-    min-height: 42px;
-}
-
-/* PREÇO */
-.price {
-    font-size: 20px;
-    font-weight: bold;
-    color: #00c853;
-}
-
-/* ESTOQUE */
-.stock {
-    font-size: 14px;
-    color: #888;
-}
-
-/* BOTÃO PRINCIPAL */
-.buy-btn button {
-    background-color: #00c853;
-    color: white;
-    font-weight: bold;
-    border-radius: 10px;
-    height: 38px;
-}
-
-/* INPUT */
-.stNumberInput {
-    min-height: 70px;
-}
-
+}}
 
 </style>
 """, unsafe_allow_html=True)
