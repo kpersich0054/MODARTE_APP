@@ -168,6 +168,14 @@ button:hover {{
     opacity: 0.7;
 }}
 
+/* IMAGEM */
+[data-testid="stImage"] img {{
+    height: 250px !important;
+    width: 150% !important;
+    object-fit: cover !important;
+    border-radius: 12px;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
