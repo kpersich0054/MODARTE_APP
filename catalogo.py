@@ -283,6 +283,15 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
+html, body {{
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}}
+
+*, *::before, *::after {{
+  box-sizing: border-box;
+}}
 </style>
 """, unsafe_allow_html=True)
 
