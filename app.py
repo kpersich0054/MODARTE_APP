@@ -714,53 +714,73 @@ elif acao == "📋 Aprovar Pedidos":
             st.rerun()
 
     pedidos = query_df("""
-        SELECT p.id, pr.produto, p.quantidade, p.produto_id
+        SELECT 
+            p.pedido_id,
+            p.produto_id,
+            pr.produto,
+            p.quantidade
         FROM pedidos p
         JOIN produtos pr ON pr.id = p.produto_id
-        WHERE p.status = 'envio_whatsap'
+        WHERE p.status = 'pendente'
+        ORDER BY p.data_pedido
     """)
 
     if pedidos.empty:
         st.info("Nenhum pedido pendente")
         st.stop()
 
-    for _, row in pedidos.iterrows():
-        st.write(f"{row['produto']} | Qtd: {row['quantidade']}")
+    for pedido_id, grupo in pedidos.groupby("pedido_id"):
+
+        st.markdown(f"### 🧾 Pedido {pedido_id[:8]}")
+    
+        for _, row in grupo.iterrows():
+            st.write(f"{row['produto']} x{row['quantidade']}")
 
         c1, c2 = st.columns(2)
 
-        # ✅ APROVAR
         with c1:
-            if st.button(f"Aprovar {row['id']}"):
-                registrar_venda(
-                    produto_id=row["produto_id"],
-                    quantidade=row["quantidade"],
-                    preco=0,  # você pode buscar do produto
-                    lucro=0,
-                    data_venda=datetime.now(),
-                    forma_pagamento="Pix"
-                )
+            if st.button(f"Aprovar {pedido_id}", key=f"ap_{pedido_id}"):
+
+                for _, row in grupo.iterrows():
+                    registrar_venda(
+                        produto_id=row["produto_id"],
+                        quantidade=row["quantidade"],
+                        preco=0,
+                        lucro=0,
+                        data_venda=datetime.now(),
+                        forma_pagamento="Pix"
+                    )
 
                 conn = get_conn()
                 cursor = conn.cursor()
-                cursor.execute("UPDATE pedidos SET status='aprovado' WHERE id=%s", (row["id"],))
+                cursor.execute("""
+                    UPDATE pedidos 
+                    SET status='aprovado' 
+                    WHERE pedido_id=%s
+                """, (pedido_id,))
                 conn.commit()
                 conn.close()
 
                 st.success("Pedido aprovado!")
                 st.rerun()
 
-        # ❌ REPROVAR
         with c2:
-            if st.button(f"Reprovar {row['id']}"):
+            if st.button(f"Reprovar {pedido_id}", key=f"rep_{pedido_id}"):
+
                 conn = get_conn()
                 cursor = conn.cursor()
-                cursor.execute("UPDATE pedidos SET status='reprovado' WHERE id=%s", (row["id"],))
+                cursor.execute("""
+                    UPDATE pedidos 
+                    SET status='reprovado' 
+                    WHERE pedido_id=%s
+                """, (pedido_id,))
                 conn.commit()
                 conn.close()
 
                 st.warning("Pedido reprovado!")
                 st.rerun()
+
+        st.markdown("---")
                 
 # =====================
 # EXCLUIR PRODUTO
