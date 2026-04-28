@@ -4,11 +4,12 @@ import psycopg2
 import uuid
 from pathlib import Path
 import urllib.parse
-import time
-   
+from streamlit_autorefresh import st_autorefresh   
 # =====================
 # CONFIG
 # =====================
+st_autorefresh(interval=3000, key="refresh_stock")
+
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
@@ -184,15 +185,6 @@ df = query_df("SELECT * FROM public.produtos")
 if df.empty:
     st.warning("Nenhum produto carregado.")
     st.stop()
-
-if "timer" not in st.session_state:
-    st.session_state.timer = time.time()
-
-if time.time() - st.session_state.timer > 3:
-    st.session_state.timer = time.time()
-
-    # 👇 sua ação automática aqui
-    df = query_df("SELECT * FROM public.produtos")
     
 df = df[df["ativo"] == True].copy()
 df = df.sort_values(by="produto")
