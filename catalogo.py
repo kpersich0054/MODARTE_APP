@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import psycopg2
 from pathlib import Path
@@ -11,33 +10,11 @@ import urllib.parse
 st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 # =====================
-# CSS FINAL (LIGHT/DARK CORRIGIDO)
+# CSS
 # =====================
 st.markdown("""
 <style>
 
-.stApp {
-    position: relative;
-    z-index: 1;
-}
-
-/* 🔥 FAZ O POPUP SAIR DO CONTAINER DO STREAMLIT */
-section.main > div:has(.popup-overlay) {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 999999 !important;
-}
-
-/* GARANTE QUE FICA ACIMA DE TUDO */
-.popup-overlay {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 999999 !important;
-}
-
-/* =========================
-   RESET GERAL
-========================= */
 div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"] > div {
     background: transparent !important;
@@ -45,111 +22,46 @@ div[data-testid="stVerticalBlock"] > div {
     border: none !important;
 }
 
-/* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
 div[data-testid="stNumberInput"] > div {
     background: transparent !important;
 }
 
-/* REMOVE PADDING DAS COLUNAS */
-div[data-testid="column"] {
-    padding: 0 !important;
-}
-
-/* =========================
-   CARD (LIGHT / DARK)
-========================= */
-
-/* 🌞 LIGHT MODE */
-html[data-theme="light"] .card {
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-/* 🌙 DARK MODE */
-html[data-theme="dark"] .card {
-    background: linear-gradient(145deg, #1e1e1e, #252525);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-}
-
-/* CARD BASE */
 .card {
     border-radius: 18px;
     padding: 16px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
     height: 100%;
     transition: 0.2s;
+    background: #1e1e1e;
 }
 
 .card:hover {
     transform: translateY(-4px);
 }
 
-/* CONTEÚDO */
-.card-content {
-    flex-grow: 1;
-}
-
-/* AÇÕES */
-.card-actions {
-    margin-top: 10px;
-}
-
-/* BOTÕES COLADOS */
-.card-actions > div {
-    gap: 6px !important;
-}
-
-/* BOTÕES PEQUENOS */
-.card-actions button {
-    width: 40px !important;
-    height: 40px !important;
-    padding: 0 !important;
-}
-
-/* IMAGEM */
-[data-testid="stImage"] img {
-    height: 250px !important;
-    width: 150% !important;
-    object-fit: cover !important;
-    border-radius: 12px;
-}
-
-/* TITULO */
 .prod-title {
     font-weight: 600;
     font-size: 14px;
     min-height: 42px;
+    color: white;
 }
 
-/* PREÇO */
 .price {
     font-size: 20px;
     font-weight: bold;
     color: #00c853;
 }
 
-/* ESTOQUE */
 .stock {
     font-size: 12px;
-    color: #888;
+    color: #aaa;
 }
 
-/* BOTÃO PRINCIPAL */
 .buy-btn button {
     background-color: #00c853;
     color: white;
     font-weight: bold;
     border-radius: 10px;
     height: 38px;
-}
-
-/* INPUT */
-.stNumberInput {
-    min-height: 70px;
 }
 
 </style>
@@ -159,7 +71,7 @@ BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
 # =====================
-# CONEXÃO
+# CONEXÃO SEGURA
 # =====================
 def get_conn():
     return psycopg2.connect(
@@ -172,16 +84,24 @@ def get_conn():
     )
 
 def query_df(sql):
-    conn = get_conn()
     try:
-        return pd.read_sql(sql, conn)
-    finally:
+        conn = get_conn()
+        df = pd.read_sql(sql, conn)
         conn.close()
+        return df
+    except Exception as e:
+        st.error(f"Erro ao conectar no banco: {e}")
+        return pd.DataFrame()
 
 # =====================
 # DADOS
 # =====================
 df = query_df("SELECT * FROM public.produtos")
+
+if df.empty:
+    st.warning("Nenhum produto carregado.")
+    st.stop()
+
 df = df[df["ativo"] == True].copy()
 df = df.sort_values(by="produto")
 
@@ -192,19 +112,15 @@ st.title("🛍️ Modarte")
 st.caption("Escolha seu look ✨")
 
 # =====================
-# BUSCA + FILTRO
+# FILTROS
 # =====================
-c1, c2 = st.columns([3, 2])
+c1, c2 = st.columns([3,2])
 
 with c1:
     busca = st.text_input("", placeholder="🔎 Buscar produto...")
 
 with c2:
-    filtro = st.radio(
-        "",
-        ["Todos", "👗 Vestido", "🩳 Macaquinho", "✨ Nina"],
-        horizontal=True
-    )
+    filtro = st.radio("", ["Todos", "👗 Vestido", "🩳 Macaquinho", "✨ Nina"], horizontal=True)
 
 if busca:
     df = df[df["produto"].str.contains(busca, case=False, na=False)]
@@ -235,16 +151,19 @@ for item in st.session_state.carrinho:
 st.sidebar.markdown("---")
 st.sidebar.write(f"**Total: R$ {total:.2f}**")
 
+# =====================
+# CONFIRMAR PEDIDO
+# =====================
 if st.session_state.carrinho:
 
     if st.sidebar.button("📦 Confirmar pedido"):
 
-        pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
-        msg = f"Olá! Quero fazer um pedido:\n{pedido_txt}"
-        link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
-
-        conn = get_conn()
         try:
+            pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
+            msg = f"Olá! Quero fazer um pedido:\n{pedido_txt}"
+            link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
+
+            conn = get_conn()
             cursor = conn.cursor()
 
             for item in st.session_state.carrinho:
@@ -254,17 +173,16 @@ if st.session_state.carrinho:
                 """, (item["id"], item["qtd"]))
 
             conn.commit()
+            conn.close()
 
             st.session_state.link_whatsapp = link
             st.session_state.pedido_confirmado = True
             st.session_state.carrinho = []
+
             st.rerun()
 
         except Exception as e:
-            conn.rollback()
-            st.error(f"Erro: {e}")
-        finally:
-            conn.close()
+            st.error(f"Erro ao finalizar pedido: {e}")
 
 # =====================
 # CONFIRMAÇÃO (SEM POPUP)
@@ -273,26 +191,29 @@ if st.session_state.get("pedido_confirmado"):
 
     st.success("🎉 Pedido enviado com sucesso!")
 
-    st.markdown(f"""
-    <a href="{st.session_state.link_whatsapp}" target="_blank"
-       style="
-            display:inline-block;
-            background:#25D366;
-            color:black;
-            padding:14px 20px;
-            border-radius:10px;
-            font-weight:bold;
-            text-decoration:none;
-            margin-top:10px;
-       ">
-       📲 Abrir WhatsApp
-    </a>
-    """, unsafe_allow_html=True)
+    col1, col2 = st.columns([2,1])
 
-    if st.button("OK"):
-        st.session_state.pedido_confirmado = False
-        st.rerun()
-       
+    with col1:
+        st.markdown(f"""
+        <a href="{st.session_state.link_whatsapp}" target="_blank"
+           style="
+                display:inline-block;
+                background:#25D366;
+                color:black;
+                padding:14px 20px;
+                border-radius:10px;
+                font-weight:bold;
+                text-decoration:none;
+           ">
+           📲 Abrir WhatsApp
+        </a>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        if st.button("Fechar"):
+            st.session_state.pedido_confirmado = False
+            st.rerun()
+
 # =====================
 # FAVORITOS
 # =====================
@@ -319,8 +240,6 @@ for row_group in rows:
 
             st.markdown('<div class="card">', unsafe_allow_html=True)
 
-            st.markdown('<div class="card-content">', unsafe_allow_html=True)
-
             st.image(img, use_container_width=True)
 
             st.markdown(f"<div class='prod-title'>{row['produto']}</div>", unsafe_allow_html=True)
@@ -328,72 +247,33 @@ for row_group in rows:
 
             if row["estoque_atual"] > 0:
                 st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
-                qtd = st.number_input("", min_value=1, max_value=int(row["estoque_atual"]), value=1, key=f"qtd_{row['id']}")
+                qtd = st.number_input("", 1, int(row["estoque_atual"]), 1, key=f"qtd_{row['id']}")
             else:
                 st.markdown("<div class='stock' style='color:#ff5252'>Sem estoque</div>", unsafe_allow_html=True)
-                st.number_input("", min_value=0, max_value=0, value=0, disabled=True, key=f"qtd_{row['id']}")
                 qtd = 0
 
-            st.markdown('</div>', unsafe_allow_html=True)
+            col1, col2 = st.columns(2)
 
-            # AÇÕES
-            st.markdown('<div class="card-actions">', unsafe_allow_html=True)
-
-            b1, b2 = st.columns([1,1])
-
-            with b1:
-                icone = "❤️" if row["id"] in st.session_state.favoritos else "🤍"
-                if st.button(icone, key=f"fav_{row['id']}"):
+            with col1:
+                if st.button("❤️" if row["id"] in st.session_state.favoritos else "🤍", key=f"fav_{row['id']}"):
                     if row["id"] in st.session_state.favoritos:
                         st.session_state.favoritos.remove(row["id"])
                     else:
                         st.session_state.favoritos.add(row["id"])
 
-            with b2:
+            with col2:
                 if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-                    item_existente = next((i for i in st.session_state.carrinho if i["id"] == row["id"]), None)
-
-                    if item_existente:
-                        item_existente["qtd"] += qtd
-                    else:
-                        st.session_state.carrinho.append({
-                            "id": row["id"],
-                            "produto": row["produto"],
-                            "preco": float(row["preco"]),
-                            "qtd": qtd
-                        })
-
-                    st.success("Adicionado!")
+                    st.session_state.carrinho.append({
+                        "id": row["id"],
+                        "produto": row["produto"],
+                        "preco": float(row["preco"]),
+                        "qtd": qtd
+                    })
                     st.rerun()
 
-            st.markdown('<div class="buy-btn">', unsafe_allow_html=True)
-
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-                conn = get_conn()
-                try:
-                    cursor = conn.cursor()
-
-                    cursor.execute("""
-                        INSERT INTO pedidos (produto_id, quantidade)
-                        VALUES (%s, %s)
-                    """, (row["id"], qtd))
-
-                    conn.commit()
-
-                    st.success("Pedido enviado para aprovação!")
-
-                except Exception as e:
-                    conn.rollback()
-                    st.error(f"Erro: {e}")
-                finally:
-                    conn.close()
-               
                 msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
                 link = f"https://wa.me/5511964336480?text={msg}"
-
-                st.success("Reservado!")
                 st.markdown(f"[👉 Abrir WhatsApp]({link})")
 
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
