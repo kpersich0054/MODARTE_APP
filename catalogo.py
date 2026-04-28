@@ -116,6 +116,20 @@ html, body {{
     background: transparent !important;
 }}
 
+/* Remove scrollbars (mas mantém rolagem) */
+html, body,
+section[data-testid="stAppViewContainer"]{{
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE/Edge antigo */
+}}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+section[data-testid="stAppViewContainer"]::-webkit-scrollbar{{
+    width: 0px;                   /* Chrome/Safari/Edge */
+    height: 0px;
+}}
+
 /* apenas área principal */
 section[data-testid="stAppViewContainer"] {{
     background: transparent !important;
