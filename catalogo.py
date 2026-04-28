@@ -292,6 +292,10 @@ html, body {{
 *, *::before, *::after {{
   box-sizing: border-box;
 }}
+
+html, body {{
+  overflow-x: hidden;
+}}
 </style>
 """, unsafe_allow_html=True)
 
