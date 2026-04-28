@@ -250,12 +250,12 @@ if st.session_state.carrinho and not st.session_state.get("aguardando"):
 # =====================
 # WHATSAPP (FUNCIONANDO)
 # =====================
-if st.session_state.get("aguardando"):
 
-    st.sidebar.info("Finalize no WhatsApp 👇")
+@st.dialog("Finalizar pedido")
+def dialog_whatsapp():
+    st.info("Finalize no WhatsApp 👇")
 
-    # 🔥 LINK REAL (FUNCIONA SEMPRE)
-    st.sidebar.markdown(f"""
+    st.markdown(f"""
     <a href="{st.session_state.link}" target="_blank"
        style="
         display:block;
@@ -270,16 +270,22 @@ if st.session_state.get("aguardando"):
     </a>
     """, unsafe_allow_html=True)
 
-    # confirmação manual
-    if st.sidebar.button("✔ Já enviei"):
-        st.session_state.aguardando = False
-        st.session_state.sucesso = True
-        st.session_state.carrinho = []
-        st.rerun()
+    col1, col2 = st.columns(2)
 
-    if st.sidebar.button("❌ Cancelar"):
-        st.session_state.aguardando = False
-        st.rerun()
+    with col1:
+        if st.button("✔ Já enviei"):
+            st.session_state.aguardando = False
+            st.session_state.sucesso = True
+            st.session_state.carrinho = []
+            st.rerun()
+
+    with col2:
+        if st.button("❌ Cancelar"):
+            st.session_state.aguardando = False
+            st.rerun()
+            
+if st.session_state.get("aguardando"):
+    dialog_whatsapp()
 
 # =====================
 # SUCESSO
