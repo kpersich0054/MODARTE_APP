@@ -617,7 +617,7 @@ elif acao == "💰 Registrar Venda":
         if not pagamento_confirmado:
             st.error("❌ Confirme o pagamento antes de continuar.")
             st.stop()
-
+        
         registrar_venda(
             produto_id=int(row["id"]),
             quantidade=quantidade,
@@ -772,6 +772,20 @@ elif acao == "📋 Aprovar Pedidos":
             if st.button(f"Aprovar", key=f"ap_{pedido_id}"):
 
                 for _, row in grupo.iterrows():
+                    prod = df[df["id"] == row["produto_id"]].iloc[0]
+
+                    preco_base = float(prod["preco"])
+                    lucro_base = float(prod["lucro"])
+
+                    # 🔥 REGRA ATACADO
+                    if quantidade >= 3:
+                        desconto = 5
+                        preco_final = preco_base - desconto
+                        lucro_final = lucro_base - desconto
+                    else:
+                        preco_final = preco_base
+                        lucro_final = lucro_base
+        
                     registrar_venda(
                         produto_id=row["produto_id"],
                         quantidade=row["quantidade"],
