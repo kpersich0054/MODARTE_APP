@@ -256,7 +256,7 @@ if st.session_state.carrinho:
             conn.commit()
 
             st.session_state.link_whatsapp = link
-            st.session_state.mostrar_popup = True
+            st.session_state.pedido_confirmado = True
             st.session_state.carrinho = []
             st.rerun()
 
@@ -267,93 +267,31 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (X FUNCIONANDO + BOTÃO PRETO)
+# CONFIRMAÇÃO (SEM POPUP)
 # =====================
-if st.session_state.get("mostrar_popup"):
+if st.session_state.get("pedido_confirmado"):
 
-    st.markdown("""
-<style>
-.popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-}
+    st.success("🎉 Pedido enviado com sucesso!")
 
-.popup-box {
-    position: relative;
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    width: 320px;
-    color: white;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
+    st.markdown(f"""
+    <a href="{st.session_state.link_whatsapp}" target="_blank"
+       style="
+            display:inline-block;
+            background:#25D366;
+            color:black;
+            padding:14px 20px;
+            border-radius:10px;
+            font-weight:bold;
+            text-decoration:none;
+            margin-top:10px;
+       ">
+       📲 Abrir WhatsApp
+    </a>
+    """, unsafe_allow_html=True)
 
-/* BOTÃO X */
-.popup-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 20px;
-    cursor: pointer;
-    color: #aaa;
-}
-
-.popup-close:hover {
-    color: white;
-}
-
-/* BOTÃO WHATSAPP */
-.popup-btn {
-    display: block;
-    background:#25D366;
-    color:black !important;   /* 👈 AGORA PRETO */
-    padding:12px;
-    border-radius:8px;
-    font-weight:bold;
-    margin-top:15px;
-    text-decoration:none;
-}
-</style>
-""", unsafe_allow_html=True)
-
-    st.markdown(f"""<div class="popup-overlay">
-<div class="popup-box">
-
-<div class="popup-close" onclick="fecharPopup()">✖</div>
-
-<h2>🎉 Pedido enviado!</h2>
-
-<a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
-📲 Abrir WhatsApp
-</a>
-
-</div>
-</div>
-
-<script>
-function fecharPopup() {{
-    const botoes = window.parent.document.querySelectorAll('button');
-    botoes.forEach(btn => {{
-        if (btn.innerText === 'fechar') {{
-            btn.click();
-        }}
-    }});
-}}
-</script>
-""", unsafe_allow_html=True)
-
-    # BOTÃO REAL (escondido)
-    if st.button("fechar"):
-        st.session_state.mostrar_popup = False
+    if st.button("OK"):
+        st.session_state.pedido_confirmado = False
         st.rerun()
-
-    st.stop()
        
 # =====================
 # FAVORITOS
