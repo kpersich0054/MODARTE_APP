@@ -21,7 +21,7 @@ def check_login():
     password = st.text_input("Senha", type="password")
 
     if st.button("Entrar"):
-        users = st.secrets["auth"]["users"]
+        users = dict(st.secrets["auth"]["users"])
 
         if user in users and users[user] == password:
             st.session_state.logged = True
