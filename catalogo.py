@@ -253,35 +253,30 @@ if st.session_state.carrinho:
         except Exception as e:
             st.error(f"Erro ao finalizar pedido: {e}")
 
-# =====================
-# CONFIRMAÇÃO (SEM POPUP)
-# =====================
 if st.session_state.get("pedido_confirmado"):
 
-    st.success("🎉 Pedido enviado com sucesso!")
+    st.sidebar.success("🎉 Pedido enviado com sucesso!")
 
-    col1, col2 = st.columns([2,1])
+    st.sidebar.markdown(f"""
+    <a href="{st.session_state.link_whatsapp}" target="_blank"
+       style="
+            display:block;
+            background:#25D366;
+            color:black;
+            padding:12px;
+            border-radius:10px;
+            font-weight:bold;
+            text-align:center;
+            text-decoration:none;
+            margin-top:10px;
+       ">
+       📲 Abrir WhatsApp
+    </a>
+    """, unsafe_allow_html=True)
 
-    with col1:
-        st.markdown(f"""
-        <a href="{st.session_state.link_whatsapp}" target="_blank"
-           style="
-                display:inline-block;
-                background:#25D366;
-                color:black;
-                padding:14px 20px;
-                border-radius:10px;
-                font-weight:bold;
-                text-decoration:none;
-           ">
-           📲 Abrir WhatsApp
-        </a>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        if st.button("Fechar"):
-            st.session_state.pedido_confirmado = False
-            st.rerun()
+    if st.sidebar.button("Fechar", key="fechar_sidebar"):
+        st.session_state.pedido_confirmado = False
+        st.rerun()
 
 # =====================
 # FAVORITOS
