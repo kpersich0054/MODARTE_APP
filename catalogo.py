@@ -267,103 +267,84 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (TOP - FUNCIONAL COMPLETO)
+# POPUP WHATSAPP (COM X FUNCIONAL)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
-    components.html(f"""
-    <style>
-    body {{
-        margin: 0;
-    }}
+    st.markdown("""
+<style>
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+}
 
-    .popup-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0,0,0,0.75);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999999;
-    }}
+.popup-box {
+    position: relative;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    width: 320px;
+    color: white;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
 
-    .popup-box {{
-        position: relative;
-        background: #1e1e1e;
-        padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-        width: 320px;
-        color: white;
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        animation: fadeIn 0.3s ease;
-    }}
+/* BOTÃO X */
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #aaa;
+}
 
-    @keyframes fadeIn {{
-        from {{opacity:0; transform: scale(0.9);}}
-        to {{opacity:1; transform: scale(1);}}
-    }}
+.popup-close:hover {
+    color: white;
+}
 
-    /* BOTÃO X */
-    .popup-close {{
-        position: absolute;
-        top: 10px;
-        right: 12px;
-        font-size: 18px;
-        cursor: pointer;
-        color: #aaa;
-    }}
+.popup-btn {
+    display: block;
+    background:#25D366;
+    color:white;
+    padding:12px;
+    border-radius:8px;
+    font-weight:bold;
+    margin-top:15px;
+    text-decoration:none;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    .popup-close:hover {{
-        color: white;
-    }}
+    # HTML SEM INDENTAÇÃO
+    st.markdown(f"""<div class="popup-overlay">
+<div class="popup-box">
 
-    /* BOTÃO WHATSAPP */
-    .popup-btn {{
-        display: block;
-        background:#25D366;
-        color:black; /* 👈 TEXTO PRETO */
-        padding:12px;
-        border-radius:8px;
-        font-weight:bold;
-        margin-top:15px;
-        text-decoration:none;
-    }}
-    </style>
+<div class="popup-close" onclick="document.getElementById('fechar_real').click()">✖</div>
 
-    <div class="popup-overlay" id="overlay">
-        <div class="popup-box" id="popup">
+<h2>🎉 Pedido enviado!</h2>
 
-            <div class="popup-close" onclick="fecharPopup()">✖</div>
+<a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
+📲 Abrir WhatsApp
+</a>
 
-            <h2>🎉 Pedido enviado!</h2>
+</div>
+</div>""", unsafe_allow_html=True)
 
-            <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
-                📲 Abrir WhatsApp
-            </a>
+    # BOTÃO REAL (INVISÍVEL)
+    if st.button("fechar", key="fechar_real"):
+        st.session_state.mostrar_popup = False
+        st.rerun()
 
-        </div>
-    </div>
-
-    <script>
-    function fecharPopup() {{
-        document.getElementById("overlay").style.display = "none";
-    }}
-
-    // clicar fora fecha
-    document.getElementById("overlay").addEventListener("click", function(e) {{
-        if (e.target.id === "overlay") {{
-            fecharPopup();
-        }}
-    }});
-    </script>
-    """, height=0)
-
-    # limpa estado pra não reaparecer
-    st.session_state.mostrar_popup = False
+    st.stop()
        
 # =====================
 # FAVORITOS
