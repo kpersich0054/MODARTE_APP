@@ -355,9 +355,6 @@ if "show_cart" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-
-if st.button("🛒", key="open_cart"):
-    st.session_state.show_cart = True
     
 st.markdown(f"""
 <div class="header-modarte">
@@ -367,8 +364,15 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-st.caption("Escolha seu look ✨")
+c1, c2 = st.columns([3,1])
 
+with c1:
+    st.caption("Escolha seu look ✨")
+
+with c2:
+    if st.button("🛒", key="open_cart"):
+        st.session_state.show_cart = True
+        
 # =====================
 # FILTROS
 # =====================
