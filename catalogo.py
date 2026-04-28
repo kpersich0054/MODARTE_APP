@@ -288,23 +288,37 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-/* DRAWER DIREITA */
-section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
+/* DRAWER REAL */
+.drawer {{
     position: fixed;
     top: 0;
     right: 0;
-    width: 350px;
+    width: 360px;
     height: 100vh;
+
     background: white;
     z-index: 9999;
+
     padding: 20px;
-    box-shadow: -5px 0 20px rgba(0,0,0,0.2);
+    box-shadow: -8px 0 25px rgba(0,0,0,0.25);
+
     overflow-y: auto;
+    animation: slideIn 0.3s ease;
 }}
 
-/* dark mode drawer */
-html[data-theme="dark"] section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
+/* DARK MODE */
+html[data-theme="dark"] .drawer {{
     background: #0A2E36;
+}}
+
+/* ANIMAÇÃO */
+@keyframes slideIn {{
+    from {{
+        transform: translateX(100%);
+    }}
+    to {{
+        transform: translateX(0);
+    }}
 }}
 
 </style>
@@ -399,6 +413,8 @@ if st.session_state.show_cart:
 
     with st.container():
 
+        st.markdown("## 🛒 Carrinho")st.markdown('<div class="drawer">', unsafe_allow_html=True)
+
         st.markdown("## 🛒 Carrinho")
 
         total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
@@ -426,6 +442,8 @@ if st.session_state.show_cart:
         if st.button("❌ Fechar carrinho"):
             st.session_state.show_cart = False
             st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # =====================
 # DIALOG
