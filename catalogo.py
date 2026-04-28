@@ -95,9 +95,9 @@ st.markdown(f"""
 /* =========================
    CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
 ========================= */
-html, body {
+html, body {{
     background: transparent !important;
-}
+}}
 
 /* apenas área principal */
 section[data-testid="stAppViewContainer"] {{
