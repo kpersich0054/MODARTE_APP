@@ -400,38 +400,39 @@ for row_group in rows:
             if row["estoque_atual"] > 0:
                 st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
                 qtd = st.number_input("", 1, int(row["estoque_atual"]), 1, key=f"qtd_{row['id']}")
-            else:
-                st.markdown("<div class='stock' style='color:#ff5252'>Sem estoque</div>", unsafe_allow_html=True)
-                qtd = 0
 
-            col1, col2 = st.columns(2)
+                col1, col2 = st.columns(2)
 
-            with col1:
-                if st.button("❤️" if row["id"] in st.session_state.favoritos else "🤍", key=f"fav_{row['id']}"):
-                    if row["id"] in st.session_state.favoritos:
-                        st.session_state.favoritos.remove(row["id"])
-                    else:
-                        st.session_state.favoritos.add(row["id"])
+                with col1:
+                    if st.button("❤️" if row["id"] in st.session_state.favoritos else "🤍", key=f"fav_{row['id']}"):
+                        if row["id"] in st.session_state.favoritos:
+                            st.session_state.favoritos.remove(row["id"])
+                        else:
+                            st.session_state.favoritos.add(row["id"])
 
-            with col2:
-                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-                    st.session_state.carrinho.append({
+                with col2:
+                    if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+                        st.session_state.carrinho.append({
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        })
+                        st.rerun()
+
+                # comprar agora (usa MESMO fluxo)
+                if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
+                    st.session_state.checkout = [{
                         "id": row["id"],
                         "produto": row["produto"],
                         "preco": float(row["preco"]),
                         "qtd": qtd
-                    })
+                    }]
+                    st.session_state.show_dialog = True
                     st.rerun()
 
-            # comprar agora (usa MESMO fluxo)
-            if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-                st.session_state.checkout = [{
-                    "id": row["id"],
-                    "produto": row["produto"],
-                    "preco": float(row["preco"]),
-                    "qtd": qtd
-                }]
-                st.session_state.show_dialog = True
-                st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                st.markdown("<div class='stock' style='color:#ff5252'; font-size:16px;>Sem estoque</div>", unsafe_allow_html=True)
+                qtd = 0
