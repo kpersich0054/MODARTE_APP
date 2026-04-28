@@ -21,7 +21,11 @@ def check_login():
     password = st.text_input("Senha", type="password")
 
     if st.button("Entrar"):
-        users = st.secrets["auth"]["users"]
+
+        users = dict(st.secrets["auth"]["users"])
+
+        user = user.strip()
+        password = password.strip()
 
         if user in users and users[user] == password:
             st.session_state.logged = True
@@ -29,7 +33,9 @@ def check_login():
             st.rerun()
         else:
             st.error("Usuário ou senha inválidos")
-            st.write(st.secrets["auth"]["users"])
+            st.write("USER:", repr(user))
+            st.write("PASS:", repr(password))
+            st.write(users)
 
     return False
     
