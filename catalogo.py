@@ -84,6 +84,22 @@ st.markdown(f"""
 }}
 
 /* =========================
+   REMOVE FUNDO BRANCO (CORREÇÃO DARK MODE)
+========================= */
+section.main {{
+    background: transparent !important;
+}}
+
+.block-container {{
+    background: transparent !important;
+    padding-top: 2rem;
+}}
+
+header {{
+    background: transparent !important;
+}}
+
+/* =========================
    RESET
 ========================= */
 div[data-testid="column"] > div,
@@ -102,34 +118,82 @@ div[data-testid="column"] {{
 }}
 
 /* =========================
-   FUNDO APP (CORRETO)
+   HEADER MODARTE
 ========================= */
-section[data-testid="stAppViewContainer"] {{
+.header-modarte {{
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+
+    background-image: url("app/static/Logo_Modarte.jpg");
+    background-size: cover;
+    background-position: center;
+
+    margin-bottom: 10px;
+}}
+
+.header-overlay {{
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.35);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}}
+
+.header-overlay h1 {{
+    color: white;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: 2px;
+
+    text-shadow:
+        -1px -1px 0 #016893,
+         1px -1px 0 #016893,
+        -1px  1px 0 #016893,
+         1px  1px 0 #016893;
+}}
+
+/* =========================
+   LIGHT MODE
+========================= */
+html[data-theme="light"] body {{
     background: var(--bg-light);
     color: var(--text-light);
 }}
 
-html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
+html[data-theme="light"] .card {{
+    background: var(--card-light);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}}
+
+html[data-theme="light"] .price {{
+    color: var(--primary-light);
+}}
+
+/* =========================
+   DARK MODE
+========================= */
+html[data-theme="dark"] body {{
     background: var(--bg-dark);
     color: var(--text-dark);
 }}
 
-/* =========================
-   SIDEBAR
-========================= */
-section[data-testid="stSidebar"] {{
-    background: var(--secondary-light);
+html[data-theme="dark"] .card {{
+    background: var(--card-dark);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }}
 
-html[data-theme="dark"] section[data-testid="stSidebar"] {{
-    background: var(--secondary-dark);
+html[data-theme="dark"] .price {{
+    color: var(--primary-dark);
 }}
 
 /* =========================
-   CARDS
+   CARD
 ========================= */
 .card {{
-    background: var(--card-light);
     border-radius: 18px;
     padding: 16px;
     display: flex;
@@ -137,10 +201,6 @@ html[data-theme="dark"] section[data-testid="stSidebar"] {{
     justify-content: space-between;
     height: 100%;
     transition: 0.2s;
-}}
-
-html[data-theme="dark"] .card {{
-    background: var(--card-dark);
 }}
 
 .card:hover {{
@@ -162,34 +222,6 @@ html[data-theme="dark"] .card {{
 }}
 
 /* =========================
-   PREÇO
-========================= */
-.price {{
-    color: var(--primary-light);
-    font-size: 20px;
-    font-weight: bold;
-}}
-
-html[data-theme="dark"] .price {{
-    color: var(--primary-dark);
-}}
-
-/* =========================
-   BOTÃO
-========================= */
-.buy-btn button {{
-    background: var(--primary-light);
-    color: white;
-    border-radius: 10px;
-    font-weight: bold;
-}}
-
-html[data-theme="dark"] .buy-btn button {{
-    background: var(--primary-dark);
-    color: black;
-}}
-
-/* =========================
    IMAGEM
 ========================= */
 [data-testid="stImage"] img {{
@@ -197,17 +229,6 @@ html[data-theme="dark"] .buy-btn button {{
     width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
-}}
-
-/* =========================
-   FORÇA TEXTO (IMPORTANTE)
-========================= */
-section[data-testid="stAppViewContainer"] * {{
-    color: var(--text-light);
-}}
-
-html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
-    color: var(--text-dark);
 }}
 
 </style>
@@ -255,7 +276,14 @@ if "show_dialog" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-st.title("🛍️ Modarte")
+st.markdown(f"""
+<div class="header-modarte">
+    <div class="header-overlay">
+        <h1>Modarte</h1>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 st.caption("Escolha seu look ✨")
 
 # =====================
