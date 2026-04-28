@@ -5,15 +5,6 @@ import uuid
 from pathlib import Path
 import urllib.parse
 import time
-
-if "timer" not in st.session_state:
-    st.session_state.timer = time.time()
-
-if time.time() - st.session_state.timer > 3:
-    st.session_state.timer = time.time()
-
-    # 👇 sua ação automática aqui
-    df = query_df("SELECT * FROM public.produtos")
    
 # =====================
 # CONFIG
@@ -194,6 +185,15 @@ if df.empty:
     st.warning("Nenhum produto carregado.")
     st.stop()
 
+if "timer" not in st.session_state:
+    st.session_state.timer = time.time()
+
+if time.time() - st.session_state.timer > 3:
+    st.session_state.timer = time.time()
+
+    # 👇 sua ação automática aqui
+    df = query_df("SELECT * FROM public.produtos")
+    
 df = df[df["ativo"] == True].copy()
 df = df.sort_values(by="produto")
 
