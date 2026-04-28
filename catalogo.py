@@ -267,7 +267,7 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (COM X FUNCIONAL)
+# POPUP WHATSAPP (X FUNCIONANDO + BOTÃO PRETO)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
@@ -275,10 +275,7 @@ if st.session_state.get("mostrar_popup"):
 <style>
 .popup-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     background: rgba(0,0,0,0.75);
     display: flex;
     align-items: center;
@@ -302,7 +299,7 @@ if st.session_state.get("mostrar_popup"):
     position: absolute;
     top: 10px;
     right: 12px;
-    font-size: 18px;
+    font-size: 20px;
     cursor: pointer;
     color: #aaa;
 }
@@ -311,10 +308,11 @@ if st.session_state.get("mostrar_popup"):
     color: white;
 }
 
+/* BOTÃO WHATSAPP */
 .popup-btn {
     display: block;
     background:#25D366;
-    color:white;
+    color:black !important;   /* 👈 AGORA PRETO */
     padding:12px;
     border-radius:8px;
     font-weight:bold;
@@ -324,11 +322,10 @@ if st.session_state.get("mostrar_popup"):
 </style>
 """, unsafe_allow_html=True)
 
-    # HTML SEM INDENTAÇÃO
     st.markdown(f"""<div class="popup-overlay">
 <div class="popup-box">
 
-<div class="popup-close" onclick="document.getElementById('fechar_real').click()">✖</div>
+<div class="popup-close" onclick="fecharPopup()">✖</div>
 
 <h2>🎉 Pedido enviado!</h2>
 
@@ -337,10 +334,22 @@ if st.session_state.get("mostrar_popup"):
 </a>
 
 </div>
-</div>""", unsafe_allow_html=True)
+</div>
 
-    # BOTÃO REAL (INVISÍVEL)
-    if st.button("fechar", key="fechar_real"):
+<script>
+function fecharPopup() {{
+    const botoes = window.parent.document.querySelectorAll('button');
+    botoes.forEach(btn => {{
+        if (btn.innerText === 'fechar') {{
+            btn.click();
+        }}
+    }});
+}}
+</script>
+""", unsafe_allow_html=True)
+
+    # BOTÃO REAL (escondido)
+    if st.button("fechar"):
         st.session_state.mostrar_popup = False
         st.rerun()
 
