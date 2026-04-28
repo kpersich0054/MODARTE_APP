@@ -99,11 +99,6 @@ header[data-testid="stHeader"] {{
     display: none;
 }}
 
-/* remove espaço que sobra em cima */
-.block-container {{
-    padding-top: 0rem !important;
-}}
-
 /* =========================
    CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
 ========================= */
