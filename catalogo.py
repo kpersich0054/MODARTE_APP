@@ -190,14 +190,13 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 
-html[data-theme="light"] body `{{
+html[data-theme="light"] [data-testid="stAppViewContainer"] {{
     background: linear-gradient(
         135deg,
         var(--bg-light) 0%,
         var(--secondary-light) 50%,
         var(--primary-light) 100%
-    );
-    background-attachment: fixed;
+    ) !important;
 }}
 
 html[data-theme="light"] .card {{
