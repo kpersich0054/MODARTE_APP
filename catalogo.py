@@ -190,12 +190,12 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 
-html[data-theme="light"] [data-testid="stAppViewContainer"] {{
+[data-testid="stAppViewContainer"] {{
     background: linear-gradient(
         135deg,
-        var(--bg-light) 0%,
-        var(--secondary-light) 50%,
-        var(--primary-light) 100%
+        var(--bg-light),
+        var(--secondary-light),
+        var(--primary-light)
     ) !important;
 }}
 
