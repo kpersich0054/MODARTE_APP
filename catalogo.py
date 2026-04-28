@@ -84,10 +84,21 @@ st.markdown(f"""
 }}
 
 /* =========================
-   GLOBAL
+   RESET
 ========================= */
-body {{
-    transition: all 0.3s ease;
+div[data-testid="column"] > div,
+div[data-testid="stVerticalBlock"] > div {{
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}}
+
+div[data-testid="stNumberInput"] > div {{
+    background: transparent !important;
+}}
+
+div[data-testid="column"] {{
+    padding: 0 !important;
 }}
 
 /* =========================
@@ -100,10 +111,16 @@ html[data-theme="light"] body {{
 
 html[data-theme="light"] .card {{
     background: var(--card-light);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }}
 
 html[data-theme="light"] .price {{
     color: var(--primary-light);
+}}
+
+html[data-theme="light"] .buy-btn button {{
+    background: var(--primary-light);
+    color: white;
 }}
 
 /* =========================
@@ -116,45 +133,33 @@ html[data-theme="dark"] body {{
 
 html[data-theme="dark"] .card {{
     background: var(--card-dark);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }}
 
 html[data-theme="dark"] .price {{
     color: var(--primary-dark);
 }}
 
-/* =========================
-   BOTÕES
-========================= */
-button {{
-    border-radius: 10px !important;
-    transition: 0.2s;
-}}
-
-html[data-theme="light"] button {{
-    background: var(--primary-light) !important;
-    color: white !important;
-}}
-
-html[data-theme="dark"] button {{
-    background: var(--primary-dark) !important;
-    color: black !important;
-}}
-
-button:hover {{
-    transform: scale(1.03);
+html[data-theme="dark"] .buy-btn button {{
+    background: var(--primary-dark);
+    color: black;
 }}
 
 /* =========================
-   CARD
+   CARD BASE
 ========================= */
 .card {{
     border-radius: 18px;
     padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
     transition: 0.2s;
 }}
 
 .card:hover {{
-    transform: translateY(-5px);
+    transform: translateY(-4px);
 }}
 
 /* =========================
@@ -162,13 +167,18 @@ button:hover {{
 ========================= */
 .prod-title {{
     font-weight: 600;
+    font-size: 14px;
+    min-height: 42px;
 }}
 
 .stock {{
-    opacity: 0.7;
+    font-size: 14px;
+    color: #888;
 }}
 
-/* IMAGEM */
+/* =========================
+   IMAGEM
+========================= */
 [data-testid="stImage"] img {{
     height: 250px !important;
     width: 150% !important;
