@@ -704,7 +704,14 @@ elif acao == "↩️ Estornar Venda":
 # =====================
 
 elif acao == "📋 Aprovar Pedidos":
-    st.subheader("📋 Pedidos Pendentes")
+    c1, c2 = st.columns([4, 1])
+
+    with c1:
+        st.subheader("📋 Pedidos Pendentes")
+
+    with c2:
+        if st.button("🔄", help="Atualizar pedidos"):
+        st.rerun()
 
     pedidos = query_df("""
         SELECT p.id, pr.produto, p.quantidade, p.produto_id
