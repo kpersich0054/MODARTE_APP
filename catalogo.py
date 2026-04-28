@@ -283,17 +283,6 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-/* Chrome/Edge/Safari */
-body::-webkit-scrollbar {{
-  width: 0;
-  height: 0;
-}}
-
-/* Firefox */
-body {{
-  scrollbar-width: none;
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
