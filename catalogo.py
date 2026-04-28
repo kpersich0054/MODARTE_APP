@@ -16,7 +16,11 @@ def get_base64_image(path):
 # =====================
 st_autorefresh(interval=3000, key="refresh_stock")
 
-st.set_page_config(page_title="Modarte Catálogo", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Modarte Catálogo",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
