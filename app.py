@@ -717,7 +717,7 @@ elif acao == "📋 Aprovar Pedidos":
         SELECT p.id, pr.produto, p.quantidade, p.produto_id
         FROM pedidos p
         JOIN produtos pr ON pr.id = p.produto_id
-        WHERE p.status = 'pendente'
+        WHERE p.status = 'envio_whatsap'
     """)
 
     if pedidos.empty:
