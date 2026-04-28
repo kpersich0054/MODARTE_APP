@@ -4,7 +4,17 @@ import psycopg2
 import uuid
 from pathlib import Path
 import urllib.parse
+import time
 
+st_autorefresh = st.empty()
+
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+if time.time() - st.session_state.last_refresh > 3:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
+   
 # =====================
 # CONFIG
 # =====================
