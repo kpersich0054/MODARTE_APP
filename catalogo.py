@@ -288,37 +288,23 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-/* DRAWER REAL */
-.drawer {{
+/* DRAWER DIREITA */
+section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
     position: fixed;
     top: 0;
     right: 0;
-    width: 360px;
+    width: 350px;
     height: 100vh;
-
     background: white;
     z-index: 9999;
-
     padding: 20px;
-    box-shadow: -8px 0 25px rgba(0,0,0,0.25);
-
+    box-shadow: -5px 0 20px rgba(0,0,0,0.2);
     overflow-y: auto;
-    animation: slideIn 0.3s ease;
 }}
 
-/* DARK MODE */
-html[data-theme="dark"] .drawer {{
+/* dark mode drawer */
+html[data-theme="dark"] section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
     background: #0A2E36;
-}}
-
-/* ANIMAÇÃO */
-@keyframes slideIn {{
-    from {{
-        transform: translateX(100%);
-    }}
-    to {{
-        transform: translateX(0);
-    }}
 }}
 
 </style>
@@ -369,6 +355,9 @@ if "show_cart" not in st.session_state:
 # =====================
 # HEADER
 # =====================
+
+if st.button("🛒", key="open_cart"):
+    st.session_state.show_cart = True
     
 st.markdown(f"""
 <div class="header-modarte">
@@ -378,15 +367,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-c1, c2 = st.columns([6,1])
+st.caption("Escolha seu look ✨")
 
-with c1:
-    st.caption("Escolha seu look ✨")
-
-with c2:
-    if st.button("🛒", key="open_cart"):
-        st.session_state.show_cart = True
-        
 # =====================
 # FILTROS
 # =====================
@@ -412,8 +394,6 @@ if filtro != "Todos":
 if st.session_state.show_cart:
 
     with st.container():
-
-        st.markdown("## 🛒 Carrinho")st.markdown('<div class="drawer">', unsafe_allow_html=True)
 
         st.markdown("## 🛒 Carrinho")
 
@@ -442,8 +422,6 @@ if st.session_state.show_cart:
         if st.button("❌ Fechar carrinho"):
             st.session_state.show_cart = False
             st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # =====================
 # DIALOG
