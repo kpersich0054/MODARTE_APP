@@ -721,7 +721,7 @@ elif acao == "📋 Aprovar Pedidos":
             p.quantidade
         FROM pedidos p
         JOIN produtos pr ON pr.id = p.produto_id
-        WHERE p.status = 'pendente'
+        WHERE p.status = 'envio_whatsap'
         ORDER BY p.data_pedido
     """)
 
