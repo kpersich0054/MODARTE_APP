@@ -212,79 +212,82 @@ if "carrinho" not in st.session_state:
 # =====================
 st.sidebar.title("🛒 Carrinho")
 
-total = 0
+total = sum(i["preco"] * i["qtd"] for i in st.session_state.carrinho)
+
 for item in st.session_state.carrinho:
-    st.sidebar.write(f"{item['produto']} x{item['qtd']} - R$ {item['preco']:.2f}")
-    total += item["preco"] * item["qtd"]
+    st.sidebar.write(f"{item['produto']} x{item['qtd']}")
 
-st.sidebar.markdown("---")
 st.sidebar.write(f"**Total: R$ {total:.2f}**")
+st.sidebar.markdown("---")
 
 # =====================
-# FLUXO DO PEDIDO (TUDO AQUI)
+# CONFIRMAR PEDIDO
 # =====================
-if st.session_state.carrinho and not st.session_state.get("aguardando_whatsapp"):
+if st.session_state.carrinho and not st.session_state.get("aguardando"):
 
     if st.sidebar.button("📦 Confirmar pedido"):
 
-        try:
-            pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
-            msg = f"Olá! Quero fazer um pedido:\n{pedido_txt}"
-            link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
+        pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
+        msg = f"Olá! Quero fazer um pedido:\n{pedido_txt}"
+        link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
 
-            conn = get_conn()
-            cursor = conn.cursor()
+        conn = get_conn()
+        cur = conn.cursor()
 
-            for item in st.session_state.carrinho:
-                cursor.execute("""
-                    INSERT INTO pedidos (produto_id, quantidade, status)
-                    VALUES (%s, %s, 'pendente')
-                """, (item["id"], item["qtd"]))
+        for item in st.session_state.carrinho:
+            cur.execute(
+                "INSERT INTO pedidos (produto_id, quantidade) VALUES (%s,%s)",
+                (item["id"], item["qtd"])
+            )
 
-            conn.commit()
-            conn.close()
+        conn.commit()
+        conn.close()
 
-            st.session_state.link_whatsapp = link
-            st.session_state.aguardando_whatsapp = True
-
-            st.rerun()
-
-        except Exception as e:
-            st.sidebar.error(f"Erro: {e}")
+        st.session_state.link = link
+        st.session_state.aguardando = True
+        st.rerun()
 
 # =====================
-# ETAPA WHATSAPP (DENTRO DO CARRINHO)
+# WHATSAPP (FUNCIONANDO)
 # =====================
-if st.session_state.get("aguardando_whatsapp"):
+if st.session_state.get("aguardando"):
 
     st.sidebar.info("Finalize no WhatsApp 👇")
 
-    if st.sidebar.button("📲 Abrir WhatsApp"):
-        st.session_state.pedido_confirmado = True
-        st.session_state.aguardando_whatsapp = False
+    # 🔥 LINK REAL (FUNCIONA SEMPRE)
+    st.sidebar.markdown(f"""
+    <a href="{st.session_state.link}" target="_blank"
+       style="
+        display:block;
+        text-align:center;
+        background:#25D366;
+        color:black;
+        padding:12px;
+        border-radius:10px;
+        font-weight:bold;
+        text-decoration:none;">
+       📲 Abrir WhatsApp
+    </a>
+    """, unsafe_allow_html=True)
+
+    # confirmação manual
+    if st.sidebar.button("✔ Já enviei"):
+        st.session_state.aguardando = False
+        st.session_state.sucesso = True
         st.session_state.carrinho = []
-
-        st.markdown(f"""
-        <script>
-            window.open("{st.session_state.link_whatsapp}", "_blank");
-        </script>
-        """, unsafe_allow_html=True)
-
         st.rerun()
 
     if st.sidebar.button("❌ Cancelar"):
-        st.session_state.aguardando_whatsapp = False
+        st.session_state.aguardando = False
         st.rerun()
 
 # =====================
-# SUCESSO (DENTRO DO CARRINHO)
+# SUCESSO
 # =====================
-if st.session_state.get("pedido_confirmado"):
-
+if st.session_state.get("sucesso"):
     st.sidebar.success("🎉 Pedido enviado!")
-
     if st.sidebar.button("OK"):
-        st.session_state.pedido_confirmado = False
+        st.session_state.sucesso = False
         st.rerun()
 
 # =====================
