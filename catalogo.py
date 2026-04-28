@@ -11,9 +11,6 @@ def get_base64_image(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
-img_logo = BASE_DIR / "Logo_Modarte.jpg"
-img_base64 = get_base64_image(img_logo)
-
 # =====================
 # CONFIG
 # =====================
@@ -23,6 +20,9 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
+
+img_logo = BASE_DIR / "Logo_Modarte.jpg"
+img_base64 = get_base64_image(img_logo)
 
 # =====================
 # CONEXÃO SEGURA
