@@ -221,9 +221,9 @@ st.sidebar.markdown("---")
 st.sidebar.write(f"**Total: R$ {total:.2f}**")
 
 # =====================
-# CONFIRMAR PEDIDO
+# FLUXO DO PEDIDO (TUDO AQUI)
 # =====================
-if st.session_state.carrinho:
+if st.session_state.carrinho and not st.session_state.get("aguardando_whatsapp"):
 
     if st.sidebar.button("📦 Confirmar pedido"):
 
@@ -250,42 +250,40 @@ if st.session_state.carrinho:
             st.rerun()
 
         except Exception as e:
-            st.error(f"Erro ao finalizar pedido: {e}")
+            st.sidebar.error(f"Erro: {e}")
 
 # =====================
-# CONFIRMAR VIA WHATSAPP
+# ETAPA WHATSAPP (DENTRO DO CARRINHO)
 # =====================
 if st.session_state.get("aguardando_whatsapp"):
 
-    st.info("Finalize seu pedido no WhatsApp 👇")
+    st.sidebar.info("Finalize no WhatsApp 👇")
 
-    col1, col2 = st.columns([1,1])
+    if st.sidebar.button("📲 Abrir WhatsApp"):
+        st.session_state.pedido_confirmado = True
+        st.session_state.aguardando_whatsapp = False
+        st.session_state.carrinho = []
 
-    with col1:
-        if st.button("📲 Abrir WhatsApp"):
-            st.session_state.pedido_confirmado = True
-            st.session_state.aguardando_whatsapp = False
-            st.session_state.carrinho = []
-            st.markdown(f"""
-            <script>
-                window.open("{st.session_state.link_whatsapp}", "_blank");
-            </script>
-            """, unsafe_allow_html=True)
-            st.rerun()
+        st.markdown(f"""
+        <script>
+            window.open("{st.session_state.link_whatsapp}", "_blank");
+        </script>
+        """, unsafe_allow_html=True)
 
-    with col2:
-        if st.button("Cancelar"):
-            st.session_state.aguardando_whatsapp = False
-            st.rerun()
-            
+        st.rerun()
+
+    if st.sidebar.button("❌ Cancelar"):
+        st.session_state.aguardando_whatsapp = False
+        st.rerun()
+
 # =====================
-# SUCESSO FINAL
+# SUCESSO (DENTRO DO CARRINHO)
 # =====================
 if st.session_state.get("pedido_confirmado"):
 
-    st.success("🎉 Pedido enviado com sucesso!")
+    st.sidebar.success("🎉 Pedido enviado!")
 
-    if st.button("OK"):
+    if st.sidebar.button("OK"):
         st.session_state.pedido_confirmado = False
         st.rerun()
 
