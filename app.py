@@ -22,20 +22,15 @@ def check_login():
 
     if st.button("Entrar"):
 
-        users = dict(st.secrets["auth"]["users"])
+        valid_user = st.secrets["auth"]["user"]
+        valid_pass = st.secrets["auth"]["password"]
 
-        user = user.strip()
-        password = password.strip()
-
-        if user in users and users[user] == password:
+        if user.strip() == valid_user and password.strip() == valid_pass:
             st.session_state.logged = True
             st.success("Login realizado!")
             st.rerun()
         else:
             st.error("Usuário ou senha inválidos")
-            st.write("USER:", repr(user))
-            st.write("PASS:", repr(password))
-            st.write(users)
 
     return False
     
