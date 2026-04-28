@@ -180,7 +180,15 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 html[data-theme="light"] body {{
-    background: var(--bg-light);
+    background: radial-gradient(circle at top left,
+        var(--secondary-light),
+        var(--bg-light) 40%
+    ),
+    linear-gradient(
+        135deg,
+        #ffffff,
+        var(--primary-light)
+    );
     color: var(--text-light);
 }}
 
