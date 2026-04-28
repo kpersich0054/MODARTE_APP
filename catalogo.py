@@ -93,35 +93,9 @@ st.markdown(f"""
 }}
 
 /* =========================
-   ESCONDER HEADER STREAMLIT
+   REMOVE FUNDO BRANCO (CORREÇÃO DARK MODE)
 ========================= */
-header[data-testid="stHeader"] {{
-    display: none;
-}}
-
-/* remove espaço que sobra em cima */
-.block-container {{
-    padding-top: 0rem !important;
-}}
-
-/* remove botão lateral (>>) */
-button[kind="header"] {{
-    display: none;
-}}
-
-/* =========================
-   CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
-========================= */
-html, body {{
-    background: transparent !important;
-}}
-
-/* apenas área principal */
-section[data-testid="stAppViewContainer"] {{
-    background: transparent !important;
-}}
-
-.main {{
+section.main {{
     background: transparent !important;
 }}
 
@@ -130,9 +104,8 @@ section[data-testid="stAppViewContainer"] {{
     padding-top: 2rem;
 }}
 
-/* NÃO mexe na sidebar */
-section[data-testid="stSidebar"] {{
-    background: var(--primary-light);
+header {{
+    background: transparent !important;
 }}
 
 /* =========================
@@ -207,13 +180,17 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 
-[data-testid="stAppViewContainer"] {{
-    background: linear-gradient(
-        135deg,
-        var(--bg-light),
+html[data-theme="light"] body {{
+    background: radial-gradient(circle at top left,
         var(--secondary-light),
+        var(--bg-light) 40%
+    ),
+    linear-gradient(
+        135deg,
+        #ffffff,
         var(--primary-light)
-    ) !important;
+    );
+    color: var(--text-light);
 }}
 
 html[data-theme="light"] .card {{
