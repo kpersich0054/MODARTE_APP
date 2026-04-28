@@ -711,7 +711,7 @@ elif acao == "📋 Aprovar Pedidos":
 
     with c2:
         if st.button("🔄", help="Atualizar pedidos"):
-        st.rerun()
+            st.rerun()
 
     pedidos = query_df("""
         SELECT p.id, pr.produto, p.quantidade, p.produto_id
