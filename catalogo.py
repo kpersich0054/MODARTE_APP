@@ -364,7 +364,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-c1, c2 = st.columns([3,0])
+c1, c2 = st.columns([4,1])
 
 with c1:
     st.caption("Escolha seu look ✨")
