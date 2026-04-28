@@ -93,9 +93,18 @@ st.markdown(f"""
 }}
 
 /* =========================
-   REMOVE FUNDO BRANCO (CORREÇÃO DARK MODE)
+   CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
 ========================= */
-section.main {{
+html, body {
+    background: transparent !important;
+}
+
+/* apenas área principal */
+section[data-testid="stAppViewContainer"] {{
+    background: transparent !important;
+}}
+
+.main {{
     background: transparent !important;
 }}
 
@@ -104,8 +113,9 @@ section.main {{
     padding-top: 2rem;
 }}
 
-header {{
-    background: transparent !important;
+/* NÃO mexe na sidebar */
+section[data-testid="stSidebar"] {{
+    background: var(--primary-light);
 }}
 
 /* =========================
@@ -180,17 +190,14 @@ div[data-testid="column"] {{
    LIGHT MODE
 ========================= */
 
-html[data-theme="light"] body {{
-    background: radial-gradient(circle at top left,
-        var(--secondary-light),
-        var(--bg-light) 40%
-    ),
-    linear-gradient(
+html[data-theme="light"] body `{{
+    background: linear-gradient(
         135deg,
-        #ffffff,
-        var(--primary-light)
+        var(--bg-light) 0%,
+        var(--secondary-light) 50%,
+        var(--primary-light) 100%
     );
-    color: var(--text-light);
+    background-attachment: fixed;
 }}
 
 html[data-theme="light"] .card {{
