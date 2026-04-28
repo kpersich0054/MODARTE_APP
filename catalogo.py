@@ -434,5 +434,5 @@ for row_group in rows:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             else:
-                st.markdown("<div class='stock' style='color:#ff5252'; font-size:16px;>Sem estoque</div>", unsafe_allow_html=True)
+                st.markdown("<div class='stock' style='color:#ff5252'; font-size:52px;>Sem estoque</div>", unsafe_allow_html=True)
                 qtd = 0
