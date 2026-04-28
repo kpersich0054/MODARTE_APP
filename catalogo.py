@@ -329,7 +329,7 @@ Total: R$ {total:.2f}
                     item["preco"],
                     desconto,
                     total,
-                    "confirmado"
+                    "envio_whatsap"
                 ))
 
             conn.commit()
