@@ -283,25 +283,15 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-/* Esconde a scrollbar vertical (mantém rolagem) */
-html, body,
-section[data-testid="stAppViewContainer"],
-div[data-testid="stApp"]{{
-  scrollbar-width: none !important;     /* Firefox */
-  -ms-overflow-style: none !important;  /* Edge antigo */
+/* Chrome/Edge/Safari */
+body::-webkit-scrollbar {{
+  width: 0;
+  height: 0;
 }}
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-section[data-testid="stAppViewContainer"]::-webkit-scrollbar,
-div[data-testid="stApp"]::-webkit-scrollbar{{
-  width: 0 !important;   /* Chrome/Edge/Safari */
-  height: 0 !important;
-}}
-
-html, body,
-section[data-testid="stAppViewContainer"]{{
-  overflow-x: hidden !important;
+/* Firefox */
+body {{
+  scrollbar-width: none;
 }}
 
 </style>
