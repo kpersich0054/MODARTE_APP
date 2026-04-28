@@ -15,6 +15,9 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 st.markdown("""
 <style>
 
+/* =========================
+   RESET GERAL
+========================= */
 div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"] > div {
     background: transparent !important;
@@ -22,40 +25,100 @@ div[data-testid="stVerticalBlock"] > div {
     border: none !important;
 }
 
+/* REMOVE FUNDO DO NUMBER INPUT (CAUSADOR DO BUG) */
 div[data-testid="stNumberInput"] > div {
     background: transparent !important;
 }
 
+/* REMOVE PADDING DAS COLUNAS */
+div[data-testid="column"] {
+    padding: 0 !important;
+}
+
+/* =========================
+   CARD (LIGHT / DARK)
+========================= */
+
+/* 🌞 LIGHT MODE */
+html[data-theme="light"] .card {
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* 🌙 DARK MODE */
+html[data-theme="dark"] .card {
+    background: linear-gradient(145deg, #1e1e1e, #252525);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+/* CARD BASE */
 .card {
     border-radius: 18px;
     padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
     height: 100%;
     transition: 0.2s;
-    background: #1e1e1e;
 }
 
 .card:hover {
     transform: translateY(-4px);
 }
 
+/* CONTEÚDO */
+.card-content {
+    flex-grow: 1;
+}
+
+/* AÇÕES */
+.card-actions {
+    margin-top: 10px;
+}
+
+/* BOTÕES COLADOS */
+.card-actions > div {
+    gap: 6px !important;
+}
+
+/* BOTÕES PEQUENOS */
+.card-actions button {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+}
+
+/* IMAGEM */
+[data-testid="stImage"] img {
+    height: 250px !important;
+    width: 150% !important;
+    object-fit: cover !important;
+    border-radius: 12px;
+}
+
+/* TITULO */
 .prod-title {
     font-weight: 600;
     font-size: 14px;
     min-height: 42px;
-    color: white;
 }
 
+/* PREÇO */
 .price {
     font-size: 20px;
     font-weight: bold;
     color: #00c853;
 }
 
+/* ESTOQUE */
 .stock {
     font-size: 12px;
-    color: #aaa;
+    color: #888;
 }
 
+/* BOTÃO PRINCIPAL */
 .buy-btn button {
     background-color: #00c853;
     color: white;
@@ -63,6 +126,12 @@ div[data-testid="stNumberInput"] > div {
     border-radius: 10px;
     height: 38px;
 }
+
+/* INPUT */
+.stNumberInput {
+    min-height: 70px;
+}
+
 
 </style>
 """, unsafe_allow_html=True)
