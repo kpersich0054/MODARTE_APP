@@ -267,93 +267,103 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (X FUNCIONANDO + BOTÃO PRETO)
+# POPUP WHATSAPP (TOP - FUNCIONAL COMPLETO)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
-    st.markdown("""
-<style>
-.popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999999;
-}
+    components.html(f"""
+    <style>
+    body {{
+        margin: 0;
+    }}
 
-.popup-box {
-    position: relative;
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    width: 320px;
-    color: white;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
-}
+    .popup-overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+    }}
 
-/* BOTÃO X */
-.popup-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    font-size: 20px;
-    cursor: pointer;
-    color: #aaa;
-}
+    .popup-box {{
+        position: relative;
+        background: #1e1e1e;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        width: 320px;
+        color: white;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+    }}
 
-.popup-close:hover {
-    color: white;
-}
+    @keyframes fadeIn {{
+        from {{opacity:0; transform: scale(0.9);}}
+        to {{opacity:1; transform: scale(1);}}
+    }}
 
-/* BOTÃO WHATSAPP */
-.popup-btn {
-    display: block;
-    background:#25D366;
-    color:black !important;   /* 👈 AGORA PRETO */
-    padding:12px;
-    border-radius:8px;
-    font-weight:bold;
-    margin-top:15px;
-    text-decoration:none;
-}
-</style>
-""", unsafe_allow_html=True)
+    /* BOTÃO X */
+    .popup-close {{
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        color: #aaa;
+    }}
 
-    st.markdown(f"""<div class="popup-overlay">
-<div class="popup-box">
+    .popup-close:hover {{
+        color: white;
+    }}
 
-<div class="popup-close" onclick="fecharPopup()">✖</div>
+    /* BOTÃO WHATSAPP */
+    .popup-btn {{
+        display: block;
+        background:#25D366;
+        color:black; /* 👈 TEXTO PRETO */
+        padding:12px;
+        border-radius:8px;
+        font-weight:bold;
+        margin-top:15px;
+        text-decoration:none;
+    }}
+    </style>
 
-<h2>🎉 Pedido enviado!</h2>
+    <div class="popup-overlay" id="overlay">
+        <div class="popup-box" id="popup">
 
-<a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
-📲 Abrir WhatsApp
-</a>
+            <div class="popup-close" onclick="fecharPopup()">✖</div>
 
-</div>
-</div>
+            <h2>🎉 Pedido enviado!</h2>
 
-<script>
-function fecharPopup() {{
-    const botoes = window.parent.document.querySelectorAll('button');
-    botoes.forEach(btn => {{
-        if (btn.innerText === 'fechar') {{
-            btn.click();
+            <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
+                📲 Abrir WhatsApp
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+    function fecharPopup() {{
+        document.getElementById("overlay").style.display = "none";
+    }}
+
+    // clicar fora fecha
+    document.getElementById("overlay").addEventListener("click", function(e) {{
+        if (e.target.id === "overlay") {{
+            fecharPopup();
         }}
     }});
-}}
-</script>
-""", unsafe_allow_html=True)
+    </script>
+    """, height=0)
 
-    # BOTÃO REAL (escondido)
-    if st.button("fechar"):
-        st.session_state.mostrar_popup = False
-        st.rerun()
-
-    st.stop()
+    # limpa estado pra não reaparecer
+    st.session_state.mostrar_popup = False
        
 # =====================
 # FAVORITOS
