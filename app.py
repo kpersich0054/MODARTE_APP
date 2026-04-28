@@ -29,6 +29,7 @@ def check_login():
             st.rerun()
         else:
             st.error("Usuário ou senha inválidos")
+            st.write(st.secrets["auth"]["users"])
 
     return False
     
