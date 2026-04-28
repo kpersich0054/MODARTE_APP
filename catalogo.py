@@ -104,11 +104,6 @@ header[data-testid="stHeader"] {{
     padding-top: 0rem !important;
 }}
 
-/* remove botão lateral (>>) */
-button[kind="header"] {{
-    display: none;
-}}
-
 /* =========================
    CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
 ========================= */
