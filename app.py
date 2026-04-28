@@ -739,7 +739,7 @@ elif acao == "📋 Aprovar Pedidos":
         c1, c2 = st.columns(2)
 
         with c1:
-            if st.button(f"Aprovar {pedido_id}", key=f"ap_{pedido_id}"):
+            if st.button(f"Aprovar", key=f"ap_{pedido_id}"):
 
                 for _, row in grupo.iterrows():
                     registrar_venda(
@@ -765,7 +765,7 @@ elif acao == "📋 Aprovar Pedidos":
                 st.rerun()
 
         with c2:
-            if st.button(f"Reprovar {pedido_id}", key=f"rep_{pedido_id}"):
+            if st.button(f"Reprovar", key=f"rep_{pedido_id}"):
 
                 conn = get_conn()
                 cursor = conn.cursor()
