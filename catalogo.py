@@ -161,6 +161,18 @@ def query_df(sql):
     except Exception as e:
         st.error(f"Erro ao conectar no banco: {e}")
         return pd.DataFrame()
+       
+# =====================
+# FUNÇÃO DE CÁLCULO
+# =====================
+def calcular_total(carrinho):
+    total_bruto = sum(i["preco"] * i["qtd"] for i in carrinho)
+    qtd_total = sum(i["qtd"] for i in carrinho)
+
+    desconto = 5 if qtd_total >= 3 else 0
+    total = total_bruto - desconto
+
+    return total_bruto, desconto, total
 
 # =====================
 # DADOS
@@ -173,6 +185,21 @@ if df.empty:
 
 df = df[df["ativo"] == True].copy()
 df = df.sort_values(by="produto")
+
+# =====================
+# ESTADO
+# =====================
+if "favoritos" not in st.session_state:
+    st.session_state.favoritos = set()
+
+if "carrinho" not in st.session_state:
+    st.session_state.carrinho = []
+
+if "checkout" not in st.session_state:
+    st.session_state.checkout = []
+
+if "show_dialog" not in st.session_state:
+    st.session_state.show_dialog = False
 
 # =====================
 # HEADER
@@ -199,94 +226,120 @@ if filtro != "Todos":
     df = df[df["produto"].str.contains(termo, case=False)]
 
 # =====================
-# ESTADO
-# =====================
-if "favoritos" not in st.session_state:
-    st.session_state.favoritos = set()
-
-if "carrinho" not in st.session_state:
-    st.session_state.carrinho = []
-
-# =====================
 # SIDEBAR
 # =====================
 st.sidebar.title("🛒 Carrinho")
 
-total = sum(i["preco"] * i["qtd"] for i in st.session_state.carrinho)
+total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
 
 for item in st.session_state.carrinho:
     st.sidebar.write(f"{item['produto']} x{item['qtd']}")
+
+st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
+
+if desconto > 0:
+    st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
 
 st.sidebar.write(f"**Total: R$ {total:.2f}**")
 st.sidebar.markdown("---")
 
 # =====================
-# CONFIRMAR PEDIDO
+# CONFIRMAR PEDIDO (ABRE DIALOG)
 # =====================
-if st.session_state.carrinho and not st.session_state.get("aguardando"):
-
+if st.session_state.carrinho:
     if st.sidebar.button("📦 Confirmar pedido"):
-
-        pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in st.session_state.carrinho])
-        msg = f"Olá! Quero fazer um pedido:\n{pedido_txt}"
-        link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
-
-        conn = get_conn()
-        cur = conn.cursor()
-
-        for item in st.session_state.carrinho:
-            cur.execute(
-                "INSERT INTO pedidos (produto_id, quantidade) VALUES (%s,%s)",
-                (item["id"], item["qtd"])
-            )
-
-        conn.commit()
-        conn.close()
-
-        st.session_state.link = link
-        st.session_state.aguardando = True
+        st.session_state.checkout = st.session_state.carrinho.copy()
+        st.session_state.show_dialog = True
         st.rerun()
 
 # =====================
-# WHATSAPP (FUNCIONANDO)
+# DIALOG
 # =====================
-
 @st.dialog("Finalizar pedido")
-def dialog_whatsapp():
-    st.info("Finalize no WhatsApp 👇")
+def dialog_checkout():
+
+    carrinho = st.session_state.checkout
+    total_bruto, desconto, total = calcular_total(carrinho)
+
+    st.subheader("🧾 Resumo do pedido")
+
+    for item in carrinho:
+        st.write(f"{item['produto']} x{item['qtd']}")
+
+    st.markdown("---")
+    st.write(f"Subtotal: R$ {total_bruto:.2f}")
+
+    if desconto > 0:
+        st.write(f"Desconto: -R$ {desconto:.2f} 🎉")
+
+    st.write(f"**Total: R$ {total:.2f}**")
+
+    # WhatsApp
+    pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in carrinho])
+
+    msg = f"""Olá! Quero fazer um pedido:
+
+{pedido_txt}
+
+Subtotal: R$ {total_bruto:.2f}
+Desconto: -R$ {desconto:.2f}
+Total: R$ {total:.2f}
+"""
+
+    link = f"https://wa.me/5511964336480?text={urllib.parse.quote_plus(msg)}"
 
     st.markdown(f"""
-    <a href="{st.session_state.link}" target="_blank"
-       style="
-        display:block;
-        text-align:center;
-        background:#25D366;
-        color:black;
-        padding:12px;
-        border-radius:10px;
-        font-weight:bold;
-        text-decoration:none;">
+    <a href="{link}" target="_blank"
+       style="display:block;text-align:center;background:#25D366;
+       color:black;padding:12px;border-radius:10px;font-weight:bold;">
        📲 Abrir WhatsApp
     </a>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
+    # CONFIRMAR
     with col1:
         if st.button("✔ Já enviei"):
-            st.session_state.aguardando = False
-            st.session_state.sucesso = True
+
+            conn = get_conn()
+            cur = conn.cursor()
+
+            for item in carrinho:
+                cur.execute("""
+                    INSERT INTO pedidos 
+                    (produto_id, quantidade, preco_unitario, desconto, total, status)
+                    VALUES (%s,%s,%s,%s,%s,%s)
+                """, (
+                    item["id"],
+                    item["qtd"],
+                    item["preco"],
+                    desconto,
+                    total,
+                    "confirmado"
+                ))
+
+            conn.commit()
+            conn.close()
+
+            # limpa tudo
             st.session_state.carrinho = []
+            st.session_state.checkout = []
+            st.session_state.show_dialog = False
+
+            st.success("Pedido confirmado!")
             st.rerun()
 
+    # CANCELAR
     with col2:
         if st.button("❌ Cancelar"):
-            st.session_state.aguardando = False
+            st.session_state.show_dialog = False
             st.rerun()
-            
-if st.session_state.get("aguardando"):
-    dialog_whatsapp()
 
+# abrir dialog
+if st.session_state.show_dialog:
+    dialog_checkout()
+    
 # =====================
 # SUCESSO
 # =====================
@@ -353,9 +406,15 @@ for row_group in rows:
                     })
                     st.rerun()
 
+            # comprar agora (usa MESMO fluxo)
             if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-                msg = urllib.parse.quote(f"Olá! Quero o produto:\n{row['produto']}\nQuantidade: {qtd}")
-                link = f"https://wa.me/5511964336480?text={msg}"
-                st.markdown(f"[👉 Abrir WhatsApp]({link})")
+                st.session_state.checkout = [{
+                    "id": row["id"],
+                    "produto": row["produto"],
+                    "preco": float(row["preco"]),
+                    "qtd": qtd
+                }]
+                st.session_state.show_dialog = True
+                st.rerun()
 
             st.markdown('</div>', unsafe_allow_html=True)
