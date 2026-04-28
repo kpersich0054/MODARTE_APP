@@ -288,25 +288,6 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-/* DRAWER DIREITA */
-section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 350px;
-    height: 100vh;
-    background: white;
-    z-index: 9999;
-    padding: 20px;
-    box-shadow: -5px 0 20px rgba(0,0,0,0.2);
-    overflow-y: auto;
-}}
-
-/* dark mode drawer */
-html[data-theme="dark"] section[data-testid="stVerticalBlock"]:has(.stMarkdown h2:contains("Carrinho")) {{
-    background: #0A2E36;
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -349,16 +330,9 @@ if "checkout" not in st.session_state:
 if "show_dialog" not in st.session_state:
     st.session_state.show_dialog = False
 
-if "show_cart" not in st.session_state:
-    st.session_state.show_cart = False
-
 # =====================
 # HEADER
 # =====================
-
-if st.button("🛒", key="open_cart"):
-    st.session_state.show_cart = True
-    
 st.markdown(f"""
 <div class="header-modarte">
     <div class="header-overlay">
@@ -390,38 +364,29 @@ if filtro != "Todos":
 # =====================
 # SIDEBAR
 # =====================
+st.sidebar.title("🛒 Carrinho")
 
-if st.session_state.show_cart:
+total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
 
-    with st.container():
+for item in st.session_state.carrinho:
+    st.sidebar.write(f"{item['produto']} x{item['qtd']}")
 
-        st.markdown("## 🛒 Carrinho")
+st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
 
-        total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
+if desconto > 0:
+    st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
 
-        if not st.session_state.carrinho:
-            st.write("Carrinho vazio")
-        else:
-            for item in st.session_state.carrinho:
-                st.write(f"{item['produto']} x{item['qtd']}")
+st.sidebar.write(f"**Total: R$ {total:.2f}**")
+st.sidebar.markdown("---")
 
-            st.markdown("---")
-            st.write(f"Subtotal: R$ {total_bruto:.2f}")
-
-            if desconto > 0:
-                st.write(f"Desconto: -R$ {desconto:.2f} 🎉")
-
-            st.write(f"**Total: R$ {total:.2f}**")
-
-            if st.button("📦 Finalizar pedido"):
-                st.session_state.checkout = st.session_state.carrinho.copy()
-                st.session_state.show_dialog = True
-                st.session_state.show_cart = False
-                st.rerun()
-
-        if st.button("❌ Fechar carrinho"):
-            st.session_state.show_cart = False
-            st.rerun()
+# =====================
+# CONFIRMAR PEDIDO (ABRE DIALOG)
+# =====================
+if st.session_state.carrinho:
+    if st.sidebar.button("📦 Confirmar pedido"):
+        st.session_state.checkout = st.session_state.carrinho.copy()
+        st.session_state.show_dialog = True
+        st.rerun()
 
 # =====================
 # DIALOG
