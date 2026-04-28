@@ -275,7 +275,20 @@ def dialog_checkout():
     st.write(f"**Total: R$ {total:.2f}**")
 
     # WhatsApp
-    pedido_txt = "\n".join([f"{i['produto']} x{i['qtd']}" for i in carrinho])
+    pedido_linhas = []
+
+    for item in carrinho:
+        preco_unit = item["preco"]
+        qtd = item["qtd"]
+        total_item = preco_unit * qtd
+
+        pedido_linhas.append(
+            f"{item['produto']} x{qtd}\n"
+            f"  • Unitário: R$ {preco_unit:.2f}\n"
+            f"  • Total: R$ {total_item:.2f}"
+        )
+
+    pedido_txt = "\n\n".join(pedido_linhas)
 
     msg = f"""Olá! Quero fazer um pedido:
 
