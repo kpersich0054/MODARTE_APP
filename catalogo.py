@@ -267,7 +267,7 @@ if st.session_state.carrinho:
             conn.close()
 
 # =====================
-# POPUP WHATSAPP (FIX REAL)
+# POPUP WHATSAPP (X FUNCIONANDO + BOTÃO PRETO)
 # =====================
 if st.session_state.get("mostrar_popup"):
 
@@ -275,10 +275,7 @@ if st.session_state.get("mostrar_popup"):
 <style>
 .popup-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     background: rgba(0,0,0,0.75);
     display: flex;
     align-items: center;
@@ -287,6 +284,7 @@ if st.session_state.get("mostrar_popup"):
 }
 
 .popup-box {
+    position: relative;
     background: #1e1e1e;
     padding: 30px;
     border-radius: 12px;
@@ -296,10 +294,25 @@ if st.session_state.get("mostrar_popup"):
     box-shadow: 0 0 30px rgba(0,0,0,0.5);
 }
 
+/* BOTÃO X */
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.popup-close:hover {
+    color: white;
+}
+
+/* BOTÃO WHATSAPP */
 .popup-btn {
     display: block;
     background:#25D366;
-    color:white;
+    color:black !important;   /* 👈 AGORA PRETO */
     padding:12px;
     border-radius:8px;
     font-weight:bold;
@@ -309,9 +322,11 @@ if st.session_state.get("mostrar_popup"):
 </style>
 """, unsafe_allow_html=True)
 
-    # ⚠️ SEM INDENTAÇÃO AQUI
     st.markdown(f"""<div class="popup-overlay">
 <div class="popup-box">
+
+<div class="popup-close" onclick="fecharPopup()">✖</div>
+
 <h2>🎉 Pedido enviado!</h2>
 
 <a class="popup-btn" href="{st.session_state.link_whatsapp}" target="_blank">
@@ -319,10 +334,22 @@ if st.session_state.get("mostrar_popup"):
 </a>
 
 </div>
-</div>""", unsafe_allow_html=True)
+</div>
 
-    # botão real do Streamlit (fora do HTML)
-    if st.button("❌ Fechar popup"):
+<script>
+function fecharPopup() {{
+    const botoes = window.parent.document.querySelectorAll('button');
+    botoes.forEach(btn => {{
+        if (btn.innerText === 'fechar') {{
+            btn.click();
+        }}
+    }});
+}}
+</script>
+""", unsafe_allow_html=True)
+
+    # BOTÃO REAL (escondido)
+    if st.button("fechar"):
         st.session_state.mostrar_popup = False
         st.rerun()
 
