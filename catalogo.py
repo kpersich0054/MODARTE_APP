@@ -118,22 +118,32 @@ div[data-testid="column"] {{
 }}
 
 /* =========================
-   HEADER MODARTE
+   HEADER FULL WIDTH
 ========================= */
-.header-modarte {{
-    width: 100%;
-    height: 120px;
-    border-radius: 16px;
-    overflow: hidden;
+.header-modarte {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
 
-    background-image: url("app/static/Logo_Modarte.jpg");
+    width: 100vw;
+    height: 140px;
+
+    background-image: url("Logo_Modarte.jpg");
     background-size: cover;
     background-position: center;
 
-    margin-bottom: 10px;
-}}
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.header-overlay {{
+    margin-top: -20px;
+    margin-bottom: 20px;
+}
+
+/* overlay escuro pra contraste */
+.header-overlay {
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,0.35);
@@ -141,20 +151,21 @@ div[data-testid="column"] {{
     display: flex;
     align-items: center;
     justify-content: center;
-}}
+}
 
-.header-overlay h1 {{
+/* TEXTO */
+.header-overlay h1 {
     color: white;
-    font-size: 42px;
-    font-weight: 800;
+    font-size: 48px;
+    font-weight: 900;
     letter-spacing: 2px;
 
     text-shadow:
-        -1px -1px 0 #016893,
-         1px -1px 0 #016893,
-        -1px  1px 0 #016893,
-         1px  1px 0 #016893;
-}}
+        -2px -2px 0 #016893,
+         2px -2px 0 #016893,
+        -2px  2px 0 #016893,
+         2px  2px 0 #016893;
+}
 
 /* =========================
    LIGHT MODE
