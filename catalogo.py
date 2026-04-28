@@ -406,42 +406,44 @@ if filtro != "Todos":
     df = df[df["produto"].str.contains(termo, case=False)]
 
 # =====================
-# CARRINHO (MODAL)
+# SIDEBAR
 # =====================
-@st.dialog("🛒 Seu Carrinho")
-def dialog_carrinho():
-    total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
 
-    if not st.session_state.carrinho:
-        st.info("Seu carrinho está vazio.")
-    else:
-        for item in st.session_state.carrinho:
-            st.write(f"**{item['produto']}** (x{item['qtd']})")
+if st.session_state.show_cart:
 
-        st.markdown("---")
-        st.write(f"Subtotal: R$ {total_bruto:.2f}")
+    with st.container():
 
-        if desconto > 0:
-            st.success(f"Desconto: -R$ {desconto:.2f} 🎉")
+        st.markdown("## 🛒 Carrinho")st.markdown('<div class="drawer">', unsafe_allow_html=True)
 
-        st.markdown(f"#### Total: R$ {total:.2f}")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("📦 Finalizar pedido", use_container_width=True):
+        st.markdown("## 🛒 Carrinho")
+
+        total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
+
+        if not st.session_state.carrinho:
+            st.write("Carrinho vazio")
+        else:
+            for item in st.session_state.carrinho:
+                st.write(f"{item['produto']} x{item['qtd']}")
+
+            st.markdown("---")
+            st.write(f"Subtotal: R$ {total_bruto:.2f}")
+
+            if desconto > 0:
+                st.write(f"Desconto: -R$ {desconto:.2f} 🎉")
+
+            st.write(f"**Total: R$ {total:.2f}**")
+
+            if st.button("📦 Finalizar pedido"):
                 st.session_state.checkout = st.session_state.carrinho.copy()
                 st.session_state.show_dialog = True
                 st.session_state.show_cart = False
                 st.rerun()
-        with col2:
-            if st.button("❌ Fechar", use_container_width=True):
-                st.session_state.show_cart = False
-                st.rerun()
 
-if st.session_state.show_cart:
-    dialog_carrinho()
+        if st.button("❌ Fechar carrinho"):
+            st.session_state.show_cart = False
+            st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # =====================
 # DIALOG
