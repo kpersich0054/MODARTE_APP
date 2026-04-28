@@ -21,8 +21,8 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
-img_logo = BASE_DIR / "Logo_Modarte.jpg"
-img_base64 = get_base64_image(img_logo)
+img_back = BASE_DIR / "Modarte_background.jpg"
+img_base64 = get_base64_image(img_back)
 
 # =====================
 # CONEXÃO SEGURA
