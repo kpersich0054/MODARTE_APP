@@ -285,7 +285,7 @@ if st.session_state.get("aguardando"):
 # SUCESSO
 # =====================
 if st.session_state.get("sucesso"):
-    st.sidebar.success("🎉 Pedido enviado!")
+    st.sidebar.success("Pedido em analise")
     if st.sidebar.button("OK"):
         st.session_state.sucesso = False
         st.rerun()
