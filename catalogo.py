@@ -116,20 +116,6 @@ html, body {{
     background: transparent !important;
 }}
 
-/* Remove scrollbars (mas mantém rolagem) */
-html, body,
-section[data-testid="stAppViewContainer"]{{
-    scrollbar-width: none;        /* Firefox */
-    -ms-overflow-style: none;     /* IE/Edge antigo */
-}}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-section[data-testid="stAppViewContainer"]::-webkit-scrollbar{{
-    width: 0px;                   /* Chrome/Safari/Edge */
-    height: 0px;
-}}
-
 /* apenas área principal */
 section[data-testid="stAppViewContainer"] {{
     background: transparent !important;
@@ -295,6 +281,27 @@ html[data-theme="dark"] .price {{
     width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
+}}
+
+/* Esconde a scrollbar vertical (mantém rolagem) */
+html, body,
+section[data-testid="stAppViewContainer"],
+div[data-testid="stApp"]{{
+  scrollbar-width: none !important;     /* Firefox */
+  -ms-overflow-style: none !important;  /* Edge antigo */
+}}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+section[data-testid="stAppViewContainer"]::-webkit-scrollbar,
+div[data-testid="stApp"]::-webkit-scrollbar{{
+  width: 0 !important;   /* Chrome/Edge/Safari */
+  height: 0 !important;
+}}
+
+html, body,
+section[data-testid="stAppViewContainer"]{{
+  overflow-x: hidden !important;
 }}
 
 </style>
