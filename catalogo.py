@@ -99,6 +99,17 @@ header[data-testid="stHeader"] {{
     display: none;
 }}
 
+/* remove espaço que sobra em cima */
+.block-container {{
+    padding-top: 0rem !important;
+}}
+
+/* remove botão lateral (>>) */
+button[kind="header"] {{
+    display: none;
+}}
+
+
 /* =========================
    CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
 ========================= */
