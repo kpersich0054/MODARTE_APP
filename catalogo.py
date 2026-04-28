@@ -406,15 +406,11 @@ if filtro != "Todos":
     df = df[df["produto"].str.contains(termo, case=False)]
 
 # =====================
-# SIDEBAR
+# CARRINHO (BARRA LATERAL)
 # =====================
 
 if st.session_state.show_cart:
-
-    with st.container():
-
-        st.markdown('<div class="drawer">', unsafe_allow_html=True)
-
+    with st.sidebar:
         st.markdown("## 🛒 Carrinho")
 
         total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
@@ -442,8 +438,6 @@ if st.session_state.show_cart:
         if st.button("❌ Fechar carrinho"):
             st.session_state.show_cart = False
             st.rerun()
-
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # =====================
 # DIALOG
