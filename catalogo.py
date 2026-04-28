@@ -5,6 +5,15 @@ import uuid
 from pathlib import Path
 import urllib.parse
 from streamlit_autorefresh import st_autorefresh   
+import base64
+
+def get_base64_image(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+img_logo = BASE_DIR / "Logo_Modarte.jpg"
+img_base64 = get_base64_image(img_logo)
+
 # =====================
 # CONFIG
 # =====================
@@ -130,7 +139,7 @@ div[data-testid="column"] {{
     width: 100vw;
     height: 140px;
 
-    background-image: url("Logo_Modarte.jpg");
+    background-image: url("data:image/jpg;base64,{img_base64}");
     background-size: cover;
     background-position: center;
 
