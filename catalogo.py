@@ -197,7 +197,7 @@ html[data-theme="dark"] .buy-btn button {{
     width: 250% !important;
     object-fit: cover !important;
     border-radius: 12px;
-    transform: scale(1.2);       /* zoom visual */
+    transform: scale(3.3);       /* zoom visual */
 }}
 
 /* =========================
