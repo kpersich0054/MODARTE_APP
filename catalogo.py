@@ -85,21 +85,13 @@ config = get_config()
 
 st.markdown(f"""
 <style>
-/* remove limite de largura do Streamlit */
-.block-container {{
-    max-width: 100% !important;
-    padding-left: 0rem !important;
-    padding-right: 0rem !important;
-}}
-
-/* remove espaçamento do topo */
-.main {{
-    padding-top: 0rem !important;
-}}
 
 .modarte-hero {{
-  width: 100%;
-  min-height: 140px;
+  width: 100vw;              /* viewport width */
+  margin-left: calc(-50vw + 50%);  /* quebra o container */
+  
+  min-height: 180px;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,7 +102,6 @@ st.markdown(f"""
   background-repeat: no-repeat;
 
   position: relative;
-  overflow: hidden;
 }}
 
 /* conteúdo acima do overlay */
