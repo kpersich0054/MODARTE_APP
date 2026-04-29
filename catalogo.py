@@ -22,8 +22,16 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
-bg_path = BASE_DIR / "Modarte_background.png"
+BASE_DIR_BACK = Path(__file__).resolve().parent
+
+matches = list(BASE_DIR_BACK.rglob("Modarte_background.png")) + list(BASE_DIR_BACK.parent.rglob("Modarte_background.png"))
+if not matches:
+    st.error("Não encontrei Modarte_background.png no projeto.")
+    st.stop()
+
+bg_path = matches[0]
 bg_b64 = image_to_base64(bg_path)
+
 # =====================
 # CONEXÃO SEGURA
 # =====================
