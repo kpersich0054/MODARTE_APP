@@ -65,6 +65,18 @@ config = get_config()
 st.markdown(f"""
 <style>
 
+/* Topo do Streamlit (onde fica o menu ⋮ e botões) */
+header {{visibility: hidden;}}
+
+/* Menu ⋮ (às vezes continua clicável; este ajuda a sumir) */
+#MainMenu {{visibility: hidden;}}
+
+/* Rodapé "Made with Streamlit" */
+footer {{visibility: hidden;}}
+
+/* Espaço que às vezes sobra no topo quando esconde o header */
+[data-testid="stAppViewContainer"] {{padding-top: 0rem;}}
+
 /* =========================
    VARIÁVEIS
 ========================= */
