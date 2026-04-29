@@ -131,7 +131,10 @@ st.markdown(f"""
 <div class="modarte-hero">
   <h1 class="modarte-title">Modarte</h1>
 </div>
+""", unsafe_allow_html=True)
 
+st.markdown(f"""
+<style>
 /* =========================
    VARIÁVEIS
 ========================= */
