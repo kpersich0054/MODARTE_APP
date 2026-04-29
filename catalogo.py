@@ -65,9 +65,6 @@ config = get_config()
 st.markdown(f"""
 <style>
 
-[data-testid="stToolbar"] {{display: none !important;}}
-[data-testid="stDecoration"] {{display: none !important;}}
-
 /* =========================
    VARIÁVEIS
 ========================= */
