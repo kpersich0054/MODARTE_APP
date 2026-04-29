@@ -258,7 +258,7 @@ if "show_dialog" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-st.title("🛍️ Modarte")
+st.header("Modarte")
 st.caption("Escolha seu look ✨")
 
 # =====================
