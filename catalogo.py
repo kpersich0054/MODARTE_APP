@@ -51,7 +51,6 @@ def get_config():
             "background_light": "#E6F2FF",
             "card_light": "#FFFFFF",
             "text_light": "#002436",
-
             "primary_dark": "#028EC7",
             "secondary_dark": "#016893",
             "background_dark": "#021317",
@@ -183,8 +182,6 @@ html[data-theme="dark"] .price {{
 .card {{
     background: transparent !important;
     border: 1px solid rgba(255,255,255,.10);
-    border-radius: 18px;
-    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -195,8 +192,6 @@ html[data-theme="dark"] .price {{
 html[data-theme="dark"] .card {{
     background: transparent !important;
     border: 1px solid rgba(255,255,255,.10);
-    border-radius: 18px;
-    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
