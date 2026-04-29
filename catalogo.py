@@ -93,7 +93,7 @@ st.markdown(f"""
   justify-content: center;
 
   background-image: url("data:image/png;base64,{bg_b64}");
-  background-size: cover;
+  background-size: 100% auto;
   background-position: center;
   background-repeat: no-repeat;
 
