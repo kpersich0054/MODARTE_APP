@@ -89,8 +89,7 @@ st.markdown(f"""
 .modarte-hero {{
   width: 100%;
   min-height: 140px;
-  border-radius: 18px;
-  padding: 22px 18px;
+  padding: 0px 0px;
 
   display: flex;
   align-items: center;
