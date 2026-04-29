@@ -5,12 +5,6 @@ import uuid
 from pathlib import Path
 import urllib.parse
 from streamlit_autorefresh import st_autorefresh   
-import base64
-
-def get_base64_image(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
 # =====================
 # CONFIG
 # =====================
@@ -20,9 +14,6 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
-
-img_back = BASE_DIR / "Modarte_background.jpg"
-img_base64 = get_base64_image(img_back)
 
 # =====================
 # CONEXÃO SEGURA
@@ -93,50 +84,6 @@ st.markdown(f"""
 }}
 
 /* =========================
-   ESCONDER HEADER STREAMLIT
-========================= */
-header[data-testid="stHeader"] {{
-    display: none;
-}}
-
-/* remove espaço que sobra em cima */
-.block-container {{
-    padding-top: 0rem !important;
-}}
-
-/* remove botão lateral (>>) */
-button[kind="header"] {{
-    display: none;
-}}
-
-
-/* =========================
-   CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
-========================= */
-html, body {{
-    background: transparent !important;
-}}
-
-/* apenas área principal */
-section[data-testid="stAppViewContainer"] {{
-    background: transparent !important;
-}}
-
-.main {{
-    background: transparent !important;
-}}
-
-.block-container {{
-    background: transparent !important;
-    padding-top: 2rem;
-}}
-
-/* NÃO mexe na sidebar */
-section[data-testid="stSidebar"] {{
-    background: var(--primary-light);
-}}
-
-/* =========================
    RESET
 ========================= */
 div[data-testid="column"] > div,
@@ -155,98 +102,34 @@ div[data-testid="column"] {{
 }}
 
 /* =========================
-   HEADER FULL WIDTH
+   FUNDO APP (CORRETO)
 ========================= */
-.header-modarte {{
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-
-    width: 100vw;
-    height: 140px;
-
-    background-image: url("data:image/jpg;base64,{img_base64}");
-    background-size: cover;
-    background-position: center;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-top: -20px;
-    margin-bottom: 20px;
+section[data-testid="stAppViewContainer"] {{
+    background: var(--bg-light);
+    color: var(--text-light);
 }}
 
-/* overlay escuro pra contraste */
-.header-overlay {{
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.35);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}}
-
-/* TEXTO */
-.header-overlay h1 {{
-    color: white;
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: 2px;
-
-    text-shadow:
-        -2px -2px 0 #016893,
-         2px -2px 0 #016893,
-        -2px  2px 0 #016893,
-         2px  2px 0 #016893;
-}}
-
-/* =========================
-   LIGHT MODE
-========================= */
-
-[data-testid="stAppViewContainer"] {{
-    background: linear-gradient(
-        135deg,
-        var(--bg-light),
-        var(--secondary-light),
-        var(--primary-light)
-    ) !important;
-}}
-
-html[data-theme="light"] .card {{
-    background: var(--card-light);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}}
-
-html[data-theme="light"] .price {{
-    color: var(--primary-light);
-}}
-
-/* =========================
-   DARK MODE
-========================= */
-html[data-theme="dark"] body {{
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
     background: var(--bg-dark);
     color: var(--text-dark);
 }}
 
-html[data-theme="dark"] .card {{
-    background: var(--card-dark);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+/* =========================
+   SIDEBAR
+========================= */
+section[data-testid="stSidebar"] {{
+    background: var(--secondary-light);
 }}
 
-html[data-theme="dark"] .price {{
-    color: var(--primary-dark);
+html[data-theme="dark"] section[data-testid="stSidebar"] {{
+    background: var(--secondary-dark);
 }}
 
 /* =========================
-   CARD
+   CARDS
 ========================= */
 .card {{
+    background: var(--card-light);
     border-radius: 18px;
     padding: 16px;
     display: flex;
@@ -254,6 +137,10 @@ html[data-theme="dark"] .price {{
     justify-content: space-between;
     height: 100%;
     transition: 0.2s;
+}}
+
+html[data-theme="dark"] .card {{
+    background: var(--card-dark);
 }}
 
 .card:hover {{
@@ -275,6 +162,34 @@ html[data-theme="dark"] .price {{
 }}
 
 /* =========================
+   PREÇO
+========================= */
+.price {{
+    color: var(--primary-light);
+    font-size: 20px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .price {{
+    color: var(--primary-dark);
+}}
+
+/* =========================
+   BOTÃO
+========================= */
+.buy-btn button {{
+    background: var(--primary-light);
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .buy-btn button {{
+    background: var(--primary-dark);
+    color: black;
+}}
+
+/* =========================
    IMAGEM
 ========================= */
 [data-testid="stImage"] img {{
@@ -282,6 +197,17 @@ html[data-theme="dark"] .price {{
     width: 150% !important;
     object-fit: cover !important;
     border-radius: 12px;
+}}
+
+/* =========================
+   FORÇA TEXTO (IMPORTANTE)
+========================= */
+section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-light);
+}}
+
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-dark);
 }}
 
 </style>
@@ -329,14 +255,7 @@ if "show_dialog" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-st.markdown(f"""
-<div class="header-modarte">
-    <div class="header-overlay">
-        <h1>Modarte</h1>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
+st.title("🛍️ Modarte")
 st.caption("Escolha seu look ✨")
 
 # =====================
