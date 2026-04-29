@@ -123,7 +123,7 @@ st.markdown(f"""
   padding: 0 !important;
 
   font-family: inherit;   /* ou coloque uma fonte fixa, ex: 'Poppins', sans-serif */
-  font-size: 100px;
+  font-size: 90px;
   font-weight: 800;
   letter-spacing: 0.5px;
   line-height: 1.0;
