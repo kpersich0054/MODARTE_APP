@@ -16,7 +16,11 @@ def get_base64_image(path):
 # =====================
 st_autorefresh(interval=3000, key="refresh_stock")
 
-st.set_page_config(page_title="Modarte Catálogo", layout="wide")
+st.set_page_config(
+    page_title="Modarte Catálogo",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
@@ -108,6 +112,7 @@ header[data-testid="stHeader"] {{
 button[kind="header"] {{
     display: none;
 }}
+
 
 /* =========================
    CORREÇÃO BACKGROUND (SEM QUEBRAR SIDEBAR)
@@ -283,19 +288,6 @@ html[data-theme="dark"] .price {{
     border-radius: 12px;
 }}
 
-html, body {{
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}}
-
-*, *::before, *::after {{
-  box-sizing: border-box;
-}}
-
-html, body {{
-  overflow-x: hidden;
-}}
 </style>
 """, unsafe_allow_html=True)
 
