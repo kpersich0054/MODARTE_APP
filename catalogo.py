@@ -89,23 +89,23 @@ html[data-theme="dark"] #root {{
 }}
 
 /* Esconde a barra, mas mantém a rolagem */
-section[data-testid="stAppViewContainer"] {
+section[data-testid="stAppViewContainer"] {{
   -ms-overflow-style: none;  /* IE/Edge antigo */
   scrollbar-width: none;     /* Firefox */
-}
-section[data-testid="stAppViewContainer"]::-webkit-scrollbar {
+}}
+section[data-testid="stAppViewContainer"]::-webkit-scrollbar {{
   width: 0px;
   height: 0px;
-}
+}}
 
-body {
+body {{
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-body::-webkit-scrollbar {
+}}
+body::-webkit-scrollbar {{
   width: 0px;
   height: 0px;
-}
+}}
 
 /* ===== APP CONTAINER ===== */
 section[data-testid="stAppViewContainer"] {{
