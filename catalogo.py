@@ -122,7 +122,7 @@ st.markdown(f"""
   padding: 0 !important;
 
   font-size: 80px;
-  font-weight: 2000;
+  font-weight: 1500;
   letter-spacing: 0.5px;
   line-height: 1.0;
   text-align: center;
@@ -143,8 +143,6 @@ st.markdown(f"""
     2px 2px 0 #A6E8FB, -2px 2px 0 #A6E8FB,
     2px -2px 0 #A6E8FB, -2px -2px 0 #A6E8FB,
 
-    /* sombra suave (profundidade) */
-    0 4px 16px rgba(0,0,0,.45);
 }}
 </style>
 
