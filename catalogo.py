@@ -144,7 +144,7 @@ st.markdown(f"""
     2px -2px 0 #A6E8FB, -2px -2px 0 #A6E8FB,
 
     /* sombra suave (profundidade) */
-    0 2px 8px rgba(0,0,0,.45);
+    0 1px 4px rgba(0,0,0,.45);
 
 }}
 </style>
