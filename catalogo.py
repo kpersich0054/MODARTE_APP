@@ -87,14 +87,12 @@ st.markdown(f"""
 <style>
 .modarte-hero {{
   width: 100vw;
-  height: 240px;
-
   margin-left: calc(-50vw + 50%);
 }}
 
 .modarte-hero img {{
   width: 100%;
-  height: 180px;
+  height: 240px;
   object-fit: cover;
 }}
 
