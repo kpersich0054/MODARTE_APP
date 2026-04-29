@@ -101,15 +101,6 @@ st.markdown(f"""
   overflow: hidden;
 }}
 
-/* overlay */
-.modarte-hero::before {{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-  z-index: 1;
-}}
-
 /* conteúdo acima do overlay */
 .modarte-content {{
   position: relative;
@@ -122,7 +113,6 @@ st.markdown(f"""
 
 <div class="modarte-hero">
     <div class="modarte-content">
-        Modarte
     </div>
 </div>
 """, unsafe_allow_html=True)
