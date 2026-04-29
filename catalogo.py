@@ -122,7 +122,7 @@ st.markdown(f"""
   padding: 0 !important;
 
   font-size: 80px;
-  font-weight: 1000;
+  font-weight: 2000;
   letter-spacing: 0.5px;
   line-height: 1.0;
   text-align: center;
