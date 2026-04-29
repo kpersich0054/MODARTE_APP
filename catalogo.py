@@ -134,22 +134,6 @@ html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
   color: var(--text-dark) !important;
 }}
 
-/* ===== TOPO (FAIXA BRANCA) ===== */
-header[data-testid="stHeader"] {{
-  background: var(--bg-light) !important;
-}}
-html[data-theme="dark"] header[data-testid="stHeader"] {{
-  background: var(--bg-dark) !important;
-}}
-
-/* Faixa/linha de decoração do Streamlit (muito comum ficar branca) */
-div[data-testid="stDecoration"] {{
-  background: var(--bg-light) !important;
-}}
-html[data-theme="dark"] div[data-testid="stDecoration"] {{
-  background: var(--bg-dark) !important;
-}}
-
 /* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"] {{
   background: var(--secondary-light) !important;
