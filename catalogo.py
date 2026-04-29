@@ -87,6 +87,8 @@ st.markdown(f"""
 <style>
 .modarte-hero {{
   width: 100vw;
+  height: 240px;
+
   margin-left: calc(-50vw + 50%);
 }}
 
