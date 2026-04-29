@@ -193,10 +193,38 @@ html[data-theme="dark"] .buy-btn button {{
    IMAGEM
 ========================= */
 [data-testid="stImage"] img {{
-    height: 250px !important;
-    width: 150% !important;
+    height: 100px !important;
+    width: 250% !important;
     object-fit: cover !important;
     border-radius: 12px;
+    transform: scale(1.1);       /* zoom visual */
+}}
+
+html, body {{ overflow-x: hidden; }}
+
+html, body, #root {{
+  background: var(--bg-light) !important;
+}}
+html[data-theme="dark"] html,
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {{
+  background: var(--bg-dark) !important;
+}}
+
+/* Topo/header do Streamlit */
+header[data-testid="stHeader"] {{
+  background: var(--bg-light) !important;
+}}
+html[data-theme="dark"] header[data-testid="stHeader"] {{
+  background: var(--bg-dark) !important;
+}}
+
+/* Às vezes existe uma “faixa” extra do topo */
+div[data-testid="stDecoration"] {{
+  background: var(--bg-light) !important;
+}}
+html[data-theme="dark"] div[data-testid="stDecoration"] {{
+  background: var(--bg-dark) !important;
 }}
 
 /* =========================
