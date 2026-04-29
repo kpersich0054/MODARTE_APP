@@ -112,6 +112,16 @@ st.markdown(f"""
   display: block;
   margin: 0 auto;
 }}
+
+/* conteúdo acima do overlay */
+.modarte-content {{
+  position: relative;
+  z-index: 2;
+  color: white;
+  font-size: 42px;
+  font-weight: bold;
+}}
+
 </style>
 
 <div class="modarte-hero">
