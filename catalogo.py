@@ -5,6 +5,12 @@ import uuid
 from pathlib import Path
 import urllib.parse
 from streamlit_autorefresh import st_autorefresh   
+import base64
+import streamlit as st
+from pathlib import Path
+
+def image_to_base64(path: Path) -> str:
+    return base64.b64encode(path.read_bytes()).decode("utf-8")
 # =====================
 # CONFIG
 # =====================
@@ -15,6 +21,8 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
+bg_path = Path(f"{BASE_DIR} / Modarte_background.png")  # ajuste para o seu arquivo
+bg_b64 = image_to_base64(bg_path)
 # =====================
 # CONEXÃO SEGURA
 # =====================
@@ -64,6 +72,52 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+.modarte-hero {{
+  width: 100%;
+  min-height: 140px;              /* altura do header */
+  border-radius: 18px;
+  padding: 22px 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-image: url("data:image/png;base64,{bg_b64}");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* opcional: leve overlay para melhorar contraste do texto */
+  position: relative;
+  overflow: hidden;
+}}
+
+.modarte-hero::before {{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);   /* ajuste ou remova */
+}}
+
+.modarte-title {{
+  position: relative;            /* acima do overlay */
+  margin: 0;
+
+  font-size: 56px;               /* ajuste */
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.0;
+  text-align: center;
+
+  color: #F2F0E9;                /* off-white */
+  -webkit-text-stroke: 2px #000; /* borda preta */
+  text-shadow: 0 6px 18px rgba(0,0,0,.45); /* ajuda no contraste */
+}}
+</style>
+
+<div class="modarte-hero">
+  <h1 class="modarte-title">Modarte</h1>
+</div>
 
 /* =========================
    VARIÁVEIS
@@ -258,7 +312,8 @@ if "show_dialog" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-st.header("Modarte")
+st.header("Modarte catálogo")
+
 st.caption("Escolha seu look ✨")
 
 # =====================
