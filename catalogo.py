@@ -88,17 +88,12 @@ st.markdown(f"""
 .modarte-hero {{
   width: 100vw;
   margin-left: calc(-50vw + 50%);
-  height: 200px;
-
-  background: linear-gradient(90deg, #0e1117, #0e1117);
-  
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }}
 
 .modarte-hero img {{
-  max-height: 140px;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
 }}
 
 /* conteúdo acima do overlay */
