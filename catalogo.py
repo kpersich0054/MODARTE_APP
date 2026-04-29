@@ -85,12 +85,9 @@ config = get_config()
 
 st.markdown(f"""
 <style>
-/* container do hero */
 .modarte-hero {{
   width: 100%;
   min-height: 140px;
-  padding: 0px 0px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,16 +101,29 @@ st.markdown(f"""
   overflow: hidden;
 }}
 
-/* overlay fixo (igual no light e no dark) */
+/* overlay */
 .modarte-hero::before {{
   content: "";
   position: absolute;
   inset: 0;
   background: rgba(0,0,0,0.25);
+  z-index: 1;
+}}
+
+/* conteúdo acima do overlay */
+.modarte-content {{
+  position: relative;
+  z-index: 2;
+  color: white;
+  font-size: 42px;
+  font-weight: bold;
 }}
 </style>
 
 <div class="modarte-hero">
+    <div class="modarte-content">
+        Modarte
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
