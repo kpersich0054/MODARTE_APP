@@ -85,9 +85,10 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+/* container do hero */
 .modarte-hero {{
   width: 100%;
-  min-height: 140px;              /* altura do header */
+  min-height: 140px;
   border-radius: 18px;
   padding: 22px 18px;
 
@@ -100,36 +101,42 @@ st.markdown(f"""
   background-position: center;
   background-repeat: no-repeat;
 
-  /* opcional: leve overlay para melhorar contraste do texto */
   position: relative;
   overflow: hidden;
 }}
 
+/* overlay fixo (igual no light e no dark) */
 .modarte-hero::before {{
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.25);   /* ajuste ou remova */
+  background: rgba(0,0,0,0.25);
 }}
 
+/* título com estilos "travados" */
 .modarte-title {{
-  position: relative;            /* acima do overlay */
-  margin: 0;
+  position: relative;
+  z-index: 1;
 
-  font-size: 56px;               /* ajuste */
+  /* “reset” para não herdar variações do tema */
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-family: inherit;   /* ou coloque uma fonte fixa, ex: 'Poppins', sans-serif */
+  font-size: 100px;
   font-weight: 800;
   letter-spacing: 0.5px;
   line-height: 1.0;
   text-align: center;
 
-  color: #F2F0E9;                /* off-white */
-  -webkit-text-stroke: 2px #000; /* borda preta */
-  text-shadow: 0 6px 18px rgba(0,0,0,.45); /* ajuda no contraste */
+  color: #F2F0E9 !important;                /* off-white fixo */
+  -webkit-text-stroke: 2px #000 !important; /* borda preta fixa */
+  text-shadow: 0 6px 18px rgba(0,0,0,.45) !important;
 }}
 </style>
 
 <div class="modarte-hero">
-  <h1 class="modarte-title">Modarte</h1>
+  <div class="modarte-title">Modarte</div>
 </div>
 """, unsafe_allow_html=True)
 
