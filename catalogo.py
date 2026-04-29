@@ -118,20 +118,33 @@ st.markdown(f"""
   position: relative;
   z-index: 1;
 
-  /* “reset” para não herdar variações do tema */
   margin: 0 !important;
   padding: 0 !important;
 
-  font-family: inherit;   /* ou coloque uma fonte fixa, ex: 'Poppins', sans-serif */
   font-size: 90px;
   font-weight: 800;
   letter-spacing: 0.5px;
   line-height: 1.0;
   text-align: center;
 
-  color: #F2F0E9 !important;                /* off-white fixo */
-  -webkit-text-stroke: 2px #000 !important; /* borda preta fixa */
-  text-shadow: 0 6px 18px rgba(0,0,0,.45) !important;
+  color: #F2F0E9 !important;   /* preenchimento off-white */
+
+  /* “borda” aproximada de 8px com gradiente via camadas de sombra */
+  text-shadow:
+    /* camada externa (cor 2 - mais escura) */
+    8px 0   0 #016893, -8px 0   0 #016893,
+    0   8px 0 #016893,  0  -8px 0 #016893,
+    6px 6px 0 #016893, -6px 6px 0 #016893,
+    6px -6px 0 #016893, -6px -6px 0 #016893,
+
+    /* camada interna (cor 1 - mais clara) */
+    6px 0   0 #A6E8FB, -6px 0   0 #A6E8FB,
+    0   6px 0 #A6E8FB,  0  -6px 0 #A6E8FB,
+    4px 4px 0 #A6E8FB, -4px 4px 0 #A6E8FB,
+    4px -4px 0 #A6E8FB, -4px -4px 0 #A6E8FB,
+
+    /* sombra suave (profundidade) */
+    0 6px 18px rgba(0,0,0,.45);
 }}
 </style>
 
