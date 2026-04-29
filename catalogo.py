@@ -87,21 +87,10 @@ st.markdown(f"""
 <style>
 
 .modarte-hero {{
-  width: 100vw;              /* viewport width */
-  margin-left: calc(-50vw + 50%);  /* quebra o container */
-  
-  min-height: 180px;
-
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   display: flex;
-  align-items: center;
   justify-content: center;
-
-  background-image: url("data:image/png;base64,{bg_b64}");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
-  position: relative;
 }}
 
 /* conteúdo acima do overlay */
@@ -112,11 +101,17 @@ st.markdown(f"""
   font-size: 42px;
   font-weight: bold;
 }}
+
+.modarte-hero img {{
+  width: 100%;
+  height: auto;
+  max-height: 220px;  /* controla altura */
+  object-fit: contain; /* garante que não corta */
+}}
 </style>
 
 <div class="modarte-hero">
-    <div class="modarte-content">
-    </div>
+    <img src="data:image/png;base64,{bg_b64}">
 </div>
 """, unsafe_allow_html=True)
 
