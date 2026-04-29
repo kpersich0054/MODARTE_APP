@@ -25,6 +25,12 @@ PASTA_IMAGENS = BASE_DIR
 bg_path = BASE_DIR / "Modarte_background.png"
 
 if not bg_path.exists():
+    st.write("BASE_DIR:", str(BASE_DIR))
+    st.write("Arquivos em BASE_DIR:")
+    st.write([p.name for p in BASE_DIR.iterdir()])
+
+    st.write("PNGs encontrados:")
+    st.write([str(p) for p in BASE_DIR.rglob("*.png")])
     st.error(f"Não encontrei: {bg_path}\n Confira nome (maiúsculas/minúsculas) e commit.")
     st.stop()
 
