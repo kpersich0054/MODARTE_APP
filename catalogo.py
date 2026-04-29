@@ -181,7 +181,8 @@ html[data-theme="dark"] .price {{
    CARDS
 ========================= */
 .card {{
-    background: var(--card-light);
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.10);
     border-radius: 18px;
     padding: 16px;
     display: flex;
@@ -192,7 +193,8 @@ html[data-theme="dark"] .price {{
 }}
 
 html[data-theme="dark"] .card {{
-    background: var(--card-dark);
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.10);
     border-radius: 18px;
     padding: 16px;
     display: flex;
