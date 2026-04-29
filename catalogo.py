@@ -112,45 +112,9 @@ st.markdown(f"""
   inset: 0;
   background: rgba(0,0,0,0.25);
 }}
-
-/* título com estilos "travados" */
-.modarte-title {{
-  position: relative;
-  z-index: 1;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  font-size: 80px;
-  font-weight: 1500;
-  letter-spacing: 0.5px;
-  line-height: 1.0;
-  text-align: center;
-
-  color: #F2F0E9 !important;   /* preenchimento off-white */
-
-  /* “borda” aproximada de 6px com gradiente via camadas de sombra */
-  text-shadow:
-    /* camada externa (cor 2 - mais escura) */
-    3px 0   0 #016893, -3px 0   0 #016893,
-    0   3px 0 #016893,  0  -3px 0 #016893,
-    2px 2px 0 #016893, -2px 2px 0 #016893,
-    2px -2px 0 #016893, -2px -2px 0 #016893,
-
-    /* camada interna (cor 1 - mais clara) */
-    2px 0   0 #A6E8FB, -2px 0   0 #A6E8FB,
-    0   2px 0 #A6E8FB,  0  -2px 0 #A6E8FB,
-    1px 1px 0 #A6E8FB, -1px 1px 0 #A6E8FB,
-    1px -1px 0 #A6E8FB, -1px -1px 0 #A6E8FB,
-
-    /* sombra suave (profundidade) */
-    0 2px 8px rgba(0,0,0,.45);
-
-}}
 </style>
 
 <div class="modarte-hero">
-  <div class="modarte-title">Modarte</div>
 </div>
 """, unsafe_allow_html=True)
 
