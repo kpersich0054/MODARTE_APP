@@ -22,7 +22,7 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
-bg_path = BASE_DIR / "Modarte_background.png"
+bg_path = BASE_DIR / "Modarte_background.jpg"
 
 if not bg_path.exists():
     st.write("BASE_DIR:", str(BASE_DIR))
