@@ -65,152 +65,72 @@ config = get_config()
 
 st.markdown(f"""
 <style>
-
-/* =========================
-   VARIÁVEIS
-========================= */
-:root {{
-    --primary-light: {config['primary_light']};
-    --secondary-light: {config['secondary_light']};
-    --bg-light: {config['background_light']};
-    --card-light: {config['card_light']};
-    --text-light: {config['text_light']};
-
-    --primary-dark: {config['primary_dark']};
-    --secondary-dark: {config['secondary_dark']};
-    --bg-dark: {config['background_dark']};
-    --card-dark: {config['card_dark']};
-    --text-dark: {config['text_dark']};
+/* ===== RESET / BASE ===== */
+html, body {{
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  overflow-x: hidden !important;   /* mata scroll horizontal */
 }}
 
-/* =========================
-   RESET
-========================= */
-div[data-testid="column"] > div,
-div[data-testid="stVerticalBlock"] > div {{
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
+*, *::before, *::after {{
+  box-sizing: border-box !important;
 }}
 
-div[data-testid="stNumberInput"] > div {{
-    background: transparent !important;
+/* ===== FUNDO GLOBAL (pega o topo também) ===== */
+html, body, #root {{
+  background: var(--bg-light) !important;
 }}
 
-div[data-testid="column"] {{
-    padding: 0 !important;
+html[data-theme="dark"] html,
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {{
+  background: var(--bg-dark) !important;
 }}
 
-/* =========================
-   FUNDO APP (CORRETO)
-========================= */
+/* ===== APP CONTAINER ===== */
 section[data-testid="stAppViewContainer"] {{
-    background: var(--bg-light);
-    color: var(--text-light);
+  background: var(--bg-light) !important;
+  color: var(--text-light) !important;
 }}
 
 html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
-    background: var(--bg-dark);
-    color: var(--text-dark);
+  background: var(--bg-dark) !important;
+  color: var(--text-dark) !important;
 }}
 
-/* =========================
-   SIDEBAR
-========================= */
+/* ===== TOPO (FAIXA BRANCA) ===== */
+header[data-testid="stHeader"] {{
+  background: var(--bg-light) !important;
+}}
+html[data-theme="dark"] header[data-testid="stHeader"] {{
+  background: var(--bg-dark) !important;
+}}
+
+/* Faixa/linha de decoração do Streamlit (muito comum ficar branca) */
+div[data-testid="stDecoration"] {{
+  background: var(--bg-light) !important;
+}}
+html[data-theme="dark"] div[data-testid="stDecoration"] {{
+  background: var(--bg-dark) !important;
+}}
+
+/* ===== SIDEBAR ===== */
 section[data-testid="stSidebar"] {{
-    background: var(--secondary-light);
+  background: var(--secondary-light) !important;
 }}
-
 html[data-theme="dark"] section[data-testid="stSidebar"] {{
-    background: var(--secondary-dark);
+  background: var(--secondary-dark) !important;
 }}
 
-/* =========================
-   CARDS
-========================= */
-.card {{
-    background: var(--card-light);
-    border-radius: 18px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    transition: 0.2s;
-}}
-
-html[data-theme="dark"] .card {{
-    background: var(--card-dark);
-}}
-
-.card:hover {{
-    transform: translateY(-4px);
-}}
-
-/* =========================
-   TEXTO
-========================= */
-.prod-title {{
-    font-weight: 600;
-    font-size: 14px;
-    min-height: 42px;
-}}
-
-.stock {{
-    font-size: 14px;
-    color: #888;
-}}
-
-/* =========================
-   PREÇO
-========================= */
-.price {{
-    color: var(--primary-light);
-    font-size: 20px;
-    font-weight: bold;
-}}
-
-html[data-theme="dark"] .price {{
-    color: var(--primary-dark);
-}}
-
-/* =========================
-   BOTÃO
-========================= */
-.buy-btn button {{
-    background: var(--primary-light);
-    color: white;
-    border-radius: 10px;
-    font-weight: bold;
-}}
-
-html[data-theme="dark"] .buy-btn button {{
-    background: var(--primary-dark);
-    color: black;
-}}
-
-/* =========================
-   IMAGEM
-========================= */
+/* ===== IMAGEM (CORRIGE SCROLL HORIZONTAL) ===== */
 [data-testid="stImage"] img {{
-    height: 100px !important;
-    width: 250% !important;
-    object-fit: cover !important;
-    border-radius: 12px;
-    transform: scale(1.2);       /* zoom visual */
+  width: 100% !important;      /* era 150% -> isso criava scroll embaixo */
+  height: 250px !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  display: block !important;
 }}
-
-/* =========================
-   FORÇA TEXTO (IMPORTANTE)
-========================= */
-section[data-testid="stAppViewContainer"] * {{
-    color: var(--text-light);
-}}
-
-html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
-    color: var(--text-dark);
-}}
-
 </style>
 """, unsafe_allow_html=True)
 
