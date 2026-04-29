@@ -25,7 +25,7 @@ PASTA_IMAGENS = BASE_DIR
 bg_path = BASE_DIR / "Modarte_background.png"
 
 if not bg_path.exists():
-    st.error(f"Não encontrei: {bg_path}/n Confira nome (maiúsculas/minúsculas) e commit.")
+    st.error(f"Não encontrei: {bg_path}\n Confira nome (maiúsculas/minúsculas) e commit.")
     st.stop()
 
 bg_b64 = image_to_base64(bg_path)
