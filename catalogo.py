@@ -85,32 +85,20 @@ config = get_config()
 
 st.markdown(f"""
 <style>
-/* libera largura total */
-.block-container {{
-    max-width: 100% !important;
-    padding-left: 0rem !important;
-    padding-right: 0rem !important;
-}}
-
 .modarte-hero {{
   width: 100vw;
   margin-left: calc(-50vw + 50%);
+  height: 200px;
+
+  background: linear-gradient(90deg, #0e1117, #0e1117);
   
   display: flex;
-  justify-content: center;
   align-items: center;
-
-  background-color: #0e1117; /* mesma cor do fundo */
+  justify-content: center;
 }}
 
 .modarte-hero img {{
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: 220px;
-
-  display: block;
-  margin: 0 auto;
+  max-height: 140px;
 }}
 
 /* conteúdo acima do overlay */
