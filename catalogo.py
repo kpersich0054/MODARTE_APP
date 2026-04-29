@@ -65,6 +65,24 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+
+/* =========================
+   VARIÁVEIS
+========================= */
+:root {{
+    --primary-light: {config['primary_light']};
+    --secondary-light: {config['secondary_light']};
+    --bg-light: {config['background_light']};
+    --card-light: {config['card_light']};
+    --text-light: {config['text_light']};
+
+    --primary-dark: {config['primary_dark']};
+    --secondary-dark: {config['secondary_dark']};
+    --bg-dark: {config['background_dark']};
+    --card-dark: {config['card_dark']};
+    --text-dark: {config['text_dark']};
+}}
+
 /* ===== RESET / BASE ===== */
 html, body {{
   margin: 0 !important;
@@ -88,41 +106,6 @@ html[data-theme="dark"] #root {{
   background: var(--bg-dark) !important;
 }}
 
-/* ===== SEM SCROLLBAR VISÍVEL (mas continua rolando) ===== */
-
-/* 1) corta overflow horizontal na raiz */
-html, body {{
-  overflow-x: hidden !important;
-}}
-
-/* 2) esconde scrollbar (Firefox) */
-html, body,
-section[data-testid="stAppViewContainer"],
-main[data-testid="stMain"],
-div[data-testid="stMainBlockContainer"],
-div[data-testid="block-container"],
-section[data-testid="stSidebar"] {{
-  scrollbar-width: none !important;     /* Firefox */
-  -ms-overflow-style: none !important;  /* Edge antigo */
-}}
-
-/* 3) esconde scrollbar (Chrome/Edge/Safari) */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-section[data-testid="stAppViewContainer"]::-webkit-scrollbar,
-main[data-testid="stMain"]::-webkit-scrollbar,
-div[data-testid="stMainBlockContainer"]::-webkit-scrollbar,
-div[data-testid="block-container"]::-webkit-scrollbar,
-section[data-testid="stSidebar"]::-webkit-scrollbar {{
-  width: 0px !important;
-  height: 0px !important;
-}}
-
-/* (opcional) evita “pulo” quando a barra some/aparece */
-html {{
-  scrollbar-gutter: stable;
-}}
-
 /* ===== APP CONTAINER ===== */
 section[data-testid="stAppViewContainer"] {{
   background: var(--bg-light) !important;
@@ -140,23 +123,6 @@ section[data-testid="stSidebar"] {{
 }}
 html[data-theme="dark"] section[data-testid="stSidebar"] {{
   background: var(--secondary-dark) !important;
-}}
-
-/* =========================
-   VARIÁVEIS
-========================= */
-:root {{
-    --primary-light: {config['primary_light']};
-    --secondary-light: {config['secondary_light']};
-    --bg-light: {config['background_light']};
-    --card-light: {config['card_light']};
-    --text-light: {config['text_light']};
-
-    --primary-dark: {config['primary_dark']};
-    --secondary-dark: {config['secondary_dark']};
-    --bg-dark: {config['background_dark']};
-    --card-dark: {config['card_dark']};
-    --text-dark: {config['text_dark']};
 }}
 
 /* ===== IMAGEM (CORRIGE SCROLL HORIZONTAL) ===== */
