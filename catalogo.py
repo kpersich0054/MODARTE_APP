@@ -132,16 +132,16 @@ st.markdown(f"""
   /* “borda” aproximada de 6px com gradiente via camadas de sombra */
   text-shadow:
     /* camada externa (cor 2 - mais escura) */
-    6px 0   0 #016893, -6px 0   0 #016893,
-    0   6px 0 #016893,  0  -6px 0 #016893,
-    4px 4px 0 #016893, -4px 4px 0 #016893,
-    4px -4px 0 #016893, -4px -4px 0 #016893,
+    3px 0   0 #016893, -3px 0   0 #016893,
+    0   3px 0 #016893,  0  -3px 0 #016893,
+    2px 2px 0 #016893, -2px 2px 0 #016893,
+    2px -2px 0 #016893, -2px -2px 0 #016893,
 
     /* camada interna (cor 1 - mais clara) */
-    4px 0   0 #A6E8FB, -4px 0   0 #A6E8FB,
-    0   4px 0 #A6E8FB,  0  -4px 0 #A6E8FB,
-    2px 2px 0 #A6E8FB, -2px 2px 0 #A6E8FB,
-    2px -2px 0 #A6E8FB, -2px -2px 0 #A6E8FB,
+    2px 0   0 #A6E8FB, -2px 0   0 #A6E8FB,
+    0   2px 0 #A6E8FB,  0  -2px 0 #A6E8FB,
+    1px 1px 0 #A6E8FB, -1px 1px 0 #A6E8FB,
+    1px -1px 0 #A6E8FB, -1px -1px 0 #A6E8FB,
 
     /* sombra suave (profundidade) */
     0 1px 4px rgba(0,0,0,.45);
