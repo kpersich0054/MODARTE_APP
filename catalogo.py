@@ -158,6 +158,23 @@ html[data-theme="dark"] section[data-testid="stSidebar"] {{
   background: var(--secondary-dark) !important;
 }}
 
+/* =========================
+   VARIÁVEIS
+========================= */
+:root {{
+    --primary-light: {config['primary_light']};
+    --secondary-light: {config['secondary_light']};
+    --bg-light: {config['background_light']};
+    --card-light: {config['card_light']};
+    --text-light: {config['text_light']};
+
+    --primary-dark: {config['primary_dark']};
+    --secondary-dark: {config['secondary_dark']};
+    --bg-dark: {config['background_dark']};
+    --card-dark: {config['card_dark']};
+    --text-dark: {config['text_dark']};
+}}
+
 /* ===== IMAGEM (CORRIGE SCROLL HORIZONTAL) ===== */
 [data-testid="stImage"] img {{
   width: 100% !important;      /* era 150% -> isso criava scroll embaixo */
@@ -166,6 +183,82 @@ html[data-theme="dark"] section[data-testid="stSidebar"] {{
   border-radius: 12px !important;
   display: block !important;
 }}
+
+/* =========================
+   FORÇA TEXTO (IMPORTANTE)
+========================= */
+section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-light);
+}}
+
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
+    color: var(--text-dark);
+}}
+
+/* =========================
+   BOTÃO
+========================= */
+.buy-btn button {{
+    background: var(--primary-light);
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .buy-btn button {{
+    background: var(--primary-dark);
+    color: black;
+}}
+
+/* =========================
+   PREÇO
+========================= */
+.price {{
+    color: var(--primary-light);
+    font-size: 20px;
+    font-weight: bold;
+}}
+
+html[data-theme="dark"] .price {{
+    color: var(--primary-dark);
+}}
+
+/* =========================
+   CARDS
+========================= */
+.card {{
+    background: var(--card-light);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    transition: 0.2s;
+}}
+
+html[data-theme="dark"] .card {{
+    background: var(--card-dark);
+}}
+
+.card:hover {{
+    transform: translateY(-4px);
+}}
+
+/* =========================
+   TEXTO
+========================= */
+.prod-title {{
+    font-weight: 600;
+    font-size: 14px;
+    min-height: 42px;
+}}
+
+.stock {{
+    font-size: 14px;
+    color: #888;
+}}
+
 </style>
 """, unsafe_allow_html=True)
 
