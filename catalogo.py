@@ -121,7 +121,7 @@ st.markdown(f"""
   margin: 0 !important;
   padding: 0 !important;
 
-  font-size: 90px;
+  font-size: 70px;
   font-weight: 800;
   letter-spacing: 0.5px;
   line-height: 1.0;
