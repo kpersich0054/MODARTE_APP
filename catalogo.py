@@ -11,6 +11,7 @@ from pathlib import Path
 
 def image_to_base64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
+
 # =====================
 # CONFIG
 # =====================
@@ -21,7 +22,7 @@ st.set_page_config(page_title="Modarte Catálogo", layout="wide")
 BASE_DIR = Path(__file__).parent
 PASTA_IMAGENS = BASE_DIR
 
-bg_path = Path(f"{BASE_DIR} / Modarte_background.png")  # ajuste para o seu arquivo
+bg_path = BASE_DIR / "Modarte_background.png"
 bg_b64 = image_to_base64(bg_path)
 # =====================
 # CONEXÃO SEGURA
