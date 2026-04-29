@@ -192,6 +192,8 @@ html[data-theme="dark"] section[data-testid="stAppViewContainer"] * {{
 html[data-theme="dark"] .buy-btn button {{
     background: var(--primary-dark);
     color: black;
+    border-radius: 10px;
+    font-weight: bold;
 }}
 
 /* =========================
@@ -205,6 +207,8 @@ html[data-theme="dark"] .buy-btn button {{
 
 html[data-theme="dark"] .price {{
     color: var(--primary-dark);
+    font-size: 20px;
+    font-weight: bold;
 }}
 
 /* =========================
@@ -223,10 +227,13 @@ html[data-theme="dark"] .price {{
 
 html[data-theme="dark"] .card {{
     background: var(--card-dark);
-}}
-
-.card:hover {{
-    transform: translateY(-4px);
+    border-radius: 18px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    transition: 0.2s;
 }}
 
 /* =========================
