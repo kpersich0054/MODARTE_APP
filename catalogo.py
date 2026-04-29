@@ -85,6 +85,18 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+/* remove limite de largura do Streamlit */
+.block-container {{
+    max-width: 100% !important;
+    padding-left: 0rem !important;
+    padding-right: 0rem !important;
+}}
+
+/* remove espaçamento do topo */
+.main {{
+    padding-top: 0rem !important;
+}}
+
 .modarte-hero {{
   width: 100%;
   min-height: 140px;
