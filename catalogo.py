@@ -328,9 +328,8 @@ if "show_dialog" not in st.session_state:
 # =====================
 # HEADER
 # =====================
-st.header("Modarte catálogo")
 
-st.caption("Escolha seu look ✨")
+st.title("Escolha seu look ✨")
 
 # =====================
 # FILTROS
