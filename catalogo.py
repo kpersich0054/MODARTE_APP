@@ -88,23 +88,39 @@ html[data-theme="dark"] #root {{
   background: var(--bg-dark) !important;
 }}
 
-/* Esconde a barra, mas mantém a rolagem */
-section[data-testid="stAppViewContainer"] {{
-  -ms-overflow-style: none;  /* IE/Edge antigo */
-  scrollbar-width: none;     /* Firefox */
-}}
-section[data-testid="stAppViewContainer"]::-webkit-scrollbar {{
-  width: 0px;
-  height: 0px;
+/* ===== SEM SCROLLBAR VISÍVEL (mas continua rolando) ===== */
+
+/* 1) corta overflow horizontal na raiz */
+html, body {{
+  overflow-x: hidden !important;
 }}
 
-body {{
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* 2) esconde scrollbar (Firefox) */
+html, body,
+section[data-testid="stAppViewContainer"],
+main[data-testid="stMain"],
+div[data-testid="stMainBlockContainer"],
+div[data-testid="block-container"],
+section[data-testid="stSidebar"] {{
+  scrollbar-width: none !important;     /* Firefox */
+  -ms-overflow-style: none !important;  /* Edge antigo */
 }}
-body::-webkit-scrollbar {{
-  width: 0px;
-  height: 0px;
+
+/* 3) esconde scrollbar (Chrome/Edge/Safari) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+section[data-testid="stAppViewContainer"]::-webkit-scrollbar,
+main[data-testid="stMain"]::-webkit-scrollbar,
+div[data-testid="stMainBlockContainer"]::-webkit-scrollbar,
+div[data-testid="block-container"]::-webkit-scrollbar,
+section[data-testid="stSidebar"]::-webkit-scrollbar {{
+  width: 0px !important;
+  height: 0px !important;
+}}
+
+/* (opcional) evita “pulo” quando a barra some/aparece */
+html {{
+  scrollbar-gutter: stable;
 }}
 
 /* ===== APP CONTAINER ===== */
