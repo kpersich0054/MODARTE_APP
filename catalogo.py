@@ -85,6 +85,7 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+/* container do hero */
 .modarte-hero {{
   width: 100%;
   min-height: 140px;
@@ -104,48 +105,51 @@ st.markdown(f"""
   overflow: hidden;
 }}
 
+/* overlay fixo (igual no light e no dark) */
 .modarte-hero::before {{
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.20);
+  background: rgba(0,0,0,0.25);
 }}
 
-.modarte-svg {{
+/* título com estilos "travados" */
+.modarte-title {{
   position: relative;
   z-index: 1;
-  width: 100%;
-  height: 120px;          /* ajuste altura do texto */
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 90px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.0;
+  text-align: center;
+
+  color: #F2F0E9 !important;   /* preenchimento off-white */
+
+  /* “borda” aproximada de 6px com gradiente via camadas de sombra */
+  text-shadow:
+    /* camada externa (cor 2 - mais escura) */
+    6px 0   0 #016893, -6px 0   0 #016893,
+    0   6px 0 #016893,  0  -6px 0 #016893,
+    4px 4px 0 #016893, -4px 4px 0 #016893,
+    4px -4px 0 #016893, -4px -4px 0 #016893,
+
+    /* camada interna (cor 1 - mais clara) */
+    4px 0   0 #A6E8FB, -4px 0   0 #A6E8FB,
+    0   4px 0 #A6E8FB,  0  -4px 0 #A6E8FB,
+    2px 2px 0 #A6E8FB, -2px 2px 0 #A6E8FB,
+    2px -2px 0 #A6E8FB, -2px -2px 0 #A6E8FB,
+
+    /* sombra suave (profundidade) */
+    0 4px 16px rgba(0,0,0,.45);
 }}
 </style>
 
 <div class="modarte-hero">
-  <svg class="modarte-svg" viewBox="0 0 1200 200" preserveAspectRatio="xMidYMid meet" aria-label="Modarte" role="img">
-    <defs>
-      <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#A6E8FB"/>
-        <stop offset="100%" stop-color="#016893"/>
-      </linearGradient>
-      <!-- sombra suave -->
-      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="rgba(0,0,0,0.45)"/>
-      </filter>
-    </defs>
-
-    <text x="50%" y="55%"
-          text-anchor="middle"
-          dominant-baseline="middle"
-          font-size="140"
-          font-weight="800"
-          font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
-          fill="#F2F0E9"
-          stroke="url(#strokeGrad)"
-          stroke-width="8"
-          paint-order="stroke fill"
-          filter="url(#shadow)">
-      Modarte
-    </text>
-  </svg>
+  <div class="modarte-title">Modarte</div>
 </div>
 """, unsafe_allow_html=True)
 
