@@ -94,7 +94,7 @@ st.markdown(f"""
   width: 100%;
   height: 30vh; /* altura proporcional à tela */
   min-height: 120px;
-  max-height: 250px;
+  max-height: 280px;
   object-fit: cover;
 }}
 
