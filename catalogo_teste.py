@@ -380,22 +380,6 @@ header[data-testid="stHeader"] {{
 </style>
 """, unsafe_allow_html=True)
 
-
-# =====================
-# TOOLBAR REAL (STREAMLIT)
-# =====================
-col2, col3 = st.columns([6,1])
-
-with col2:
-    if st.button("🌙" if st.session_state.dark_mode else "☀️"):
-        st.session_state.dark_mode = not st.session_state.dark_mode
-        st.rerun()
-
-with col3:
-    if st.button("🛒"):
-        st.session_state.show_sidebar = not st.session_state.show_sidebar
-        st.rerun()
-
 if st.session_state.show_sidebar:
     # =====================
     # SIDEBAR
