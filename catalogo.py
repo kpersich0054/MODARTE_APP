@@ -87,11 +87,8 @@ st.markdown(f"""
 <style>
 .modarte-hero {{
   position: relative;
-  top: 0;
   left: 50%;
-  right: 50%;
   margin-left: -50vw;
-  margin-right: -50vw;
   width: 100vw;
 }}
 
@@ -99,9 +96,10 @@ st.markdown(f"""
   width: 100%;
   height: 250px;
   object-fit: cover;
+  display: block;
 }}
 
-/* 📱 MOBILE */
+/* MOBILE */
 @media (max-width: 768px) {{
   .modarte-hero img {{
     height: auto;
