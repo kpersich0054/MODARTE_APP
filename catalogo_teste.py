@@ -384,7 +384,7 @@ header[data-testid="stHeader"] {{
 # =====================
 # TOOLBAR REAL (STREAMLIT)
 # =====================
-col2, col3 = st.columns([6,1,1])
+col2, col3 = st.columns([6,1])
 
 with col2:
     if st.button("🌙" if st.session_state.dark_mode else "☀️"):
