@@ -86,16 +86,23 @@ config = get_config()
 st.markdown(f"""
 <style>
 .modarte-hero {{
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
+  width: 100%;
+  margin: 0;
 }}
 
 .modarte-hero img {{
   width: 100%;
-  height: 38vh; /* altura proporcional à tela */
-  min-height: 120px;
-  max-height: 250px;
+  height: 220px;
   object-fit: cover;
+}}
+
+/* 📱 MOBILE */
+@media (max-width: 768px) {{
+  .modarte-hero img {{
+    height: auto;          /* deixa a imagem respirar */
+    max-height: 180px;
+    object-fit: contain;   /* NÃO corta o logo */
+  }}
 }}
 
 /* conteúdo acima do overlay */
