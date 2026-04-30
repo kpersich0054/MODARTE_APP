@@ -85,6 +85,40 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+.toolbar {{
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  width: 100vw;
+  height: 60px;
+  background: {card};
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  z-index: 999;
+}}
+
+.toolbar button {{
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: {text};
+}}
+</style>
+
+<div class="toolbar">
+    <form action="" method="post">
+        <button name="cart">🛒 Carrinho</button>
+        <button name="theme">🌙</button>
+    </form>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(f"""
+<style>
 header[data-testid="stHeader"] {{
   background: transparent !important;
   height: 0px !important;
@@ -182,7 +216,8 @@ html, body {{
 
 /* ===== FUNDO GLOBAL (pega o topo também) ===== */
 html, body, #root {{
-  background: var(--bg-light) !important;
+  background: {bg} !important;
+  color: {text} !important;
 }}
 
 html[data-theme="dark"] html,
@@ -318,6 +353,12 @@ df = df.sort_values(by="produto")
 # =====================
 # ESTADO
 # =====================
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = True
+    
 if "favoritos" not in st.session_state:
     st.session_state.favoritos = set()
 
@@ -334,6 +375,25 @@ if "show_dialog" not in st.session_state:
 # HEADER
 # =====================
 
+bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
+text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
+card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
+
+col1, col2, col3 = st.columns([8,1,1])
+
+with col2:
+    if st.button("🌙" if st.session_state.dark_mode else "☀️"):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
+
+with col3:
+    if st.button("🛒"):
+        st.session_state.show_sidebar = True
+        st.rerun()
+
+if st.session_state.show_sidebar:
+    st.sidebar.title("🛒 Carrinho")
+    
 st.title("Escolha seu look ✨")
 
 # =====================
