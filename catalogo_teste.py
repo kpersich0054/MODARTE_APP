@@ -86,9 +86,6 @@ def get_config():
 # =====================
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = True
-
-if "show_sidebar" not in st.session_state:
-    st.session_state.show_sidebar = True
     
 # =====================
 # CORES DINÂMICAS
