@@ -423,7 +423,7 @@ with c1:
     busca = st.text_input("", placeholder="🔎 Buscar produto...")
 
 with c2:
-    filtro = st.radio("", ["Todos", "👗 Vestido", "🩳 Macaquinho", "✨ Nina"], horizontal=True)
+    filtro = st.radio("", ["Todos", "👗 Vestido", "🩳 Macaquinho", "✨ Nina", "✨ Lastex"], horizontal=True)
 
 if busca:
     df = df[df["produto"].str.contains(busca, case=False, na=False)]
