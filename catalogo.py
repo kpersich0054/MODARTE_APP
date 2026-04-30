@@ -93,6 +93,10 @@ st.markdown(f"""
   z-index: 999;
 }}
 
+.block-container {{
+  padding-top: 260px !important;
+}}
+
 .modarte-hero img {{
   width: 100%;
   height: 250px;
