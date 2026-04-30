@@ -81,18 +81,26 @@ def get_config():
 
     return df.iloc[0]
 
+# =====================
+# ESTADO
+# =====================
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = True
+    
+# =====================
+# CORES DINÂMICAS
+# =====================
+bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
+text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
+card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
+
 config = get_config()
 
 st.markdown(f"""
 <style>
-header[data-testid="stHeader"] {{
-  background: transparent !important;
-  height: 0px !important;
-}}
-
-div[data-testid="stToolbar"] {{
-  top: 0;
-}}
 
 .modarte-hero {{
   position: relative;
@@ -182,7 +190,8 @@ html, body {{
 
 /* ===== FUNDO GLOBAL (pega o topo também) ===== */
 html, body, #root {{
-  background: var(--bg-light) !important;
+  background: {bg} !important;
+  color: {text} !important;
 }}
 
 html[data-theme="dark"] html,
@@ -318,6 +327,7 @@ df = df.sort_values(by="produto")
 # =====================
 # ESTADO
 # =====================
+    
 if "favoritos" not in st.session_state:
     st.session_state.favoritos = set()
 
@@ -330,10 +340,78 @@ if "checkout" not in st.session_state:
 if "show_dialog" not in st.session_state:
     st.session_state.show_dialog = False
 
-# =====================
+st.markdown(f"""
+<style>
+
+/* REMOVE ESPAÇO DO TOPO */
+header[data-testid="stHeader"] {{
+  height: 0px !important;
+  background: transparent !important;
+}}
+
+.block-container {{
+  padding-top: 0rem !important;
+}}
+
+/* TOOLBAR */
+.toolbar {{
+  position: relative;
+  left: 50%;
+  margin-left: -50vw;
+  width: 100vw;
+  height: 60px;
+  background: {card};
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}}
+
+.toolbar-title {{
+  position: absolute;
+  left: 20px;
+  font-weight: bold;
+  font-size: 18px;
+  color: {text};
+}}
+
+</style>
+""", unsafe_allow_html=True)
+
+if st.session_state.show_sidebar:
+    # =====================
+    # SIDEBAR
+    # =====================
+    st.sidebar.title("🛒 Carrinho")
+
+    total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
+
+    for item in st.session_state.carrinho:
+        st.sidebar.write(f"{item['produto']} x{item['qtd']}")
+
+    st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
+
+    if desconto > 0:
+        st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
+
+    st.sidebar.write(f"**Total: R$ {total:.2f}**")
+    st.sidebar.markdown("---")
+
+    # =====================
+    # CONFIRMAR PEDIDO (ABRE DIALOG)
+    # =====================
+    if st.session_state.carrinho:
+        if st.sidebar.button("📦 Confirmar pedido"):
+            st.session_state.checkout = st.session_state.carrinho.copy()
+            st.session_state.show_dialog = True
+            st.rerun()
+            
+# =====================   
 # HEADER
 # =====================
-
+    
 st.title("Escolha seu look ✨")
 
 # =====================
@@ -353,33 +431,6 @@ if busca:
 if filtro != "Todos":
     termo = filtro.split(" ")[-1]
     df = df[df["produto"].str.contains(termo, case=False)]
-
-# =====================
-# SIDEBAR
-# =====================
-st.sidebar.title("🛒 Carrinho")
-
-total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
-
-for item in st.session_state.carrinho:
-    st.sidebar.write(f"{item['produto']} x{item['qtd']}")
-
-st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
-
-if desconto > 0:
-    st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
-
-st.sidebar.write(f"**Total: R$ {total:.2f}**")
-st.sidebar.markdown("---")
-
-# =====================
-# CONFIRMAR PEDIDO (ABRE DIALOG)
-# =====================
-if st.session_state.carrinho:
-    if st.sidebar.button("📦 Confirmar pedido"):
-        st.session_state.checkout = st.session_state.carrinho.copy()
-        st.session_state.show_dialog = True
-        st.rerun()
 
 # =====================
 # DIALOG
