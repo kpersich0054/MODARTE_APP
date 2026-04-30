@@ -397,25 +397,34 @@ with col3:
         st.rerun()
 
 if st.session_state.show_sidebar:
-    with st.sidebar:
-        st.title("🛒 Carrinho")
+    # =====================
+    # SIDEBAR
+    # =====================
+    st.sidebar.title("🛒 Carrinho")
 
-        total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
+    total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
 
-        for item in st.session_state.carrinho:
-            st.write(f"{item['produto']} x{item['qtd']}")
+    for item in st.session_state.carrinho:
+        st.sidebar.write(f"{item['produto']} x{item['qtd']}")
 
-        st.write(f"Subtotal: R$ {total_bruto:.2f}")
+    st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
 
-        if desconto > 0:
-            st.write(f"Desconto: -R$ {desconto:.2f} 🎉")
+    if desconto > 0:
+        st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
 
-        st.write(f"**Total: R$ {total:.2f}**")
+    st.sidebar.write(f"**Total: R$ {total:.2f}**")
+    st.sidebar.markdown("---")
 
-        if st.button("❌ Fechar"):
-            st.session_state.show_sidebar = False
+    # =====================
+    # CONFIRMAR PEDIDO (ABRE DIALOG)
+    # =====================
+    if st.session_state.carrinho:
+        if st.sidebar.button("📦 Confirmar pedido"):
+            st.session_state.checkout = st.session_state.carrinho.copy()
+            st.session_state.show_dialog = True
             st.rerun()
-# =====================
+            
+# =====================   
 # HEADER
 # =====================
     
@@ -438,33 +447,6 @@ if busca:
 if filtro != "Todos":
     termo = filtro.split(" ")[-1]
     df = df[df["produto"].str.contains(termo, case=False)]
-
-# =====================
-# SIDEBAR
-# =====================
-st.sidebar.title("🛒 Carrinho")
-
-total_bruto, desconto, total = calcular_total(st.session_state.carrinho)
-
-for item in st.session_state.carrinho:
-    st.sidebar.write(f"{item['produto']} x{item['qtd']}")
-
-st.sidebar.write(f"Subtotal: R$ {total_bruto:.2f}")
-
-if desconto > 0:
-    st.sidebar.write(f"Desconto: -R$ {desconto:.2f} 🎉")
-
-st.sidebar.write(f"**Total: R$ {total:.2f}**")
-st.sidebar.markdown("---")
-
-# =====================
-# CONFIRMAR PEDIDO (ABRE DIALOG)
-# =====================
-if st.session_state.carrinho:
-    if st.sidebar.button("📦 Confirmar pedido"):
-        st.session_state.checkout = st.session_state.carrinho.copy()
-        st.session_state.show_dialog = True
-        st.rerun()
 
 # =====================
 # DIALOG
