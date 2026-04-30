@@ -117,12 +117,28 @@ st.markdown(f"""
   font-weight: bold;
 }}
 
+/* ===== APP CONTAINER ===== */
+section[data-testid="stAppViewContainer"] {{
+  padding-top: 0 !important;
+  background: var(--bg-light) !important;
+  color: var(--text-light) !important;
+}}
+
+html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
+  padding-top: 0 !important;
+  background: var(--bg-dark) !important;
+  color: var(--text-dark) !important;
+}}
+
 </style>
 
 <div class="modarte-hero">
     <img src="data:image/png;base64,{bg_b64}">
 </div>
+
 """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown(f"""
 <style>
@@ -164,19 +180,6 @@ html[data-theme="dark"] html,
 html[data-theme="dark"] body,
 html[data-theme="dark"] #root {{
   background: var(--bg-dark) !important;
-}}
-
-/* ===== APP CONTAINER ===== */
-section[data-testid="stAppViewContainer"] {{
-  padding-top: 0 !important;
-  background: var(--bg-light) !important;
-  color: var(--text-light) !important;
-}}
-
-html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
-  padding-top: 0 !important;
-  background: var(--bg-dark) !important;
-  color: var(--text-dark) !important;
 }}
 
 /* ===== SIDEBAR ===== */
