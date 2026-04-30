@@ -13,6 +13,13 @@ def image_to_base64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 # =====================
+# CORES DINÂMICAS
+# =====================
+bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
+text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
+card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
+
+# =====================
 # CONFIG
 # =====================
 st_autorefresh(interval=3000, key="refresh_stock")
@@ -328,13 +335,6 @@ if "checkout" not in st.session_state:
 
 if "show_dialog" not in st.session_state:
     st.session_state.show_dialog = False
-
-# =====================
-# CORES DINÂMICAS
-# =====================
-bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
-text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
-card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
 
 st.markdown(f"""
 <style>
