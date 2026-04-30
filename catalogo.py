@@ -89,9 +89,6 @@ st.markdown(f"""
   position: fixed;
   top: 0;
   left: 0;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
   width: 100vw;
   z-index: 999;
 }}
