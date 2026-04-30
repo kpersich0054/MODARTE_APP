@@ -327,9 +327,6 @@ df = df.sort_values(by="produto")
 # =====================
 # ESTADO
 # =====================
-    
-if "favoritos" not in st.session_state:
-    st.session_state.favoritos = set()
 
 if "carrinho" not in st.session_state:
     st.session_state.carrinho = []
@@ -546,14 +543,6 @@ if st.session_state.get("sucesso"):
         st.rerun()
 
 # =====================
-# FAVORITOS
-# =====================
-mostrar_fav = st.checkbox("❤️ Ver favoritos")
-
-if mostrar_fav:
-    df = df[df["id"].isin(st.session_state.favoritos)]
-
-# =====================
 # GRID
 # =====================
 n_cols = 4
@@ -580,24 +569,14 @@ for row_group in rows:
                 st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
                 qtd = st.number_input("", 1, int(row["estoque_atual"]), 1, key=f"qtd_{row['id']}")
 
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    if st.button("❤️" if row["id"] in st.session_state.favoritos else "🤍", key=f"fav_{row['id']}"):
-                        if row["id"] in st.session_state.favoritos:
-                            st.session_state.favoritos.remove(row["id"])
-                        else:
-                            st.session_state.favoritos.add(row["id"])
-
-                with col2:
-                    if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-                        st.session_state.carrinho.append({
-                            "id": row["id"],
-                            "produto": row["produto"],
-                            "preco": float(row["preco"]),
-                            "qtd": qtd
-                        })
-                        st.rerun()
+                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+                    st.session_state.carrinho.append({
+                        "id": row["id"],
+                        "produto": row["produto"],
+                        "preco": float(row["preco"]),
+                        "qtd": qtd
+                    })
+                    st.rerun()
 
                 # comprar agora (usa MESMO fluxo)
                 if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
