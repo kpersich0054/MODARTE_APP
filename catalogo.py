@@ -168,11 +168,13 @@ html[data-theme="dark"] #root {{
 
 /* ===== APP CONTAINER ===== */
 section[data-testid="stAppViewContainer"] {{
+  padding-top: 0 !important;
   background: var(--bg-light) !important;
   color: var(--text-light) !important;
 }}
 
 html[data-theme="dark"] section[data-testid="stAppViewContainer"] {{
+  padding-top: 0 !important;
   background: var(--bg-dark) !important;
   color: var(--text-dark) !important;
 }}
