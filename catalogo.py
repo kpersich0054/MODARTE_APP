@@ -569,7 +569,7 @@ for row_group in rows:
                 st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
                 qtd = st.number_input("", 1, int(row["estoque_atual"]), 1, key=f"qtd_{row['id']}")
 
-                col1, col2 = st.columns(1,2)
+                col1, col2 = st.columns(2)
 
                 with col1:
                     if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
