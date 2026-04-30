@@ -92,7 +92,9 @@ st.markdown(f"""
 
 .modarte-hero img {{
   width: 100%;
-  height: 250px;
+  height: 30vh; /* altura proporcional à tela */
+  min-height: 120px;
+  max-height: 250px;
   object-fit: cover;
 }}
 
