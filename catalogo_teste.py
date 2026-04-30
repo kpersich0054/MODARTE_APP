@@ -86,6 +86,9 @@ def get_config():
 # =====================
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = True
+
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = True
     
 # =====================
 # CORES DINÂMICAS
@@ -381,10 +384,7 @@ header[data-testid="stHeader"] {{
 # =====================
 # TOOLBAR REAL (STREAMLIT)
 # =====================
-col1, col2, col3 = st.columns([6,1,1])
-
-with col1:
-    st.markdown("### 🛍️ Modarte")
+col2, col3 = st.columns([6,1,1])
 
 with col2:
     if st.button("🌙" if st.session_state.dark_mode else "☀️"):
