@@ -86,7 +86,7 @@ config = get_config()
 st.markdown(f"""
 <style>
 .modarte-hero {{
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   width: 100vw;
