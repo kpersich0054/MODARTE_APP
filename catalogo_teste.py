@@ -13,13 +13,6 @@ def image_to_base64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 # =====================
-# CORES DINÂMICAS
-# =====================
-bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
-text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
-card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
-
-# =====================
 # CONFIG
 # =====================
 st_autorefresh(interval=3000, key="refresh_stock")
@@ -87,6 +80,22 @@ def get_config():
         }
 
     return df.iloc[0]
+
+# =====================
+# ESTADO
+# =====================
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
+
+if "show_sidebar" not in st.session_state:
+    st.session_state.show_sidebar = True
+    
+# =====================
+# CORES DINÂMICAS
+# =====================
+bg = "#021317" if st.session_state.dark_mode else "#E6F2FF"
+text = "#E6F2FF" if st.session_state.dark_mode else "#002436"
+card = "#0A2E36" if st.session_state.dark_mode else "#FFFFFF"
 
 config = get_config()
 
@@ -318,11 +327,6 @@ df = df.sort_values(by="produto")
 # =====================
 # ESTADO
 # =====================
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = True
-
-if "show_sidebar" not in st.session_state:
-    st.session_state.show_sidebar = True
     
 if "favoritos" not in st.session_state:
     st.session_state.favoritos = set()
