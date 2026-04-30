@@ -569,25 +569,28 @@ for row_group in rows:
                 st.markdown(f"<div class='stock'>Estoque: {int(row['estoque_atual'])}</div>", unsafe_allow_html=True)
                 qtd = st.number_input("", 1, int(row["estoque_atual"]), 1, key=f"qtd_{row['id']}")
 
-                if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
-                    st.session_state.carrinho.append({
-                        "id": row["id"],
-                        "produto": row["produto"],
-                        "preco": float(row["preco"]),
-                        "qtd": qtd
-                    })
-                    st.rerun()
+                col1, col2 = st.columns(1,2)
 
-                # comprar agora (usa MESMO fluxo)
-                if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
-                    st.session_state.checkout = [{
-                        "id": row["id"],
-                        "produto": row["produto"],
-                        "preco": float(row["preco"]),
-                        "qtd": qtd
-                    }]
-                    st.session_state.show_dialog = True
-                    st.rerun()
+                with col1:
+                    if st.button("🛒", key=f"cart_{row['id']}") and qtd > 0:
+                        st.session_state.carrinho.append({
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        })
+                        st.rerun()
+                with col2:
+                    # comprar agora (usa MESMO fluxo)
+                    if st.button("Comprar agora", key=f"buy_{row['id']}") and qtd > 0:
+                        st.session_state.checkout = [{
+                            "id": row["id"],
+                            "produto": row["produto"],
+                            "preco": float(row["preco"]),
+                            "qtd": qtd
+                        }]
+                        st.session_state.show_dialog = True
+                        st.rerun()
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
