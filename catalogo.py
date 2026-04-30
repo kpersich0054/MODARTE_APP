@@ -86,22 +86,26 @@ config = get_config()
 st.markdown(f"""
 <style>
 .modarte-hero {{
-  width: 100%;
-  margin: 0;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
 }}
 
 .modarte-hero img {{
   width: 100%;
-  height: 220px;
+  height: 250px;
   object-fit: cover;
 }}
 
 /* 📱 MOBILE */
 @media (max-width: 768px) {{
   .modarte-hero img {{
-    height: auto;          /* deixa a imagem respirar */
+    height: auto;
     max-height: 180px;
-    object-fit: contain;   /* NÃO corta o logo */
+    object-fit: contain;
   }}
 }}
 
