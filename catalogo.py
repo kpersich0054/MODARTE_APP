@@ -87,6 +87,7 @@ st.markdown(f"""
 <style>
 .modarte-hero {{
   position: relative;
+  top: 0;
   left: 50%;
   right: 50%;
   margin-left: -50vw;
