@@ -86,15 +86,14 @@ config = get_config()
 st.markdown(f"""
 <style>
 .modarte-hero {{
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
   width: 100vw;
   z-index: 999;
-}}
-
-.block-container {{
-  padding-top: 260px !important;
 }}
 
 .modarte-hero img {{
