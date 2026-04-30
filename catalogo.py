@@ -85,6 +85,15 @@ config = get_config()
 
 st.markdown(f"""
 <style>
+header[data-testid="stHeader"] {{
+  background: transparent !important;
+  height: 0px !important;
+}}
+
+div[data-testid="stToolbar"] {{
+  top: 0;
+}}
+
 .modarte-hero {{
   position: relative;
   left: 50%;
